@@ -4,250 +4,269 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#F8F4EE">
 <title>UVI Catering OS</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --gold:        #C9A84C;
-    --gold-dark:   #A8841E;
-    --gold-light:  #E2C97E;
-    --gold-border: rgba(201,168,76,0.30);
-    --gold-glow:   rgba(201,168,76,0.10);
-    --bg:          #F8F4EE;
-    --surface:     #FFFFFF;
-    --card-alt:    #F2EDE4;
-    --text:        #1A1510;
-    --text-soft:   #3D3020;
-    --muted:       #8A7A65;
-    --border:      #E0D5C5;
-    --faint:       #EDE4D8;
-    --red:         #C0392B;
-    --green:       #2E7D52;
-    --blue:        #2C5282;
-    --orange:      #C05621;
-    --purple:      #553C9A;
-    --pink:        #9B2C5E;
-    --serif:       'Playfair Display', Georgia, serif;
-    --sans:        'DM Sans', system-ui, sans-serif;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  body { font-family: var(--sans); background: var(--bg); color: var(--text); max-width: 480px; margin: 0 auto; min-height: 100vh; }
-  ::-webkit-scrollbar { display: none; }
+:root {
+  --gold:#C9A84C; --gold-dark:#A8841E; --gold-light:#E2C97E;
+  --gold-border:rgba(201,168,76,0.30); --gold-glow:rgba(201,168,76,0.10);
+  --bg:#F8F4EE; --surface:#FFFFFF; --card-alt:#F2EDE4;
+  --text:#1A1510; --text-soft:#3D3020; --muted:#8A7A65;
+  --border:#E0D5C5; --faint:#EDE4D8;
+  --red:#C0392B; --green:#2E7D52; --blue:#2C5282;
+  --orange:#C05621; --purple:#553C9A; --pink:#9B2C5E;
+  --serif:'Playfair Display',Georgia,serif;
+  --sans:'DM Sans',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);max-width:480px;margin:0 auto;min-height:100vh}
+::-webkit-scrollbar{display:none}
 
-  /* HEADER */
-  .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
-  .header-brand { display: flex; align-items: center; gap: 11px; }
-  .header-brand-text h1 { font-family: var(--serif); font-size: 18px; color: var(--gold-dark); letter-spacing: 2px; line-height: 1; }
-  .header-brand-text p  { font-size: 9px; color: var(--muted); letter-spacing: 2.5px; text-transform: uppercase; margin-top: 3px; }
-  .badge-red { background: var(--red); color: #fff; border-radius: 20px; font-size: 11px; padding: 4px 12px; font-weight: 700; }
+/* PIN SCREEN */
+#pinScreen{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 24px}
+.pin-logo{margin-bottom:24px;text-align:center}
+.pin-logo h1{font-family:var(--serif);font-size:28px;color:var(--gold-dark);letter-spacing:3px}
+.pin-logo p{font-size:10px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-top:4px}
+.pin-dots{display:flex;gap:14px;margin:28px 0 20px;justify-content:center}
+.pin-dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--gold-border);background:transparent;transition:all 0.2s}
+.pin-dot.filled{background:var(--gold);border-color:var(--gold)}
+.pin-error{font-size:13px;color:var(--red);margin-bottom:16px;min-height:20px;text-align:center}
+.pin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:240px}
+.pin-key{height:60px;border-radius:14px;border:1.5px solid var(--border);background:var(--surface);font-size:22px;font-family:var(--sans);font-weight:600;color:var(--text);cursor:pointer;transition:all 0.15s;box-shadow:0 2px 6px rgba(0,0,0,0.06)}
+.pin-key:active{background:var(--gold-glow);border-color:var(--gold);transform:scale(0.95)}
+.pin-key.del{font-size:16px;color:var(--muted)}
+.pin-key.empty{visibility:hidden}
 
-  /* NAV */
-  .nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: var(--surface); border-top: 1px solid var(--border); box-shadow: 0 -2px 10px rgba(0,0,0,0.07); display: flex; z-index: 100; }
-  .nav-btn { flex: 1; padding: 11px 4px 6px; background: transparent; border: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; }
-  .nav-btn .icon { font-size: 20px; transition: all 0.2s; }
-  .nav-btn .label { font-size: 9px; text-transform: uppercase; letter-spacing: 1.2px; font-family: var(--sans); font-weight: 500; color: var(--muted); transition: all 0.2s; }
-  .nav-btn.active .icon { filter: drop-shadow(0 0 4px var(--gold)); }
-  .nav-btn.active .label { color: var(--gold-dark); font-weight: 700; }
-  .nav-btn .underline { width: 20px; height: 2.5px; background: var(--gold); border-radius: 2px; display: none; }
-  .nav-btn.active .underline { display: block; }
+/* HEADER */
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 18px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;box-shadow:0 2px 10px rgba(0,0,0,0.06)}
+.header-brand{display:flex;align-items:center;gap:11px}
+.header-brand-text h1{font-family:var(--serif);font-size:18px;color:var(--gold-dark);letter-spacing:2px;line-height:1}
+.header-brand-text p{font-size:9px;color:var(--muted);letter-spacing:2.5px;text-transform:uppercase;margin-top:3px}
+.header-right{display:flex;align-items:center;gap:8px}
+.badge-red{background:var(--red);color:#fff;border-radius:20px;font-size:11px;padding:4px 12px;font-weight:700}
+.user-badge{background:var(--gold-glow);border:1px solid var(--gold-border);color:var(--gold-dark);border-radius:20px;font-size:11px;padding:4px 10px;font-weight:600}
 
-  /* SCREENS */
-  .screen { display: none; padding: 18px 16px 90px; }
-  .screen.active { display: block; }
+/* NAV */
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--surface);border-top:1px solid var(--border);box-shadow:0 -2px 10px rgba(0,0,0,0.07);display:flex;z-index:100}
+.nav-btn{flex:1;padding:11px 4px 6px;background:transparent;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
+.nav-btn .icon{font-size:20px;transition:all 0.2s}
+.nav-btn .label{font-size:9px;text-transform:uppercase;letter-spacing:1.2px;font-weight:500;color:var(--muted);transition:all 0.2s}
+.nav-btn.active .label{color:var(--gold-dark);font-weight:700}
+.nav-btn .underline{width:20px;height:2.5px;background:var(--gold);border-radius:2px;display:none}
+.nav-btn.active .underline{display:block}
 
-  /* LOADING */
-  .loading { text-align: center; padding: 40px 20px; }
-  .loading-spinner { width: 32px; height: 32px; border: 3px solid var(--faint); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .loading p { color: var(--muted); font-size: 14px; }
+/* SCREENS */
+.screen{display:none;padding:18px 16px 90px}
+.screen.active{display:block}
 
-  /* CARDS */
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-  .card-alt { background: var(--card-alt); }
+/* LOADING */
+.loading{text-align:center;padding:40px 20px}
+.spinner{width:30px;height:30px;border:3px solid var(--faint);border-top-color:var(--gold);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading p{color:var(--muted);font-size:14px}
 
-  /* TYPOGRAPHY */
-  .page-title { font-family: var(--serif); font-size: 26px; color: var(--text); margin-bottom: 4px; }
-  .page-sub   { font-size: 13px; color: var(--muted); margin-bottom: 18px; }
-  .section-label { font-size: 11px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; font-weight: 600; }
-  .gold-line { height: 1px; background: var(--border); margin: 12px 0; }
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,0.05)}
 
-  /* TAGS */
-  .tag { display: inline-block; font-size: 10px; padding: 3px 8px; border-radius: 20px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; white-space: nowrap; }
+/* TYPE */
+.page-title{font-family:var(--serif);font-size:26px;color:var(--text);margin-bottom:4px}
+.page-sub{font-size:13px;color:var(--muted);margin-bottom:18px}
+.section-label{font-size:11px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;font-weight:600}
+.gold-line{height:1px;background:var(--border);margin:12px 0}
+.tag{display:inline-block;font-size:10px;padding:3px 8px;border-radius:20px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;white-space:nowrap}
 
-  /* BUTTONS */
-  .btn { width: 100%; padding: 13px 16px; border-radius: 10px; font-family: var(--serif); font-size: 14px; font-weight: 700; cursor: pointer; border: none; transition: all 0.2s; }
-  .btn-gold { background: linear-gradient(135deg, var(--gold), var(--gold-dark)); color: #fff; box-shadow: 0 2px 10px rgba(201,168,76,0.25); }
-  .btn-gold:active { transform: scale(0.98); }
-  .btn-outline { background: transparent; border: 1.5px solid var(--gold-border); color: var(--gold-dark); }
-  .btn-sm { padding: 9px 16px; font-size: 13px; }
-  .btn-row { display: flex; gap: 8px; }
-  .btn-row .btn { flex: 1; }
+/* BUTTONS */
+.btn{width:100%;padding:13px 16px;border-radius:10px;font-family:var(--serif);font-size:14px;font-weight:700;cursor:pointer;border:none;transition:all 0.2s}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:#fff;box-shadow:0 2px 10px rgba(201,168,76,0.25)}
+.btn-gold:active{transform:scale(0.98)}
+.btn-outline{background:transparent;border:1.5px solid var(--gold-border);color:var(--gold-dark)}
+.btn-sm{padding:9px 16px;font-size:13px}
 
-  /* PIPELINE */
-  .pipeline { display: flex; align-items: flex-start; width: 100%; margin: 14px 0; }
-  .pip-item { flex: 1; display: flex; align-items: center; }
-  .pip-dot-wrap { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-  .pip-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--faint); flex-shrink: 0; transition: all 0.3s; }
-  .pip-dot.done { background: var(--stage-color, var(--gold)); }
-  .pip-dot.current { width: 12px; height: 12px; border: 2.5px solid var(--stage-color, var(--gold)); background: transparent; box-shadow: 0 0 7px var(--stage-color, var(--gold)); }
-  .pip-label { font-size: 8px; color: var(--stage-color, var(--gold)); text-align: center; line-height: 1.2; font-weight: 700; white-space: pre-line; }
-  .pip-line { flex: 1; height: 1.5px; background: var(--faint); }
-  .pip-line.done { background: rgba(201,168,76,0.4); }
+/* PIPELINE */
+.pipeline{display:flex;align-items:flex-start;width:100%;margin:14px 0}
+.pip-item{flex:1;display:flex;align-items:center}
+.pip-dot-wrap{display:flex;flex-direction:column;align-items:center;gap:2px}
+.pip-dot{width:8px;height:8px;border-radius:50%;background:var(--faint);flex-shrink:0;transition:all 0.3s}
+.pip-dot.done{background:var(--sc,var(--gold))}
+.pip-dot.current{width:12px;height:12px;border:2.5px solid var(--sc,var(--gold));background:transparent;box-shadow:0 0 7px var(--sc,var(--gold))}
+.pip-label{font-size:8px;color:var(--sc,var(--gold));text-align:center;line-height:1.2;font-weight:700;white-space:pre-line}
+.pip-line{flex:1;height:1.5px;background:var(--faint)}
+.pip-line.done{background:rgba(201,168,76,0.4)}
 
-  /* STAGE LEGEND */
-  .stage-legend { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; margin-bottom: 18px; box-shadow: 0 1px 6px rgba(0,0,0,0.04); }
-  .stage-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px 14px; margin-top: 10px; }
-  .stage-item { display: flex; align-items: center; gap: 8px; }
-  .stage-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-  .stage-item span { font-size: 13px; color: var(--text-soft); }
+/* STAGE LEGEND */
+.stage-legend{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:18px;box-shadow:0 1px 6px rgba(0,0,0,0.04)}
+.stage-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px 14px;margin-top:10px}
+.stage-item{display:flex;align-items:center;gap:8px}
+.stage-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.stage-item span{font-size:13px;color:var(--text-soft)}
 
-  /* TODAY SCREEN */
-  .date-header { margin-bottom: 22px; }
-  .date-header .day { font-size: 12px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 3px; }
-  .date-header .date { font-family: var(--serif); font-size: 30px; color: var(--text); line-height: 1.1; }
-  .date-header .summary { font-size: 14px; color: var(--gold-dark); margin-top: 5px; font-weight: 600; }
-  .stat-row { display: flex; gap: 10px; margin-bottom: 26px; }
-  .stat-card { flex: 1; background: var(--surface); border-radius: 12px; padding: 14px 8px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-top: 3px solid transparent; }
-  .stat-card .n { font-size: 28px; font-weight: 700; line-height: 1; font-family: var(--sans); }
-  .stat-card .l { font-size: 11px; color: var(--muted); margin-top: 4px; }
-  .task-section { margin-bottom: 24px; }
-  .task-section-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-  .task-section-bar { width: 4px; height: 18px; border-radius: 2px; }
-  .task-section-title { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; }
-  .task-row { display: flex; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--faint); }
-  .task-time { width: 58px; text-align: right; flex-shrink: 0; padding-top: 1px; font-size: 11px; font-weight: 600; font-family: var(--sans); }
-  .task-bar  { width: 3px; border-radius: 2px; flex-shrink: 0; min-height: 36px; align-self: stretch; opacity: 0.7; }
-  .task-body { flex: 1; }
-  .task-text { font-size: 14px; color: var(--text); line-height: 1.5; }
-  .task-meta { display: flex; gap: 6px; margin-top: 5px; align-items: center; flex-wrap: wrap; }
-  .task-event { font-size: 11px; color: var(--muted); }
-  .task-done-btn { background: none; border: 1px solid var(--border); border-radius: 6px; padding: 3px 8px; font-size: 10px; color: var(--muted); cursor: pointer; }
-  .task-done-btn:hover { border-color: var(--green); color: var(--green); }
+/* TODAY */
+.date-header{margin-bottom:22px}
+.date-header .day{font-size:12px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:3px}
+.date-header .date{font-family:var(--serif);font-size:30px;color:var(--text);line-height:1.1}
+.date-header .summary{font-size:14px;color:var(--gold-dark);margin-top:5px;font-weight:600}
+.stat-row{display:flex;gap:10px;margin-bottom:26px}
+.stat-card{flex:1;background:var(--surface);border-radius:12px;padding:14px 8px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.05);border-top:3px solid transparent}
+.stat-card .n{font-size:28px;font-weight:700;line-height:1}
+.stat-card .l{font-size:11px;color:var(--muted);margin-top:4px}
+.task-section{margin-bottom:24px}
+.task-section-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.task-section-bar{width:4px;height:18px;border-radius:2px}
+.task-section-title{font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:700}
+.task-row{display:flex;gap:10px;padding:12px 0;border-bottom:1px solid var(--faint)}
+.task-time{width:58px;text-align:right;flex-shrink:0;padding-top:1px;font-size:11px;font-weight:600}
+.task-bar{width:3px;border-radius:2px;flex-shrink:0;min-height:36px;align-self:stretch;opacity:0.7}
+.task-body{flex:1}
+.task-text{font-size:14px;color:var(--text);line-height:1.5}
+.task-meta{display:flex;gap:6px;margin-top:5px;align-items:center;flex-wrap:wrap}
+.task-event{font-size:11px;color:var(--muted)}
+.task-done-btn{background:none;border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-size:10px;color:var(--muted);cursor:pointer}
 
-  /* EVENTS SCREEN */
-  .event-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px; margin-bottom: 14px; cursor: pointer; position: relative; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.06); transition: box-shadow 0.2s; }
-  .event-card:active { box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
-  .event-left-bar { position: absolute; left: 0; top: 0; bottom: 0; width: 5px; border-radius: 14px 0 0 14px; }
-  .event-inner { padding-left: 12px; }
-  .event-name { font-family: var(--serif); font-size: 20px; color: var(--text); }
-  .event-sub  { font-size: 13px; color: var(--muted); margin-top: 2px; margin-bottom: 16px; }
-  .event-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; }
-  .event-balance { text-align: right; }
-  .event-balance .amount { font-size: 16px; color: var(--gold-dark); font-weight: 700; }
-  .event-balance .label  { font-size: 10px; color: var(--muted); }
+/* EVENTS */
+.event-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:14px;cursor:pointer;position:relative;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.06);transition:box-shadow 0.2s}
+.event-card:active{box-shadow:0 1px 4px rgba(0,0,0,0.08)}
+.event-left-bar{position:absolute;left:0;top:0;bottom:0;width:5px;border-radius:14px 0 0 14px}
+.event-inner{padding-left:12px}
+.event-name{font-family:var(--serif);font-size:20px;color:var(--text)}
+.event-sub{font-size:13px;color:var(--muted);margin-top:2px;margin-bottom:16px}
+.event-footer{display:flex;justify-content:space-between;align-items:center;margin-top:14px}
+.event-balance .amount{font-size:16px;color:var(--gold-dark);font-weight:700}
+.event-balance .label{font-size:10px;color:var(--muted)}
 
-  /* EVENT DETAIL */
-  .back-btn { background: none; border: none; color: var(--gold-dark); font-size: 14px; cursor: pointer; padding: 0 0 16px; font-family: var(--serif); display: flex; align-items: center; gap: 5px; }
-  .fin-row { display: flex; gap: 10px; margin-top: 14px; }
-  .fin-card { flex: 1; background: var(--card-alt); border-radius: 10px; padding: 12px 14px; }
-  .fin-card .amount { font-size: 17px; font-weight: 700; font-family: var(--sans); }
-  .fin-card .label  { font-size: 11px; color: var(--muted); margin-top: 3px; }
-  .action-btns { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
-  .tabs { display: flex; background: var(--card-alt); border-radius: 12px; padding: 4px; margin-bottom: 16px; border: 1px solid var(--border); }
-  .tab-btn { flex: 1; padding: 10px 0; border: none; cursor: pointer; border-radius: 8px; font-family: var(--serif); font-size: 14px; transition: all 0.2s; background: transparent; color: var(--muted); border-bottom: 2px solid transparent; }
-  .tab-btn.active { background: var(--surface); color: var(--gold-dark); font-weight: 700; box-shadow: 0 1px 5px rgba(0,0,0,0.07); border-bottom: 2px solid var(--gold); }
-  .tab-content { display: none; }
-  .tab-content.active { display: block; }
-  .vendor-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 5px rgba(0,0,0,0.04); }
-  .vendor-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
-  .vendor-card-name { font-family: var(--serif); font-size: 16px; color: var(--text); }
-  .vendor-card-item { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
-  .vendor-price-row { display: flex; justify-content: space-between; margin-bottom: 14px; }
-  .vendor-price-col .lbl { font-size: 11px; color: var(--muted); margin-bottom: 2px; }
-  .vendor-price-col .val { font-size: 16px; font-weight: 600; font-family: var(--sans); }
+/* EVENT DETAIL */
+.back-btn{background:none;border:none;color:var(--gold-dark);font-size:14px;cursor:pointer;padding:0 0 16px;font-family:var(--serif);display:flex;align-items:center;gap:5px}
+.fin-row{display:flex;gap:10px;margin-top:14px}
+.fin-card{flex:1;background:var(--card-alt);border-radius:10px;padding:12px 14px}
+.fin-card .amount{font-size:17px;font-weight:700}
+.fin-card .label{font-size:11px;color:var(--muted);margin-top:3px}
+.action-btns{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+.tabs{display:flex;background:var(--card-alt);border-radius:12px;padding:4px;margin-bottom:16px;border:1px solid var(--border)}
+.tab-btn{flex:1;padding:10px 0;border:none;cursor:pointer;border-radius:8px;font-family:var(--serif);font-size:14px;transition:all 0.2s;background:transparent;color:var(--muted);border-bottom:2px solid transparent}
+.tab-btn.active{background:var(--surface);color:var(--gold-dark);font-weight:700;box-shadow:0 1px 5px rgba(0,0,0,0.07);border-bottom:2px solid var(--gold)}
+.tab-content{display:none}
+.tab-content.active{display:block}
+.vendor-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 1px 5px rgba(0,0,0,0.04)}
+.vendor-price-row{display:flex;justify-content:space-between;margin-bottom:14px}
+.vpc .lbl{font-size:11px;color:var(--muted);margin-bottom:2px}
+.vpc .val{font-size:16px;font-weight:600}
 
-  /* FORMS */
-  .form-group { margin-bottom: 14px; }
-  .form-label { font-size: 13px; color: var(--muted); margin-bottom: 6px; display: block; }
-  .form-input { width: 100%; background: var(--bg); border: 1.5px solid var(--border); border-radius: 10px; padding: 11px 14px; color: var(--text); font-family: var(--sans); font-size: 14px; outline: none; transition: border-color 0.2s; }
-  .form-input:focus { border-color: var(--gold); }
-  .form-select { width: 100%; background: var(--bg); border: 1.5px solid var(--border); border-radius: 10px; padding: 11px 14px; color: var(--text); font-family: var(--sans); font-size: 14px; outline: none; }
-  .form-textarea { width: 100%; background: var(--bg); border: 1.5px solid var(--border); border-radius: 10px; padding: 11px 14px; color: var(--text); font-family: Georgia, serif; font-size: 13px; outline: none; resize: none; line-height: 1.7; }
-  .form-row { display: flex; gap: 10px; }
-  .form-row .form-group { flex: 1; }
+/* FORMS */
+.form-group{margin-bottom:14px}
+.form-label{font-size:13px;color:var(--muted);margin-bottom:6px;display:block}
+.form-input{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-family:var(--sans);font-size:14px;outline:none;transition:border-color 0.2s}
+.form-input:focus{border-color:var(--gold)}
+.form-select{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-family:var(--sans);font-size:14px;outline:none}
+.form-textarea{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-family:Georgia,serif;font-size:13px;outline:none;resize:none;line-height:1.7}
+.form-row{display:flex;gap:10px}
+.form-row .form-group{flex:1}
 
-  /* WA PREVIEW */
-  .wa-preview { background: #E8F5E9; border: 1px solid #C8E6C9; border-radius: 12px; padding: 14px; font-size: 13px; color: #1B5E20; line-height: 1.8; font-family: var(--sans); white-space: pre-line; margin-bottom: 14px; }
+/* WA PREVIEW */
+.wa-preview{background:#E8F5E9;border:1px solid #C8E6C9;border-radius:12px;padding:14px;font-size:13px;color:#1B5E20;line-height:1.8;font-family:var(--sans);white-space:pre-line;margin-bottom:14px}
 
-  /* SUCCESS */
-  .success-box { background: #E8F5E9; border: 1px solid #A5D6A7; border-radius: 12px; padding: 14px 18px; text-align: center; margin-top: 14px; }
-  .success-box .title { font-size: 15px; color: var(--green); font-weight: 700; }
-  .success-box .sub   { font-size: 12px; color: #388E3C; margin-top: 4px; }
+/* SUCCESS */
+.success-box{background:#E8F5E9;border:1px solid #A5D6A7;border-radius:12px;padding:14px 18px;text-align:center;margin-top:14px}
+.success-box .title{font-size:15px;color:var(--green);font-weight:700}
+.success-box .sub{font-size:12px;color:#388E3C;margin-top:4px}
 
-  /* VENDORS SCREEN */
-  .filter-row { display: flex; gap: 6px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px; }
-  .filter-btn { padding: 6px 14px; border-radius: 20px; border: 1.5px solid var(--border); background: var(--surface); color: var(--muted); font-size: 12px; cursor: pointer; white-space: nowrap; font-family: var(--sans); transition: all 0.2s; }
-  .filter-btn.active { border-color: var(--gold); background: var(--gold-glow); color: var(--gold-dark); font-weight: 700; }
-  .vendor-list-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; display: flex; gap: 14px; align-items: center; box-shadow: 0 1px 5px rgba(0,0,0,0.04); cursor: pointer; }
-  .vendor-emoji-box { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
-  .vendor-list-name { font-size: 15px; color: var(--text); }
-  .vendor-list-sub  { font-size: 12px; color: var(--muted); margin-top: 2px; }
+/* VENDORS */
+.filter-row{display:flex;gap:6px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px}
+.filter-btn{padding:6px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--surface);color:var(--muted);font-size:12px;cursor:pointer;white-space:nowrap;font-family:var(--sans);transition:all 0.2s}
+.filter-btn.active{border-color:var(--gold);background:var(--gold-glow);color:var(--gold-dark);font-weight:700}
+.vendor-list-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:10px;display:flex;gap:14px;align-items:center;box-shadow:0 1px 5px rgba(0,0,0,0.04)}
+.vendor-emoji-box{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;background:rgba(201,168,76,0.12);border:1.5px solid rgba(201,168,76,0.25)}
+.vendor-list-name{font-size:15px;color:var(--text)}
+.vendor-list-sub{font-size:12px;color:var(--muted);margin-top:2px}
 
-  /* MODAL */
-  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; display: none; align-items: flex-end; justify-content: center; }
-  .modal-overlay.open { display: flex; }
-  .modal { background: var(--surface); border-radius: 20px 20px 0 0; padding: 20px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; animation: slideUp 0.3s ease; }
-  @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-  .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
-  .modal-title { font-family: var(--serif); font-size: 20px; color: var(--text); }
-  .modal-close { background: none; border: none; font-size: 22px; color: var(--muted); cursor: pointer; }
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;display:none;align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;animation:slideUp 0.3s ease}
+@keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.modal-title{font-family:var(--serif);font-size:20px;color:var(--text)}
+.modal-close{background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer}
 
-  /* STEP TABS */
-  .step-tabs { display: flex; gap: 6px; margin-bottom: 20px; }
-  .step-tab { flex: 1; padding: 10px 6px; border-radius: 10px; border: none; cursor: pointer; font-size: 12px; font-family: var(--sans); transition: all 0.2s; background: var(--card-alt); color: var(--muted); border-bottom: 2.5px solid transparent; }
-  .step-tab.active { background: var(--surface); color: var(--gold-dark); font-weight: 700; border-bottom-color: var(--gold); box-shadow: 0 1px 5px rgba(0,0,0,0.07); }
+/* STEP TABS */
+.step-tabs{display:flex;gap:6px;margin-bottom:20px}
+.step-tab{flex:1;padding:10px 6px;border-radius:10px;border:none;cursor:pointer;font-size:12px;font-family:var(--sans);transition:all 0.2s;background:var(--card-alt);color:var(--muted);border-bottom:2.5px solid transparent}
+.step-tab.active{background:var(--surface);color:var(--gold-dark);font-weight:700;border-bottom-color:var(--gold);box-shadow:0 1px 5px rgba(0,0,0,0.07)}
 
-  /* ATTACH BOX */
-  .attach-box { border: 2px dashed var(--gold-border); border-radius: 12px; padding: 22px; text-align: center; cursor: pointer; background: var(--bg); margin-bottom: 14px; transition: all 0.2s; }
-  .attach-box:hover { background: var(--card-alt); }
-  .attach-box .icon { font-size: 30px; margin-bottom: 8px; }
-  .attach-box .text { font-size: 14px; color: var(--muted); }
-  .attach-box .hint { font-size: 12px; color: var(--gold); margin-top: 4px; }
+/* ATTACH BOX */
+.attach-box{border:2px dashed var(--gold-border);border-radius:12px;padding:22px;text-align:center;cursor:pointer;background:var(--bg);margin-bottom:14px;transition:all 0.2s}
+.attach-box:hover{background:var(--card-alt)}
 
-  /* RADIO */
-  .radio-option { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 10px; margin-bottom: 8px; cursor: pointer; border: 1.5px solid var(--border); background: var(--bg); transition: all 0.2s; }
-  .radio-option.selected { background: var(--gold-glow); border-color: var(--gold); }
-  .radio-circle { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--muted); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  .radio-option.selected .radio-circle { border-color: var(--gold); }
-  .radio-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--gold); display: none; }
-  .radio-option.selected .radio-dot { display: block; }
-  .radio-label { font-size: 14px; color: var(--text-soft); }
-  .radio-option.selected .radio-label { color: var(--gold-dark); }
+/* RADIO */
+.radio-option{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;margin-bottom:8px;cursor:pointer;border:1.5px solid var(--border);background:var(--bg);transition:all 0.2s}
+.radio-option.selected{background:var(--gold-glow);border-color:var(--gold)}
+.radio-circle{width:18px;height:18px;border-radius:50%;border:2px solid var(--muted);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.radio-option.selected .radio-circle{border-color:var(--gold)}
+.radio-dot{width:9px;height:9px;border-radius:50%;background:var(--gold);display:none}
+.radio-option.selected .radio-dot{display:block}
+.radio-label{font-size:14px;color:var(--text-soft)}
+.radio-option.selected .radio-label{color:var(--gold-dark)}
 
-  /* CHIP */
-  .chip { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 12px; cursor: pointer; border: 1.5px solid var(--border); background: var(--card-alt); color: var(--text-soft); margin: 3px; transition: all 0.2s; font-family: var(--sans); }
-  .chip.selected { background: var(--gold-glow); border-color: var(--gold); color: var(--gold-dark); font-weight: 700; }
+/* CHIP */
+.chip{display:inline-block;padding:6px 14px;border-radius:20px;font-size:12px;cursor:pointer;border:1.5px solid var(--border);background:var(--card-alt);color:var(--text-soft);margin:3px;transition:all 0.2s;font-family:var(--sans)}
+.chip.selected{background:var(--gold-glow);border-color:var(--gold);color:var(--gold-dark);font-weight:700}
 
-  /* SELECTED ITEM ROW */
-  .selected-item { display: flex; justify-content: space-between; align-items: center; padding: 11px 14px; background: var(--card-alt); border-radius: 10px; margin-bottom: 7px; border: 1px solid var(--border); }
-  .selected-item span { font-size: 14px; color: var(--text); }
-  .remove-btn { background: none; border: none; color: var(--red); cursor: pointer; font-size: 18px; }
+/* SELECTED ITEM */
+.selected-item{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;background:var(--card-alt);border-radius:10px;margin-bottom:7px;border:1px solid var(--border)}
+.selected-item span{font-size:14px;color:var(--text)}
+.remove-btn{background:none;border:none;color:var(--red);cursor:pointer;font-size:18px}
 
-  /* SENT ROW */
-  .sent-row { display: flex; gap: 8px; margin-top: 10px; }
-  .mark-btn { flex: 1; padding: 12px; border-radius: 10px; cursor: pointer; font-family: var(--sans); font-size: 13px; border: 1.5px solid var(--border); background: var(--card-alt); color: var(--muted); transition: all 0.2s; }
-  .mark-btn.done { background: #E8F5E9; border-color: var(--green); color: var(--green); font-weight: 700; }
+/* SENT ROW */
+.sent-row{display:flex;gap:8px;margin-top:10px}
+.mark-btn{flex:1;padding:12px;border-radius:10px;cursor:pointer;font-family:var(--sans);font-size:13px;border:1.5px solid var(--border);background:var(--card-alt);color:var(--muted);transition:all 0.2s}
+.mark-btn.done{background:#E8F5E9;border-color:var(--green);color:var(--green);font-weight:700}
 
-  /* NEW EVENT FORM */
-  .new-event-btn { position: fixed; bottom: 72px; right: 16px; width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border: none; font-size: 24px; color: #fff; cursor: pointer; box-shadow: 0 4px 16px rgba(201,168,76,0.4); z-index: 99; display: flex; align-items: center; justify-content: center; }
+/* FAB */
+.fab{position:fixed;bottom:72px;right:16px;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-dark));border:none;font-size:24px;color:#fff;cursor:pointer;box-shadow:0 4px 16px rgba(201,168,76,0.4);z-index:99;display:none;align-items:center;justify-content:center}
 
-  /* EMPTY STATE */
-  .empty-state { text-align: center; padding: 40px 20px; }
-  .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
-  .empty-state p { color: var(--muted); font-size: 14px; }
-
-  /* STAGE COLORS */
-  .s1 { --stage-color: #3B5BDB; }
-  .s2 { --stage-color: #D4500A; }
-  .s3 { --stage-color: #B7900A; }
-  .s4 { --stage-color: #862E62; }
-  .s5 { --stage-color: #553C9A; }
-  .s6 { --stage-color: #C9A84C; }
+/* EMPTY */
+.empty-state{text-align:center;padding:40px 20px}
+.empty-state .icon{font-size:40px;margin-bottom:12px}
+.empty-state p{color:var(--muted);font-size:14px}
 </style>
 </head>
 <body>
+
+<!-- PIN SCREEN -->
+<div id="pinScreen">
+  <div class="pin-logo">
+    <svg width="60" height="60" viewBox="0 0 60 60" style="margin-bottom:10px">
+      <circle cx="30" cy="30" r="26" fill="none" stroke="#C9A84C" stroke-width="2" stroke-dasharray="130 26" stroke-dashoffset="-8"/>
+      <text x="30" y="37" text-anchor="middle" fill="#A8841E" style="font-size:18px;font-family:'Playfair Display',serif;font-weight:700;letter-spacing:1px">UVI</text>
+    </svg>
+    <h1>UVI</h1>
+    <p>Luxury Catering & Decor</p>
+  </div>
+  <div style="font-size:14px;color:var(--muted);margin-bottom:8px">Enter your PIN</div>
+  <div class="pin-dots">
+    <div class="pin-dot" id="pd0"></div>
+    <div class="pin-dot" id="pd1"></div>
+    <div class="pin-dot" id="pd2"></div>
+    <div class="pin-dot" id="pd3"></div>
+  </div>
+  <div class="pin-error" id="pinError"></div>
+  <div class="pin-grid">
+    <button class="pin-key" onclick="pinPress('1')">1</button>
+    <button class="pin-key" onclick="pinPress('2')">2</button>
+    <button class="pin-key" onclick="pinPress('3')">3</button>
+    <button class="pin-key" onclick="pinPress('4')">4</button>
+    <button class="pin-key" onclick="pinPress('5')">5</button>
+    <button class="pin-key" onclick="pinPress('6')">6</button>
+    <button class="pin-key" onclick="pinPress('7')">7</button>
+    <button class="pin-key" onclick="pinPress('8')">8</button>
+    <button class="pin-key" onclick="pinPress('9')">9</button>
+    <button class="pin-key empty"></button>
+    <button class="pin-key" onclick="pinPress('0')">0</button>
+    <button class="pin-key del" onclick="pinDel()">⌫</button>
+  </div>
+</div>
+
+<!-- MAIN APP (hidden until PIN) -->
+<div id="mainApp" style="display:none">
 
 <!-- HEADER -->
 <div class="header">
@@ -261,12 +280,13 @@
       <p>Luxury Catering & Decor</p>
     </div>
   </div>
-  <div id="overdueBadge" style="display:none" class="badge-red">0 Overdue</div>
+  <div class="header-right">
+    <div id="overdueBadge" style="display:none" class="badge-red">0 Overdue</div>
+    <div id="userBadge" class="user-badge">—</div>
+  </div>
 </div>
 
 <!-- SCREENS -->
-
-<!-- TODAY -->
 <div id="screen-today" class="screen active">
   <div class="date-header">
     <div class="day" id="todayDay">—</div>
@@ -287,21 +307,13 @@
       <div class="l">Tomorrow</div>
     </div>
   </div>
-  <div id="taskList">
-    <div class="loading"><div class="loading-spinner"></div><p>Loading tasks...</p></div>
-  </div>
+  <div id="taskList"><div class="loading"><div class="spinner"></div><p>Loading tasks...</p></div></div>
 </div>
 
-<!-- EVENTS -->
 <div id="screen-events" class="screen">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-    <div>
-      <div class="page-title">Events</div>
-      <div class="page-sub" id="eventCount">Loading...</div>
-    </div>
+    <div><div class="page-title">Events</div><div class="page-sub" id="eventCount">Loading...</div></div>
   </div>
-
-  <!-- Stage Legend -->
   <div class="stage-legend">
     <div class="section-label">Pipeline Stages</div>
     <div class="stage-grid">
@@ -313,51 +325,36 @@
       <div class="stage-item"><div class="stage-dot" style="background:#C9A84C"></div><span>6. Final Orders</span></div>
     </div>
   </div>
-
-  <div id="eventList">
-    <div class="loading"><div class="loading-spinner"></div><p>Loading events...</p></div>
-  </div>
-
-  <!-- Event Detail (hidden by default) -->
+  <div id="eventList"><div class="loading"><div class="spinner"></div><p>Loading events...</p></div></div>
   <div id="eventDetail" style="display:none"></div>
 </div>
 
-<!-- VENDORS -->
 <div id="screen-vendors" class="screen">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-    <div>
-      <div class="page-title">Vendors</div>
-      <div class="page-sub" id="vendorCount">Loading...</div>
-    </div>
-    <button class="btn btn-gold btn-sm" style="width:auto;padding:9px 16px" onclick="showAddVendor()">+ Add</button>
+    <div><div class="page-title">Vendors</div><div class="page-sub" id="vendorCount">Loading...</div></div>
+    <button class="btn btn-gold btn-sm" style="width:auto;padding:9px 16px" onclick="openModal('modal-addVendor')">+ Add</button>
   </div>
   <div class="filter-row" id="cuisineFilters"></div>
-  <div id="vendorList">
-    <div class="loading"><div class="loading-spinner"></div><p>Loading vendors...</p></div>
-  </div>
+  <div id="vendorList"><div class="loading"><div class="spinner"></div><p>Loading vendors...</p></div></div>
 </div>
 
-<!-- FAB for new event -->
-<button class="new-event-btn" id="fabNewEvent" onclick="showNewEventModal()" style="display:none">+</button>
+<!-- FAB -->
+<button class="fab" id="fabNewEvent" onclick="openModal('modal-newEvent')">+</button>
 
 <!-- NAV -->
 <nav class="nav">
   <button class="nav-btn active" onclick="switchScreen('today',this)">
-    <span class="icon">◉</span>
-    <span class="label">Today</span>
-    <div class="underline"></div>
+    <span class="icon">◉</span><span class="label">Today</span><div class="underline"></div>
   </button>
   <button class="nav-btn" onclick="switchScreen('events',this)">
-    <span class="icon">◈</span>
-    <span class="label">Events</span>
-    <div class="underline"></div>
+    <span class="icon">◈</span><span class="label">Events</span><div class="underline"></div>
   </button>
   <button class="nav-btn" onclick="switchScreen('vendors',this)">
-    <span class="icon">◎</span>
-    <span class="label">Vendors</span>
-    <div class="underline"></div>
+    <span class="icon">◎</span><span class="label">Vendors</span><div class="underline"></div>
   </button>
 </nav>
+
+</div><!-- end mainApp -->
 
 <!-- MODALS -->
 <div class="modal-overlay" id="modal-newEvent">
@@ -366,49 +363,28 @@
       <div class="modal-title">New Event</div>
       <button class="modal-close" onclick="closeModal('modal-newEvent')">×</button>
     </div>
-    <div class="form-group">
-      <label class="form-label">Client Name</label>
-      <input class="form-input" id="new-client" placeholder="e.g. Mehta Family">
-    </div>
+    <div class="form-group"><label class="form-label">Client Name *</label><input class="form-input" id="new-client" placeholder="e.g. Mehta Family"></div>
     <div class="form-group">
       <label class="form-label">Occasion</label>
       <select class="form-select" id="new-occasion">
-        <option>Wedding Reception</option>
-        <option>Wedding Lunch</option>
-        <option>Sangeet</option>
-        <option>Haldi</option>
-        <option>Mehendi</option>
-        <option>Corporate Dinner</option>
-        <option>Birthday Gala</option>
-        <option>Anniversary</option>
-        <option>Other</option>
+        <option>Wedding Reception</option><option>Wedding Lunch</option><option>Sangeet</option>
+        <option>Haldi</option><option>Mehendi</option><option>Corporate Dinner</option>
+        <option>Birthday Gala</option><option>Anniversary</option><option>Other</option>
       </select>
     </div>
     <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Event Date</label>
-        <input class="form-input" id="new-date" type="date">
-      </div>
-      <div class="form-group">
-        <label class="form-label">No. of Guests</label>
-        <input class="form-input" id="new-pax" type="number" placeholder="100">
-      </div>
+      <div class="form-group"><label class="form-label">Event Date</label><input class="form-input" id="new-date" type="date"></div>
+      <div class="form-group"><label class="form-label">Guests</label><input class="form-input" id="new-pax" type="number" placeholder="100"></div>
     </div>
-    <div class="form-group">
-      <label class="form-label">Notes (optional)</label>
-      <input class="form-input" id="new-notes" placeholder="Any special requirements">
-    </div>
-    <button class="btn btn-gold" onclick="saveNewEvent()">Create Event</button>
+    <div class="form-group"><label class="form-label">Notes</label><input class="form-input" id="new-notes" placeholder="Any special requirements"></div>
+    <button class="btn btn-gold" onclick="saveNewEvent()" id="saveEventBtn">Create Event</button>
     <div id="newEventMsg" style="margin-top:10px"></div>
   </div>
 </div>
 
 <div class="modal-overlay" id="modal-sendMenu">
   <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title">Send Menu Quote</div>
-      <button class="modal-close" onclick="closeModal('modal-sendMenu')">×</button>
-    </div>
+    <div class="modal-header"><div class="modal-title">Send Menu Quote</div><button class="modal-close" onclick="closeModal('modal-sendMenu')">×</button></div>
     <div class="step-tabs">
       <button class="step-tab active" onclick="goStep('menu',1,this)">1. Attach</button>
       <button class="step-tab" onclick="goStep('menu',2,this)">2. Message</button>
@@ -416,27 +392,21 @@
     </div>
     <div id="menu-step-1">
       <div class="attach-box" onclick="menuAttachClick()">
-        <div class="icon" id="menuAttachIcon">📁</div>
-        <div class="text" id="menuAttachText">Tap to attach menu PDF</div>
-        <div class="hint">From your Canva export</div>
+        <div style="font-size:30px;margin-bottom:8px" id="menuAttachIcon">📁</div>
+        <div style="font-size:14px;color:var(--muted)" id="menuAttachText">Tap to attach menu PDF</div>
+        <div style="font-size:12px;color:var(--gold);margin-top:4px">From your Canva export</div>
       </div>
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Meal / Function</label>
           <select class="form-select" id="menuMeal">
-            <option>Haldi Lunch</option>
-            <option>Mehendi Dinner</option>
-            <option>Sangeet Dinner</option>
-            <option>Wedding Lunch</option>
-            <option selected>Reception Dinner</option>
-            <option>Full Event</option>
+            <option>Haldi Lunch</option><option>Mehendi Dinner</option><option>Sangeet Dinner</option>
+            <option>Wedding Lunch</option><option selected>Reception Dinner</option><option>Full Event</option>
           </select>
         </div>
         <div class="form-group" style="flex:0 0 85px">
           <label class="form-label">Version</label>
-          <select class="form-select" id="menuVersion">
-            <option>V1</option><option>V2</option><option>V3</option><option>Final</option>
-          </select>
+          <select class="form-select" id="menuVersion"><option>V1</option><option>V2</option><option>V3</option><option>Final</option></select>
         </div>
       </div>
       <button class="btn btn-gold" onclick="goStep('menu',2,null)">Next →</button>
@@ -450,7 +420,7 @@
       <button class="btn btn-gold" onclick="goStep('menu',3,null)">Next →</button>
     </div>
     <div id="menu-step-3" style="display:none">
-      <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Copy the message and send with the PDF on WhatsApp. Then mark as sent below.</p>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Copy the message, open WhatsApp, send with the PDF attached. Then mark as sent.</p>
       <button class="btn btn-gold" onclick="copyMenuMsg()" style="margin-bottom:10px">📋 Copy Message</button>
       <button class="btn btn-outline" id="menuMarkSentBtn" onclick="markMenuSent()">✅ Mark as Sent — Record in App</button>
       <div id="menuSentMsg"></div>
@@ -460,51 +430,30 @@
 
 <div class="modal-overlay" id="modal-tasting">
   <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title">Tasting Setup</div>
-      <button class="modal-close" onclick="closeModal('modal-tasting')">×</button>
-    </div>
+    <div class="modal-header"><div class="modal-title">Tasting Setup</div><button class="modal-close" onclick="closeModal('modal-tasting')">×</button></div>
     <div class="step-tabs">
       <button class="step-tab active" onclick="goStep('tasting',1,this)">1. Details</button>
       <button class="step-tab" onclick="goStep('tasting',2,this)">2. Items</button>
       <button class="step-tab" onclick="goStep('tasting',3,this)">3. Send</button>
     </div>
     <div id="tasting-step-1">
-      <div class="form-group">
-        <label class="form-label">Tasting Date</label>
-        <input class="form-input" id="tastingDate" type="date">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Time</label>
-        <input class="form-input" id="tastingTime" placeholder="e.g. 12:00 PM">
-      </div>
+      <div class="form-group"><label class="form-label">Tasting Date</label><input class="form-input" id="tastingDate" type="date"></div>
+      <div class="form-group"><label class="form-label">Time</label><input class="form-input" id="tastingTime" placeholder="e.g. 12:00 PM"></div>
       <div class="form-group">
         <label class="form-label">Venue Type</label>
-        <div class="radio-option" onclick="selectVenue(this,'client')">
-          <div class="radio-circle"><div class="radio-dot"></div></div>
-          <div class="radio-label">Client's Home / Office</div>
-        </div>
-        <div class="radio-option" onclick="selectVenue(this,'neutral')">
-          <div class="radio-circle"><div class="radio-dot"></div></div>
-          <div class="radio-label">Neutral location (arranged by us)</div>
-        </div>
-        <div class="radio-option" onclick="selectVenue(this,'vendor')">
-          <div class="radio-circle"><div class="radio-dot"></div></div>
-          <div class="radio-label">Vendor's Kitchen / Restaurant</div>
-        </div>
+        <div class="radio-option" onclick="selectVenue(this,'client')"><div class="radio-circle"><div class="radio-dot"></div></div><div class="radio-label">Client's Home / Office</div></div>
+        <div class="radio-option" onclick="selectVenue(this,'neutral')"><div class="radio-circle"><div class="radio-dot"></div></div><div class="radio-label">Neutral location (arranged by us)</div></div>
+        <div class="radio-option" onclick="selectVenue(this,'vendor')"><div class="radio-circle"><div class="radio-dot"></div></div><div class="radio-label">Vendor's Kitchen / Restaurant</div></div>
       </div>
-      <div class="form-group">
-        <label class="form-label">Venue / Address</label>
-        <input class="form-input" id="tastingVenue" placeholder="Enter venue details">
-      </div>
+      <div class="form-group"><label class="form-label">Venue / Address</label><input class="form-input" id="tastingVenue" placeholder="Enter venue details"></div>
       <button class="btn btn-gold" onclick="goStep('tasting',2,null)">Next → Select Items</button>
     </div>
     <div id="tasting-step-2" style="display:none">
       <div style="display:flex;gap:8px;margin-bottom:14px">
-        <input class="form-input" id="tastingNewItem" placeholder="Type item name + Enter" onkeydown="if(event.key==='Enter')addTastingItem()">
+        <input class="form-input" id="tastingNewItem" placeholder="Type item + Enter" onkeydown="if(event.key==='Enter')addTastingItem()">
         <button onclick="addTastingItem()" style="background:var(--gold);border:none;border-radius:10px;padding:11px 16px;color:#fff;font-weight:700;cursor:pointer;font-size:18px">+</button>
       </div>
-      <div class="section-label" style="margin-bottom:8px">Quick add from vendors:</div>
+      <div class="section-label">Quick add from vendors:</div>
       <div id="tastingQuickChips" style="margin-bottom:16px"></div>
       <div id="tastingSelectedItems"></div>
       <button class="btn btn-gold" onclick="goStep('tasting',3,null)">Next → Send Messages</button>
@@ -517,7 +466,7 @@
         </div>
         <div class="wa-preview" id="tastingClientMsg"></div>
         <div class="sent-row">
-          <button class="btn btn-gold btn-sm" style="flex:2" onclick="copyText('tastingClientMsg')">📋 Copy + WhatsApp</button>
+          <button class="btn btn-gold btn-sm" style="flex:2" onclick="copyText('tastingClientMsg')">📋 Copy</button>
           <button class="mark-btn" id="clientMarkBtn" onclick="markClientSent()">Mark Sent</button>
         </div>
       </div>
@@ -530,48 +479,20 @@
 
 <div class="modal-overlay" id="modal-addVendor">
   <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title">Add Vendor</div>
-      <button class="modal-close" onclick="closeModal('modal-addVendor')">×</button>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Agency Name *</label>
-      <input class="form-input" id="av-name" placeholder="e.g. Le Jardin Patisserie">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Cuisine / Specialty *</label>
-      <input class="form-input" id="av-cuisine" placeholder="e.g. Desserts, Live Counter">
-    </div>
+    <div class="modal-header"><div class="modal-title">Add Vendor</div><button class="modal-close" onclick="closeModal('modal-addVendor')">×</button></div>
+    <div class="form-group"><label class="form-label">Agency Name *</label><input class="form-input" id="av-name" placeholder="e.g. Le Jardin Patisserie"></div>
+    <div class="form-group"><label class="form-label">Cuisine / Specialty *</label><input class="form-input" id="av-cuisine" placeholder="e.g. Desserts"></div>
     <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Contact Person</label>
-        <input class="form-input" id="av-contact" placeholder="Name">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Designation</label>
-        <input class="form-input" id="av-designation" placeholder="Owner">
-      </div>
+      <div class="form-group"><label class="form-label">Contact Person</label><input class="form-input" id="av-contact" placeholder="Name"></div>
+      <div class="form-group"><label class="form-label">Designation</label><input class="form-input" id="av-desig" placeholder="Owner"></div>
     </div>
-    <div class="form-group">
-      <label class="form-label">Contact Number</label>
-      <input class="form-input" id="av-phone" type="tel" placeholder="9XXXXXXXXX">
+    <div class="form-group"><label class="form-label">Contact Number</label><input class="form-input" id="av-phone" type="tel" placeholder="9XXXXXXXXX"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Contact Person 2</label><input class="form-input" id="av-contact2" placeholder="Optional"></div>
+      <div class="form-group"><label class="form-label">Number 2</label><input class="form-input" id="av-phone2" type="tel" placeholder="Optional"></div>
     </div>
-    <div class="form-group">
-      <label class="form-label">Contact Person 2</label>
-      <input class="form-input" id="av-contact2" placeholder="Name (optional)">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Contact Number 2</label>
-      <input class="form-input" id="av-phone2" type="tel" placeholder="9XXXXXXXXX (optional)">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Base City</label>
-      <input class="form-input" id="av-city" placeholder="Vadodara">
-    </div>
-    <div class="form-group">
-      <label class="form-label">WhatsApp Group Link</label>
-      <input class="form-input" id="av-walink" placeholder="https://chat.whatsapp.com/...">
-    </div>
+    <div class="form-group"><label class="form-label">Base City</label><input class="form-input" id="av-city" placeholder="Vadodara"></div>
+    <div class="form-group"><label class="form-label">WhatsApp Group Link</label><input class="form-input" id="av-walink" placeholder="https://chat.whatsapp.com/..."></div>
     <button class="btn btn-gold" onclick="saveNewVendor()">Save Vendor</button>
     <div id="addVendorMsg" style="margin-top:10px"></div>
   </div>
@@ -580,41 +501,77 @@
 <script>
 // ── CONFIG ────────────────────────────────────────────────────
 const API = "https://script.google.com/macros/s/AKfycbzKaypHQmy6cQEhLTVT_O3dzsyAkw9TCQyJ5IDoWjTdbCxsIzZl1-Vu3llHYPzGi7V39w/exec";
-
 const STAGE_COLORS = ["","#3B5BDB","#D4500A","#B7900A","#862E62","#553C9A","#C9A84C"];
 const STAGE_LABELS = ["","Menu Quote","Vendor Costs","Price Quote","Tasting","Advance & Confirm","Final Orders"];
-const DAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const DAYS   = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
 // ── STATE ─────────────────────────────────────────────────────
 let APP = {
-  vendors: [], events: [], tasks: [], settings: {},
-  currentEvent: null, currentEventVendors: [],
-  tastingItems: [], tastingVenueType: "client",
-  menuAttached: false, menuFileName: "",
-  clientSent: false, vendorsSent: {},
+  vendors:[], events:[], tasks:[], settings:{},
+  currentEvent:null, currentEventVendors:[],
+  tastingItems:[], tastingVenueType:"client",
+  menuAttached:false, menuFileName:"",
+  clientSent:false, vendorsSent:{},
+  currentUser:""
 };
 
-// ── INIT ──────────────────────────────────────────────────────
-window.onload = async () => {
-  setTodayHeader();
-  await Promise.all([loadSettings(), loadVendors(), loadEvents(), loadTasks()]);
-  renderToday();
-  renderVendors();
-};
-
+// ── API — ALL VIA GET (CORS FIX) ──────────────────────────────
 async function apiGet(action, params="") {
   const r = await fetch(`${API}?action=${action}${params}`);
   return r.json();
 }
 
-async function apiPost(data) {
-  const r = await fetch(API, {
-    method:"POST",
-    body: JSON.stringify(data),
-    headers:{"Content-Type":"application/json"}
-  });
+// All writes use GET with encoded data param
+async function apiWrite(action, data) {
+  const encoded = encodeURIComponent(JSON.stringify(data));
+  const r = await fetch(`${API}?action=${action}&d=${encoded}`);
   return r.json();
+}
+
+// ── PIN ───────────────────────────────────────────────────────
+let pinValue = "";
+
+function pinPress(d) {
+  if (pinValue.length >= 4) return;
+  pinValue += d;
+  updatePinDots();
+  if (pinValue.length === 4) setTimeout(checkPin, 200);
+}
+
+function pinDel() {
+  pinValue = pinValue.slice(0,-1);
+  updatePinDots();
+  document.getElementById("pinError").textContent = "";
+}
+
+function updatePinDots() {
+  for (let i=0;i<4;i++) {
+    document.getElementById("pd"+i).classList.toggle("filled", i < pinValue.length);
+  }
+}
+
+async function checkPin() {
+  const res = await apiGet("checkPin", "&pin="+pinValue);
+  if (res.success) {
+    APP.currentUser = res.name;
+    document.getElementById("pinScreen").style.display = "none";
+    document.getElementById("mainApp").style.display = "block";
+    document.getElementById("userBadge").textContent = res.name;
+    initApp();
+  } else {
+    document.getElementById("pinError").textContent = "Incorrect PIN. Try again.";
+    pinValue = "";
+    updatePinDots();
+  }
+}
+
+// ── INIT ──────────────────────────────────────────────────────
+async function initApp() {
+  setTodayHeader();
+  await Promise.all([loadSettings(), loadVendors(), loadEvents(), loadTasks()]);
+  renderToday();
+  renderVendors();
 }
 
 async function loadSettings() { APP.settings = await apiGet("getSettings"); }
@@ -622,7 +579,7 @@ async function loadVendors()  { APP.vendors  = await apiGet("getVendors");  }
 async function loadEvents()   { APP.events   = await apiGet("getEvents");   }
 async function loadTasks()    { APP.tasks    = await apiGet("getTasks");    }
 
-// ── NAVIGATION ────────────────────────────────────────────────
+// ── NAV ───────────────────────────────────────────────────────
 function switchScreen(name, btn) {
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
   document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
@@ -630,7 +587,7 @@ function switchScreen(name, btn) {
   btn.classList.add("active");
   const fab = document.getElementById("fabNewEvent");
   fab.style.display = name === "events" ? "flex" : "none";
-  if (name === "events") { renderEvents(); showEventList(); }
+  if (name === "events")  { renderEvents(); showEventList(); }
   if (name === "vendors") renderVendors();
 }
 
@@ -647,21 +604,20 @@ function setTodayHeader() {
 }
 
 function renderToday() {
-  const tasks   = APP.tasks || [];
-  const overdue = tasks.filter(t => t.urgency === "overdue");
-  const today   = tasks.filter(t => t.urgency === "today");
-  const tomorrow= tasks.filter(t => t.urgency === "tomorrow");
-  const future  = tasks.filter(t => t.urgency === "future");
+  const tasks    = APP.tasks || [];
+  const overdue  = tasks.filter(t => t.urgency==="overdue");
+  const today    = tasks.filter(t => t.urgency==="today");
+  const tomorrow = tasks.filter(t => t.urgency==="tomorrow");
+  const future   = tasks.filter(t => t.urgency==="future");
 
   document.getElementById("statOverdue").textContent  = overdue.length;
   document.getElementById("statToday").textContent    = today.length;
   document.getElementById("statTomorrow").textContent = tomorrow.length;
   document.getElementById("todaySummary").textContent = `${tasks.length} actions across ${APP.events.length} active events`;
 
-  const overdueCount = overdue.length;
   const badge = document.getElementById("overdueBadge");
-  if (overdueCount > 0) { badge.style.display="block"; badge.textContent = overdueCount+" Overdue"; } 
-  else { badge.style.display="none"; }
+  if (overdue.length) { badge.style.display="block"; badge.textContent=overdue.length+" Overdue"; }
+  else badge.style.display="none";
 
   let html = "";
   if (overdue.length)  html += renderTaskSection("OVERDUE",  "#C0392B", overdue);
@@ -673,7 +629,12 @@ function renderToday() {
 }
 
 function renderTaskSection(label, color, tasks) {
-  const rows = tasks.map(t => `
+  return `<div class="task-section">
+    <div class="task-section-head">
+      <div class="task-section-bar" style="background:${color}"></div>
+      <div class="task-section-title" style="color:${color}">${label} (${tasks.length})</div>
+    </div>
+    ${tasks.map(t => `
     <div class="task-row">
       <div class="task-time" style="color:${color}">${t.Due_Date||"—"}</div>
       <div class="task-bar" style="background:${color}"></div>
@@ -685,22 +646,14 @@ function renderTaskSection(label, color, tasks) {
           <button class="task-done-btn" onclick="doneTask('${t.Row_ID}',this)">Done</button>
         </div>
       </div>
-    </div>`).join("");
-  return `
-    <div class="task-section">
-      <div class="task-section-head">
-        <div class="task-section-bar" style="background:${color}"></div>
-        <div class="task-section-title" style="color:${color}">${label} (${tasks.length})</div>
-      </div>
-      ${rows}
-    </div>`;
+    </div>`).join("")}
+  </div>`;
 }
 
 async function doneTask(rowId, btn) {
-  btn.textContent = "✓"; btn.style.color = "var(--green)";
-  await apiPost({ action:"completeTask", data:{ Row_ID: rowId } });
-  await loadTasks();
-  renderToday();
+  btn.textContent="✓"; btn.style.color="var(--green)";
+  await apiWrite("completeTask", { Row_ID: rowId });
+  await loadTasks(); renderToday();
 }
 
 // ── EVENTS ────────────────────────────────────────────────────
@@ -712,10 +665,9 @@ function renderEvents() {
     return;
   }
   document.getElementById("eventList").innerHTML = events.map(ev => {
-    const stage = parseInt(ev.Stage) || 1;
+    const stage = parseInt(ev.Stage)||1;
     const color = STAGE_COLORS[stage];
-    return `
-    <div class="event-card s${stage}" onclick="openEvent('${ev.Event_ID}')">
+    return `<div class="event-card" onclick="openEvent('${ev.Event_ID}')">
       <div class="event-left-bar" style="background:${color}"></div>
       <div class="event-inner">
         <div style="display:flex;justify-content:space-between;align-items:flex-start">
@@ -725,9 +677,7 @@ function renderEvents() {
         <div class="event-sub">${ev.Occasion||""} · ${ev.Pax||0} guests</div>
         ${renderPipeline(stage)}
         <div class="event-footer">
-          <span class="tag" style="background:${color}18;color:${color};border:1px solid ${color}30">
-            Stage ${stage}: ${STAGE_LABELS[stage]}
-          </span>
+          <span class="tag" style="background:${color}18;color:${color};border:1px solid ${color}30">Stage ${stage}: ${STAGE_LABELS[stage]}</span>
           <div class="event-balance">
             <div class="amount">${ev.Balance_Due||"—"}</div>
             <div class="label">balance due</div>
@@ -740,64 +690,52 @@ function renderEvents() {
 
 function renderPipeline(current) {
   let html = `<div class="pipeline">`;
-  for (let i = 1; i <= 6; i++) {
+  for (let i=1;i<=6;i++) {
     const color = STAGE_COLORS[i];
-    const isCurrent = i === current;
-    const isDone    = i < current;
+    const isCurrent = i===current, isDone = i<current;
     html += `<div class="pip-item">
       <div class="pip-dot-wrap">
-        <div class="pip-dot ${isCurrent?"current":isDone?"done":""}" style="--stage-color:${color}"></div>
-        ${isCurrent ? `<div class="pip-label" style="color:${color}">${STAGE_LABELS[i].replace(" ","\n")}</div>` : ""}
+        <div class="pip-dot ${isCurrent?"current":isDone?"done":""}" style="--sc:${color}"></div>
+        ${isCurrent?`<div class="pip-label" style="color:${color}">${STAGE_LABELS[i].replace(" ","\n")}</div>`:""}
       </div>
-      ${i < 6 ? `<div class="pip-line ${isDone?"done":""}"></div>` : ""}
+      ${i<6?`<div class="pip-line ${isDone?"done":""}"></div>`:""}
     </div>`;
   }
-  return html + `</div>`;
+  return html+`</div>`;
 }
 
 async function openEvent(eventId) {
-  APP.currentEvent = APP.events.find(e => e.Event_ID === eventId);
+  APP.currentEvent = APP.events.find(e => e.Event_ID===eventId);
   if (!APP.currentEvent) return;
-  APP.currentEventVendors = await apiGet("getEventVendors", `&event_id=${eventId}`);
+  APP.currentEventVendors = await apiGet("getEventVendors","&event_id="+eventId);
   renderEventDetail();
-  document.getElementById("eventList").style.display   = "none";
-  document.getElementById("eventDetail").style.display = "block";
+  document.getElementById("eventList").style.display="none";
+  document.getElementById("eventDetail").style.display="block";
 }
 
 function renderEventDetail() {
   const ev    = APP.currentEvent;
-  const stage = parseInt(ev.Stage) || 1;
+  const stage = parseInt(ev.Stage)||1;
   const color = STAGE_COLORS[stage];
-  const menus = APP.currentEventVendors; // reuse for simplicity
 
-  // Build action buttons based on stage
   let actions = "";
-  if (stage === 1) actions += `<button class="btn btn-gold" onclick="openSendMenu()">📎  Send Menu Quote to Client</button>`;
-  if (stage === 3) actions += `<button class="btn btn-gold" onclick="openPriceQuote()">💰  Send Price Quote to Client</button>`;
-  if (stage >= 2)  actions += `<button class="btn btn-outline" style="margin-top:8px" onclick="openTasting()">🍽️  Set Up Tasting</button>`;
+  if (stage===1) actions += `<button class="btn btn-gold" onclick="openSendMenu()">📎  Send Menu Quote to Client</button>`;
+  if (stage===3) actions += `<button class="btn btn-gold" onclick="openPriceQuote()">💰  Send Price Quote to Client</button>`;
+  if (stage>=2)  actions += `<button class="btn btn-outline" style="margin-top:8px" onclick="openTasting()">🍽️  Set Up Tasting</button>`;
 
-  // Vendor cards
   const vendorCards = APP.currentEventVendors.length
     ? APP.currentEventVendors.map(v => `
       <div class="vendor-card">
-        <div class="vendor-card-header">
-          <div class="vendor-card-name">${v.Agency_Name||v.Vendor_ID}</div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+          <div style="font-family:var(--serif);font-size:16px">${v.Agency_Name||v.Vendor_ID}</div>
           <span class="tag" style="background:#2C528218;color:#2C5282;border:1px solid #2C528230">${v.Status||"pending"}</span>
         </div>
-        <div class="vendor-card-item">${v.Items||"—"}</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:12px">${v.Items||"—"}</div>
+        <div class="gold-line"></div>
         <div class="vendor-price-row">
-          <div class="vendor-price-col">
-            <div class="lbl">Vendor Cost</div>
-            <div class="val" style="color:var(--text)">${v.Vendor_Cost||"—"}</div>
-          </div>
-          <div class="vendor-price-col">
-            <div class="lbl">Your Price</div>
-            <div class="val" style="color:var(--gold-dark)">${v.Your_Price||"—"}</div>
-          </div>
-          <div class="vendor-price-col">
-            <div class="lbl">Advance</div>
-            <div class="val" style="color:${v.Advance_Paid==='paid'?'var(--green)':'var(--red)'}">${v.Advance_Paid||"pending"}</div>
-          </div>
+          <div class="vpc"><div class="lbl">Vendor Cost</div><div class="val">${v.Vendor_Cost||"—"}</div></div>
+          <div class="vpc"><div class="lbl">Your Price</div><div class="val" style="color:var(--gold-dark)">${v.Your_Price||"—"}</div></div>
+          <div class="vpc"><div class="lbl">Advance</div><div class="val" style="color:${v.Advance_Paid==='paid'?'var(--green)':'var(--red)'}">${v.Advance_Paid||"pending"}</div></div>
         </div>
         <button class="btn btn-outline btn-sm" onclick="msgVendor('${v.Vendor_ID}')">💬  Message Vendor</button>
       </div>`).join("")
@@ -810,14 +748,8 @@ function renderEventDetail() {
       <div style="font-size:13px;color:var(--muted);margin-bottom:16px">${ev.Occasion} · ${ev.Event_Date} · ${ev.Pax} pax</div>
       ${renderPipeline(stage)}
       <div class="fin-row">
-        <div class="fin-card">
-          <div class="amount" style="color:var(--green)">${ev.Advance_Recd||"—"}</div>
-          <div class="label">Advance Received</div>
-        </div>
-        <div class="fin-card">
-          <div class="amount" style="color:var(--orange)">${ev.Balance_Due||"—"}</div>
-          <div class="label">Balance Due</div>
-        </div>
+        <div class="fin-card"><div class="amount" style="color:var(--green)">${ev.Advance_Recd||"—"}</div><div class="label">Advance Received</div></div>
+        <div class="fin-card"><div class="amount" style="color:var(--orange)">${ev.Balance_Due||"—"}</div><div class="label">Balance Due</div></div>
       </div>
     </div>
     <div class="action-btns">${actions}</div>
@@ -826,10 +758,7 @@ function renderEventDetail() {
       <button class="tab-btn" onclick="switchTab('vendors',this)">🏪  Vendors</button>
     </div>
     <div id="tab-client" class="tab-content active">
-      <div class="card">
-        <div class="section-label">Menus Sent</div>
-        <div style="font-size:13px;color:var(--muted);padding:10px 0">No menus recorded yet. Use Send Menu Quote above.</div>
-      </div>
+      <div class="card"><div class="section-label">Menus Sent</div><div style="font-size:13px;color:var(--muted);padding:10px 0">No menus recorded yet.</div></div>
     </div>
     <div id="tab-vendors" class="tab-content">
       ${vendorCards}
@@ -844,355 +773,281 @@ function switchTab(name, btn) {
   document.getElementById("tab-"+name).classList.add("active");
 }
 
+// ── NEW EVENT ─────────────────────────────────────────────────
+async function saveNewEvent() {
+  const client = document.getElementById("new-client").value.trim();
+  if (!client) { alert("Client name is required"); return; }
+  const btn = document.getElementById("saveEventBtn");
+  btn.textContent = "Saving..."; btn.disabled = true;
+  try {
+    const res = await apiWrite("addEvent", {
+      Client_Name: client,
+      Occasion:    document.getElementById("new-occasion").value,
+      Event_Date:  document.getElementById("new-date").value,
+      Pax:         document.getElementById("new-pax").value||0,
+      Notes:       document.getElementById("new-notes").value,
+      Stage: 1
+    });
+    if (res.success) {
+      document.getElementById("newEventMsg").innerHTML = `<div class="success-box"><div class="title">✓ Event Created</div><div class="sub">ID: ${res.Event_ID} · Tasks auto-generated.</div></div>`;
+      await loadEvents(); await loadTasks();
+      renderEvents(); renderToday();
+      setTimeout(() => { closeModal("modal-newEvent"); document.getElementById("newEventMsg").innerHTML=""; }, 1500);
+    } else {
+      document.getElementById("newEventMsg").innerHTML = `<div style="color:var(--red);font-size:13px;margin-top:8px">Error: ${res.error||"Unknown error"}</div>`;
+    }
+  } catch(e) {
+    document.getElementById("newEventMsg").innerHTML = `<div style="color:var(--red);font-size:13px;margin-top:8px">Connection error. Check internet.</div>`;
+  }
+  btn.textContent = "Create Event"; btn.disabled = false;
+}
+
 // ── SEND MENU ─────────────────────────────────────────────────
 function openSendMenu() {
-  APP.menuAttached = false; APP.menuFileName = "";
-  document.getElementById("menuAttachIcon").textContent = "📁";
-  document.getElementById("menuAttachText").textContent = "Tap to attach menu PDF";
-  goStep("menu", 1, null);
-  updateMenuPreview();
+  APP.menuAttached=false; APP.menuFileName="";
+  document.getElementById("menuAttachIcon").textContent="📁";
+  document.getElementById("menuAttachText").textContent="Tap to attach menu PDF";
+  goStep("menu",1,null); updateMenuPreview();
   openModal("modal-sendMenu");
 }
 
 function menuAttachClick() {
-  APP.menuAttached = true;
-  APP.menuFileName = `${APP.currentEvent.Client_Name.replace(/ /g,"_")}_Menu_${document.getElementById("menuVersion").value}.pdf`;
-  document.getElementById("menuAttachIcon").textContent = "📎";
-  document.getElementById("menuAttachText").textContent = APP.menuFileName;
+  APP.menuAttached=true;
+  APP.menuFileName=`${APP.currentEvent.Client_Name.replace(/ /g,"_")}_Menu_${document.getElementById("menuVersion").value}.pdf`;
+  document.getElementById("menuAttachIcon").textContent="📎";
+  document.getElementById("menuAttachText").textContent=APP.menuFileName;
 }
 
 function updateMenuPreview() {
-  const ev   = APP.currentEvent;
-  const note = document.getElementById("menuNote")?.value || "";
-  const meal = document.getElementById("menuMeal")?.value || "";
-  const ver  = document.getElementById("menuVersion")?.value || "V1";
-  const sig  = APP.settings.Signature || "UVI Luxury Catering & Decor";
-  const msg  = `Dear ${(ev.Client_Name||"").split(" ")[0]},\n\nPlease find attached the menu proposal for your *${ev.Occasion}*.\n\n📅 Date: ${ev.Event_Date}\n👥 Guests: ${ev.Pax} pax\n🍽️ Meal: ${meal} (${ver})\n\n${note}\n\nWarm regards,\n*${sig}*`;
-  const el = document.getElementById("menuWAPreview");
-  if (el) el.textContent = msg;
-  APP._menuMsg = msg;
+  const ev=APP.currentEvent; if (!ev) return;
+  const note=document.getElementById("menuNote")?.value||"";
+  const meal=document.getElementById("menuMeal")?.value||"";
+  const ver =document.getElementById("menuVersion")?.value||"V1";
+  const sig =APP.settings.Signature||"UVI Luxury Catering & Decor";
+  APP._menuMsg=`Dear ${(ev.Client_Name||"").split(" ")[0]},\n\nPlease find attached the menu proposal for your *${ev.Occasion}*.\n\n📅 Date: ${ev.Event_Date}\n👥 Guests: ${ev.Pax} pax\n🍽️ Meal: ${meal} (${ver})\n\n${note}\n\nWarm regards,\n*${sig}*`;
+  const el=document.getElementById("menuWAPreview"); if (el) el.textContent=APP._menuMsg;
 }
 
 function copyMenuMsg() {
-  navigator.clipboard.writeText(APP._menuMsg || "").then(() => alert("Message copied! Open WhatsApp and paste."));
+  navigator.clipboard.writeText(APP._menuMsg||"").then(()=>alert("Message copied! Open WhatsApp and paste."));
 }
 
 async function markMenuSent() {
-  const ev = APP.currentEvent;
-  const res = await apiPost({ action:"addMenuSent", data:{
-    Event_ID:      ev.Event_ID,
-    Meal_Function: document.getElementById("menuMeal").value,
-    Version:       document.getElementById("menuVersion").value,
-    File_Name:     APP.menuFileName || "Menu.pdf",
-    Drive_Link:    ""
-  }});
+  const ev=APP.currentEvent;
+  const res=await apiWrite("addMenuSent",{
+    Event_ID:ev.Event_ID, Meal_Function:document.getElementById("menuMeal").value,
+    Version:document.getElementById("menuVersion").value, File_Name:APP.menuFileName||"Menu.pdf", Drive_Link:""
+  });
   if (res.success) {
-    document.getElementById("menuSentMsg").innerHTML = `<div class="success-box"><div class="title">✓ Menu Quote Recorded</div><div class="sub">Follow-up reminder set for 2 days.</div></div>`;
-    document.getElementById("menuMarkSentBtn").textContent = "✓ Recorded";
-    document.getElementById("menuMarkSentBtn").style.background = "#E8F5E9";
-    document.getElementById("menuMarkSentBtn").style.color = "var(--green)";
-    // Update stage to 2
-    await apiPost({ action:"updateEvent", data:{ Event_ID: ev.Event_ID, Stage: 2 }});
+    document.getElementById("menuSentMsg").innerHTML=`<div class="success-box"><div class="title">✓ Menu Quote Recorded</div><div class="sub">Follow-up reminder set for 2 days.</div></div>`;
+    document.getElementById("menuMarkSentBtn").textContent="✓ Recorded";
+    document.getElementById("menuMarkSentBtn").style.background="#E8F5E9";
+    document.getElementById("menuMarkSentBtn").style.color="var(--green)";
+    await apiWrite("updateEvent",{Event_ID:ev.Event_ID,Stage:2});
     await loadEvents();
   }
 }
 
 // ── TASTING ───────────────────────────────────────────────────
 function openTasting() {
-  APP.tastingItems = [];
-  APP.tastingVenueType = "client";
-  document.querySelectorAll(".radio-option").forEach(r => r.classList.remove("selected"));
-  renderTastingChips();
-  renderTastingSelected();
-  goStep("tasting", 1, null);
-  openModal("modal-tasting");
+  APP.tastingItems=[]; APP.tastingVenueType="client";
+  document.querySelectorAll(".radio-option").forEach(r=>r.classList.remove("selected"));
+  renderTastingChips(); renderTastingSelected();
+  goStep("tasting",1,null); openModal("modal-tasting");
 }
 
 function selectVenue(el, type) {
-  document.querySelectorAll(".radio-option").forEach(r => r.classList.remove("selected"));
-  el.classList.add("selected");
-  APP.tastingVenueType = type;
+  document.querySelectorAll(".radio-option").forEach(r=>r.classList.remove("selected"));
+  el.classList.add("selected"); APP.tastingVenueType=type;
 }
 
 function renderTastingChips() {
-  const chips = APP.currentEventVendors.flatMap(v => (v.Items||"").split("+").map(i => i.trim())).filter(Boolean);
-  document.getElementById("tastingQuickChips").innerHTML = chips.map(item =>
+  const chips=[...new Set(APP.currentEventVendors.flatMap(v=>(v.Items||"").split("+").map(i=>i.trim())).filter(Boolean))];
+  document.getElementById("tastingQuickChips").innerHTML=chips.map(item=>
     `<span class="chip ${APP.tastingItems.includes(item)?"selected":""}" onclick="toggleTastingChip(this,'${item}')">${APP.tastingItems.includes(item)?"✓ ":""}${item}</span>`
   ).join("");
 }
 
 function toggleTastingChip(el, item) {
-  if (APP.tastingItems.includes(item)) APP.tastingItems = APP.tastingItems.filter(i => i !== item);
+  if (APP.tastingItems.includes(item)) APP.tastingItems=APP.tastingItems.filter(i=>i!==item);
   else APP.tastingItems.push(item);
-  renderTastingChips();
-  renderTastingSelected();
+  renderTastingChips(); renderTastingSelected();
 }
 
 function addTastingItem() {
-  const val = document.getElementById("tastingNewItem").value.trim();
-  if (val && !APP.tastingItems.includes(val)) { APP.tastingItems.push(val); renderTastingSelected(); renderTastingChips(); }
-  document.getElementById("tastingNewItem").value = "";
+  const val=document.getElementById("tastingNewItem").value.trim();
+  if (val&&!APP.tastingItems.includes(val)){APP.tastingItems.push(val);renderTastingSelected();renderTastingChips();}
+  document.getElementById("tastingNewItem").value="";
 }
 
 function renderTastingSelected() {
-  document.getElementById("tastingSelectedItems").innerHTML = APP.tastingItems.length
-    ? `<div class="section-label">Selected (${APP.tastingItems.length}):</div>` +
-      APP.tastingItems.map((item,i) => `
-        <div class="selected-item">
-          <span>🍽️ ${item}</span>
-          <button class="remove-btn" onclick="removeTastingItem(${i})">×</button>
-        </div>`).join("")
-    : "";
+  document.getElementById("tastingSelectedItems").innerHTML=APP.tastingItems.length
+    ?`<div class="section-label">Selected (${APP.tastingItems.length}):</div>`+
+      APP.tastingItems.map((item,i)=>`<div class="selected-item"><span>🍽️ ${item}</span><button class="remove-btn" onclick="removeTastingItem(${i})">×</button></div>`).join("")
+    :"";
 }
 
-function removeTastingItem(i) {
-  APP.tastingItems.splice(i, 1);
-  renderTastingSelected(); renderTastingChips();
-}
+function removeTastingItem(i){APP.tastingItems.splice(i,1);renderTastingSelected();renderTastingChips();}
 
 function buildTastingMsgs() {
-  const ev   = APP.currentEvent;
-  const date = document.getElementById("tastingDate").value;
-  const time = document.getElementById("tastingTime").value;
-  const venue= document.getElementById("tastingVenue").value;
-  const sig  = APP.settings.Signature || "UVI Luxury Catering & Decor";
-  const itemList = APP.tastingItems.map(i => `• ${i}`).join("\n");
-
-  APP._tastingClientMsg = `Dear ${(ev.Client_Name||"").split(" ")[0]},\n\nWe are pleased to confirm your *Tasting Session*:\n\n📅 Date: ${date}\n⏰ Time: ${time}\n📍 Venue: ${venue}\n\n🍽️ Items:\n${itemList}\n\nLooking forward to hosting you.\n\n*${sig}*`;
-
-  document.getElementById("tastingClientMsg").textContent = APP._tastingClientMsg;
-
-  const vendorHtml = APP.currentEventVendors.map((v, i) => {
-    const msg = `Dear ${(v.Agency_Name||"Vendor").split(" ")[0]},\n\nKindly prepare *tasting portions* of:\n${itemList}\n\nPickup: *${date}* at *${time}*\nEvent: ${ev.Occasion} — ${ev.Client_Name}\n\nPlease confirm.\n\n*${sig}*`;
-    APP[`_tastingVendorMsg_${i}`] = msg;
-    return `
-      <div class="card" style="margin-bottom:10px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-          <strong style="font-size:14px">${v.Agency_Name}</strong>
-          <span id="vendorSentTag_${i}"></span>
-        </div>
-        <div class="wa-preview" id="tastingVendorMsg_${i}">${msg}</div>
-        <div class="sent-row">
-          <button class="btn btn-gold btn-sm" style="flex:2" onclick="copyVendorMsg(${i})">📋 Copy + WhatsApp</button>
-          <button class="mark-btn" id="vendorMarkBtn_${i}" onclick="markVendorSent(${i})">Mark Sent</button>
-        </div>
-      </div>`;
+  const ev=APP.currentEvent;
+  const date=document.getElementById("tastingDate").value;
+  const time=document.getElementById("tastingTime").value;
+  const venue=document.getElementById("tastingVenue").value;
+  const sig=APP.settings.Signature||"UVI Luxury Catering & Decor";
+  const itemList=APP.tastingItems.map(i=>`• ${i}`).join("\n");
+  APP._tastingClientMsg=`Dear ${(ev.Client_Name||"").split(" ")[0]},\n\nWe are pleased to confirm your *Tasting Session*:\n\n📅 Date: ${date}\n⏰ Time: ${time}\n📍 Venue: ${venue}\n\n🍽️ Items:\n${itemList}\n\nLooking forward to hosting you.\n\n*${sig}*`;
+  document.getElementById("tastingClientMsg").textContent=APP._tastingClientMsg;
+  document.getElementById("tastingVendorMsgs").innerHTML=APP.currentEventVendors.map((v,i)=>{
+    const msg=`Dear ${(v.Agency_Name||"Vendor").split(" ")[0]},\n\nKindly prepare *tasting portions* of:\n${itemList}\n\nPickup: *${date}* at *${time}*\nEvent: ${ev.Occasion} — ${ev.Client_Name}\n\nPlease confirm.\n\n*${sig}*`;
+    APP[`_tvm_${i}`]=msg;
+    return `<div class="card" style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <strong style="font-size:14px">${v.Agency_Name}</strong><span id="vendorSentTag_${i}"></span>
+      </div>
+      <div class="wa-preview" id="tvm_${i}">${msg}</div>
+      <div class="sent-row">
+        <button class="btn btn-gold btn-sm" style="flex:2" onclick="copyVendorMsg(${i})">📋 Copy</button>
+        <button class="mark-btn" id="vendorMarkBtn_${i}" onclick="markVendorSent(${i})">Mark Sent</button>
+      </div>
+    </div>`;
   }).join("");
-  document.getElementById("tastingVendorMsgs").innerHTML = vendorHtml;
-  APP.clientSent = false;
-  APP.vendorsSent = {};
+  APP.clientSent=false; APP.vendorsSent={};
 }
 
-function markClientSent() {
-  APP.clientSent = true;
-  document.getElementById("clientMarkBtn").className = "mark-btn done";
-  document.getElementById("clientMarkBtn").textContent = "✓ Done";
-  document.getElementById("clientSentTag").innerHTML = `<span class="tag" style="background:#2E7D5218;color:#2E7D52;border:1px solid #2E7D5230">✓ Sent</span>`;
+function markClientSent(){
+  APP.clientSent=true;
+  document.getElementById("clientMarkBtn").className="mark-btn done";
+  document.getElementById("clientMarkBtn").textContent="✓ Done";
+  document.getElementById("clientSentTag").innerHTML=`<span class="tag" style="background:#2E7D5218;color:#2E7D52;border:1px solid #2E7D5230">✓ Sent</span>`;
   checkAllSent();
 }
 
-function markVendorSent(i) {
-  APP.vendorsSent[i] = true;
-  document.getElementById(`vendorMarkBtn_${i}`).className = "mark-btn done";
-  document.getElementById(`vendorMarkBtn_${i}`).textContent = "✓ Done";
-  document.getElementById(`vendorSentTag_${i}`).innerHTML = `<span class="tag" style="background:#2E7D5218;color:#2E7D52;border:1px solid #2E7D5230">✓ Sent</span>`;
+function markVendorSent(i){
+  APP.vendorsSent[i]=true;
+  document.getElementById(`vendorMarkBtn_${i}`).className="mark-btn done";
+  document.getElementById(`vendorMarkBtn_${i}`).textContent="✓ Done";
+  document.getElementById(`vendorSentTag_${i}`).innerHTML=`<span class="tag" style="background:#2E7D5218;color:#2E7D52;border:1px solid #2E7D5230">✓ Sent</span>`;
   checkAllSent();
 }
 
-function checkAllSent() {
-  if (APP.clientSent && Object.keys(APP.vendorsSent).length >= APP.currentEventVendors.length) {
-    document.getElementById("tastingAllSentMsg").innerHTML = `<div class="success-box"><div class="title">✓ Tasting Fully Coordinated</div><div class="sub">All messages sent. Reminder set for tasting day.</div></div>`;
-    // Save tasting to sheet
-    apiPost({ action:"addTasting", data:{
-      Event_ID:   APP.currentEvent.Event_ID,
-      Tasting_Date: document.getElementById("tastingDate").value,
-      Time:       document.getElementById("tastingTime").value,
-      Venue_Type: APP.tastingVenueType,
-      Venue:      document.getElementById("tastingVenue").value,
-      Items:      APP.tastingItems.join(", "),
-      Client_Msg_Sent: "Y", Vendors_Msg_Sent: "Y"
-    }});
-    apiPost({ action:"updateEvent", data:{ Event_ID: APP.currentEvent.Event_ID, Stage: 4 }});
+function checkAllSent(){
+  if (APP.clientSent&&Object.keys(APP.vendorsSent).length>=APP.currentEventVendors.length){
+    document.getElementById("tastingAllSentMsg").innerHTML=`<div class="success-box"><div class="title">✓ Tasting Fully Coordinated</div><div class="sub">All messages sent. Reminder set for tasting day.</div></div>`;
+    apiWrite("addTasting",{Event_ID:APP.currentEvent.Event_ID,Tasting_Date:document.getElementById("tastingDate").value,Time:document.getElementById("tastingTime").value,Venue_Type:APP.tastingVenueType,Venue:document.getElementById("tastingVenue").value,Items:APP.tastingItems.join(", "),Client_Msg_Sent:"Y",Vendors_Msg_Sent:"Y"});
+    apiWrite("updateEvent",{Event_ID:APP.currentEvent.Event_ID,Stage:4});
   }
 }
 
-function copyVendorMsg(i) {
-  const msg = APP[`_tastingVendorMsg_${i}`] || "";
-  navigator.clipboard.writeText(msg).then(() => alert("Copied! Paste on WhatsApp."));
-}
+function copyVendorMsg(i){navigator.clipboard.writeText(APP[`_tvm_${i}`]||"").then(()=>alert("Copied! Paste on WhatsApp."));}
 
 // ── PRICE QUOTE ───────────────────────────────────────────────
-function openPriceQuote() {
-  const ev = APP.currentEvent;
-  const vendors = APP.currentEventVendors;
-  const total = vendors.reduce((s, v) => s + (parseInt((v.Your_Price||"0").replace(/[₹,]/g,""))||0), 0);
-  const sig = APP.settings.Signature || "UVI Luxury Catering & Decor";
-  const msg = `Dear ${(ev.Client_Name||"").split(" ")[0]},\n\nPlease find our *Final Price Quote* for your ${ev.Occasion}.\n\n📅 Date: ${ev.Event_Date}\n👥 Guests: ${ev.Pax} pax\n💰 Total Package: ₹${total.toLocaleString()}\n\nThis includes full coordination, setup & our quality guarantee. Valid for 48 hours.\n\nKindly confirm to proceed.\n\n*${sig}*`;
-  navigator.clipboard.writeText(msg).then(() => alert("Price quote copied! Paste on WhatsApp to client."));
+function openPriceQuote(){
+  const ev=APP.currentEvent;
+  const vendors=APP.currentEventVendors;
+  const total=vendors.reduce((s,v)=>s+(parseInt((v.Your_Price||"0").replace(/[₹,]/g,""))||0),0);
+  const sig=APP.settings.Signature||"UVI Luxury Catering & Decor";
+  const msg=`Dear ${(ev.Client_Name||"").split(" ")[0]},\n\nPlease find our *Final Price Quote* for your ${ev.Occasion}.\n\n📅 Date: ${ev.Event_Date}\n👥 Guests: ${ev.Pax} pax\n💰 Total Package: ₹${total.toLocaleString()}\n\nThis includes full coordination, setup & our quality guarantee. Valid for 48 hours.\n\nKindly confirm to proceed.\n\n*${sig}*`;
+  navigator.clipboard.writeText(msg).then(()=>alert("Price quote copied! Paste on WhatsApp to client."));
 }
 
 // ── MSG VENDOR ────────────────────────────────────────────────
-function msgVendor(vendorId) {
-  const vendor = APP.vendors.find(v => v.Vendor_ID === vendorId);
+function msgVendor(vendorId){
+  const vendor=APP.vendors.find(v=>v.Vendor_ID===vendorId);
   if (!vendor) return;
-  const link = vendor.WhatsApp_Group_Link;
-  if (link) window.open(link, "_blank");
-  else if (vendor.Contact_Number) window.open(`https://wa.me/91${vendor.Contact_Number}`, "_blank");
+  if (vendor.WhatsApp_Group_Link) window.open(vendor.WhatsApp_Group_Link,"_blank");
+  else if (vendor.Contact_Number) window.open(`https://wa.me/91${vendor.Contact_Number}`,"_blank");
   else alert("No WhatsApp contact found for this vendor.");
 }
 
 // ── VENDORS ───────────────────────────────────────────────────
-let vendorFilter = "All";
-function renderVendors() {
-  const vendors = APP.vendors || [];
-  const cuisines = [...new Set(vendors.map(v => v.Cuisine).filter(Boolean))];
-  document.getElementById("vendorCount").textContent = `${vendors.length} partners`;
-
-  // Filters
-  const allFilters = ["All", ...cuisines.slice(0,6)];
-  document.getElementById("cuisineFilters").innerHTML = allFilters.map(c =>
-    `<button class="filter-btn ${vendorFilter===c?"active":""}" onclick="setVendorFilter('${c}',this)">${c}</button>`
+let vendorFilter="All";
+function renderVendors(){
+  const vendors=APP.vendors||[];
+  const cuisines=[...new Set(vendors.map(v=>v.Cuisine).filter(Boolean))];
+  document.getElementById("vendorCount").textContent=`${vendors.length} partners`;
+  const allFilters=["All",...cuisines.slice(0,7)];
+  document.getElementById("cuisineFilters").innerHTML=allFilters.map(c=>
+    `<button class="filter-btn ${vendorFilter===c?"active":""}" onclick="setVendorFilter('${c}')">${c}</button>`
   ).join("");
-
-  const shown = vendorFilter === "All" ? vendors : vendors.filter(v => v.Cuisine === vendorFilter);
-  const emojiMap = { Sweets:"🍰", Dessert:"🎂", Chaat:"🥘", Italian:"🍝", "Indian Food":"🍛", Crockery:"🍽️", "Welcome Drink":"🥤", Multi:"⭐", "Coffee Bar":"☕", Mediterranean:"🫒", Srikhand:"🍨", Snacks:"🥨", Mukhwas:"🌿", Chole:"🍲", Farsan:"🧆", "Gujarati Live Counter":"🍱", "Live Counters, Soup, Starters":"🍜", "VIP Boys Waiter":"👔", Safa:"🎀", "Coffee Bar, Moctail Bar, Chai Tapri":"☕" };
-  
-  document.getElementById("vendorList").innerHTML = shown.map(v => `
-    <div class="vendor-list-card" onclick="openVendorDetail('${v.Vendor_ID}')">
-      <div class="vendor-emoji-box" style="background:rgba(201,168,76,0.12);border:1.5px solid rgba(201,168,76,0.25)">
-        ${emojiMap[v.Cuisine] || "🏪"}
-      </div>
+  const emojiMap={Sweets:"🍰",Dessert:"🎂",Chaat:"🥘",Italian:"🍝","Indian Food":"🍛",Crockery:"🍽️","Welcome Drink":"🥤",Multi:"⭐","Coffee Bar":"☕",Mediterranean:"🫒",Srikhand:"🍨",Snacks:"🥨",Farsan:"🧆","Gujarati Live Counter":"🍱"};
+  const shown=vendorFilter==="All"?vendors:vendors.filter(v=>v.Cuisine===vendorFilter);
+  document.getElementById("vendorList").innerHTML=shown.map(v=>`
+    <div class="vendor-list-card">
+      <div class="vendor-emoji-box">${emojiMap[v.Cuisine]||"🏪"}</div>
       <div style="flex:1">
         <div class="vendor-list-name">${v.Agency_Name}</div>
         <div class="vendor-list-sub">${v.Cuisine||""} · ${v.Base_City||""}</div>
       </div>
       <div style="text-align:right">
         <div style="font-size:11px;color:var(--gold)">★★★★★</div>
-        <div style="font-size:10px;color:var(--muted);margin-top:3px">${v.Contact_Person||""}</div>
-        ${v.Contact_Number ? `<button onclick="event.stopPropagation();window.open('https://wa.me/91${v.Contact_Number}','_blank')" style="margin-top:5px;background:none;border:1px solid #25D36630;color:#25D366;border-radius:6px;padding:3px 8px;font-size:10px;cursor:pointer">WhatsApp</button>` : ""}
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">${v.Contact_Person||""}</div>
+        ${v.Contact_Number?`<button onclick="window.open('https://wa.me/91${v.Contact_Number}','_blank')" style="margin-top:5px;background:none;border:1px solid #25D36640;color:#25D366;border-radius:6px;padding:3px 8px;font-size:10px;cursor:pointer">WhatsApp</button>`:""}
       </div>
     </div>`).join("");
 }
 
-function setVendorFilter(f, btn) {
-  vendorFilter = f;
-  renderVendors();
-}
+function setVendorFilter(f){vendorFilter=f;renderVendors();}
 
-function openVendorDetail(vendorId) {
-  const v = APP.vendors.find(x => x.Vendor_ID === vendorId);
-  if (!v) return;
-  const wa = v.WhatsApp_Group_Link
-    ? `<a href="${v.WhatsApp_Group_Link}" target="_blank" style="color:#25D366">Open WhatsApp Group</a>`
-    : v.Contact_Number ? `<a href="https://wa.me/91${v.Contact_Number}" target="_blank" style="color:#25D366">WhatsApp ${v.Contact_Person}</a>` : "—";
-  alert(`${v.Agency_Name}\n${v.Cuisine} · ${v.Base_City}\n\nContact: ${v.Contact_Person} (${v.Designation})\nPhone: ${v.Contact_Number}\n${v.Contact_Person_2 ? `Contact 2: ${v.Contact_Person_2} (${v.Contact_Number_2})` : ""}`);
-}
-
-function showAddVendor() { openModal("modal-addVendor"); }
-
-async function saveNewVendor() {
-  const name = document.getElementById("av-name").value.trim();
-  if (!name) { alert("Agency name is required"); return; }
-  const res = await apiPost({ action:"addVendor", data:{
-    Agency_Name:      name,
-    Cuisine:          document.getElementById("av-cuisine").value,
-    Contact_Person:   document.getElementById("av-contact").value,
-    Designation:      document.getElementById("av-designation").value,
-    Contact_Number:   document.getElementById("av-phone").value,
-    Contact_Person_2: document.getElementById("av-contact2").value,
-    Contact_Number_2: document.getElementById("av-phone2").value,
-    Base_City:        document.getElementById("av-city").value,
-    WhatsApp_Group_Link: document.getElementById("av-walink").value,
-    Active: "Y"
-  }});
-  if (res.success) {
-    document.getElementById("addVendorMsg").innerHTML = `<div class="success-box"><div class="title">✓ Vendor Added</div></div>`;
+async function saveNewVendor(){
+  const name=document.getElementById("av-name").value.trim();
+  if (!name){alert("Agency name is required");return;}
+  const res=await apiWrite("addVendor",{
+    Agency_Name:name, Cuisine:document.getElementById("av-cuisine").value,
+    Contact_Person:document.getElementById("av-contact").value, Designation:document.getElementById("av-desig").value,
+    Contact_Number:document.getElementById("av-phone").value, Contact_Person_2:document.getElementById("av-contact2").value,
+    Contact_Number_2:document.getElementById("av-phone2").value, Base_City:document.getElementById("av-city").value,
+    WhatsApp_Group_Link:document.getElementById("av-walink").value, Active:"Y"
+  });
+  if (res.success){
+    document.getElementById("addVendorMsg").innerHTML=`<div class="success-box"><div class="title">✓ Vendor Added</div></div>`;
     await loadVendors(); renderVendors();
-    setTimeout(() => closeModal("modal-addVendor"), 1200);
-  }
-}
-
-// ── NEW EVENT ─────────────────────────────────────────────────
-function showNewEventModal() { openModal("modal-newEvent"); }
-
-async function saveNewEvent() {
-  const client = document.getElementById("new-client").value.trim();
-  if (!client) { alert("Client name is required"); return; }
-  const res = await apiPost({ action:"addEvent", data:{
-    Client_Name: client,
-    Occasion:    document.getElementById("new-occasion").value,
-    Event_Date:  document.getElementById("new-date").value,
-    Pax:         document.getElementById("new-pax").value || 0,
-    Notes:       document.getElementById("new-notes").value,
-    Stage: 1
-  }});
-  if (res.success) {
-    document.getElementById("newEventMsg").innerHTML = `<div class="success-box"><div class="title">✓ Event Created</div><div class="sub">Tasks auto-generated.</div></div>`;
-    await loadEvents(); await loadTasks();
-    renderEvents(); renderToday();
-    setTimeout(() => closeModal("modal-newEvent"), 1200);
+    setTimeout(()=>closeModal("modal-addVendor"),1200);
   }
 }
 
 // ── ASSIGN VENDOR ─────────────────────────────────────────────
-function showAssignVendor() {
-  const vendorOptions = APP.vendors.map(v => `<option value="${v.Vendor_ID}">${v.Agency_Name}</option>`).join("");
-  const html = `
-    <div style="margin-bottom:14px">
-      <label class="form-label">Select Vendor</label>
-      <select class="form-select" id="assignVendorSelect">${vendorOptions}</select>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Items / Description</label>
-      <input class="form-input" id="assignItems" placeholder="e.g. Macarons + Opera Cake">
-    </div>
-    <button class="btn btn-gold" onclick="saveAssignVendor()">Assign Vendor</button>`;
-  // Simple inline — append to vendor tab
-  const tab = document.getElementById("tab-vendors");
-  const div = document.createElement("div");
-  div.className = "card"; div.id = "assignVendorForm";
-  div.innerHTML = `<div class="section-label" style="margin-bottom:12px">Assign Vendor</div>${html}`;
-  tab.appendChild(div);
+function showAssignVendor(){
+  const vendorOptions=APP.vendors.map(v=>`<option value="${v.Vendor_ID}">${v.Agency_Name}</option>`).join("");
+  const existing=document.getElementById("assignVendorForm");
+  if (existing) existing.remove();
+  const div=document.createElement("div");
+  div.className="card"; div.id="assignVendorForm";
+  div.innerHTML=`<div class="section-label" style="margin-bottom:12px">Assign Vendor</div>
+    <div class="form-group"><label class="form-label">Select Vendor</label><select class="form-select" id="assignVendorSelect">${vendorOptions}</select></div>
+    <div class="form-group"><label class="form-label">Items</label><input class="form-input" id="assignItems" placeholder="e.g. Macarons + Opera Cake"></div>
+    <button class="btn btn-gold btn-sm" onclick="saveAssignVendor()">Assign</button>`;
+  document.getElementById("tab-vendors").appendChild(div);
 }
 
-async function saveAssignVendor() {
-  const vendorId = document.getElementById("assignVendorSelect").value;
-  const vendor   = APP.vendors.find(v => v.Vendor_ID === vendorId);
-  const res = await apiPost({ action:"addEventVendor", data:{
-    Event_ID:   APP.currentEvent.Event_ID,
-    Vendor_ID:  vendorId,
-    Agency_Name: vendor?.Agency_Name || "",
-    Items:      document.getElementById("assignItems").value,
-    Status:     "quote_pending"
-  }});
-  if (res.success) {
-    APP.currentEventVendors = await apiGet("getEventVendors", `&event_id=${APP.currentEvent.Event_ID}`);
+async function saveAssignVendor(){
+  const vendorId=document.getElementById("assignVendorSelect").value;
+  const vendor=APP.vendors.find(v=>v.Vendor_ID===vendorId);
+  const res=await apiWrite("addEventVendor",{
+    Event_ID:APP.currentEvent.Event_ID, Vendor_ID:vendorId,
+    Agency_Name:vendor?.Agency_Name||"", Items:document.getElementById("assignItems").value, Status:"quote_pending"
+  });
+  if (res.success){
+    APP.currentEventVendors=await apiGet("getEventVendors","&event_id="+APP.currentEvent.Event_ID);
     renderEventDetail();
   }
 }
 
-// ── STEP NAVIGATION ───────────────────────────────────────────
-function goStep(prefix, step, btn) {
-  [1,2,3].forEach(i => {
-    const el = document.getElementById(`${prefix}-step-${i}`);
-    if (el) el.style.display = i === step ? "block" : "none";
-  });
-  if (btn) {
-    document.querySelectorAll(".step-tab").forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-  }
-  if (prefix === "menu" && step === 2) updateMenuPreview();
-  if (prefix === "tasting" && step === 3) buildTastingMsgs();
+// ── STEP NAV ──────────────────────────────────────────────────
+function goStep(prefix,step,btn){
+  [1,2,3].forEach(i=>{const el=document.getElementById(`${prefix}-step-${i}`);if(el)el.style.display=i===step?"block":"none";});
+  if (btn){document.querySelectorAll(".step-tab").forEach(b=>b.classList.remove("active"));btn.classList.add("active");}
+  if (prefix==="menu"&&step===2) updateMenuPreview();
+  if (prefix==="tasting"&&step===3) buildTastingMsgs();
 }
 
 // ── MODALS ────────────────────────────────────────────────────
-function openModal(id)  { document.getElementById(id).classList.add("open"); }
-function closeModal(id) { document.getElementById(id).classList.remove("open"); }
+function openModal(id){document.getElementById(id).classList.add("open");}
+function closeModal(id){document.getElementById(id).classList.remove("open");}
 
-// ── COPY TEXT ─────────────────────────────────────────────────
-function copyText(elId) {
-  const text = document.getElementById(elId)?.textContent || "";
-  navigator.clipboard.writeText(text).then(() => alert("Copied! Open WhatsApp and paste."));
+function copyText(elId){
+  const text=document.getElementById(elId)?.textContent||"";
+  navigator.clipboard.writeText(text).then(()=>alert("Copied! Open WhatsApp and paste."));
 }
 </script>
 </body>
