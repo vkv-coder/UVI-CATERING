@@ -741,20 +741,61 @@ function renderEventDetail() {
   }
 
   const vendorCards=APP.currentEventVendors.length
-    ?APP.currentEventVendors.map(v=>`<div class="vendor-card">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
-        <div style="font-family:var(--serif);font-size:16px">${v.Agency_Name||v.Vendor_ID}</div>
-        <span class="tag" style="background:#2C528218;color:#2C5282;border:1px solid #2C528230">${v.Status||"pending"}</span>
-      </div>
-      <div style="font-size:13px;color:var(--muted);margin-bottom:12px">${v.Items||"—"}</div>
-      <div class="gold-line"></div>
-      <div class="vendor-price-row">
-        <div class="vpc"><div class="lbl">Vendor Cost</div><div class="val">${v.Vendor_Cost||"—"}</div></div>
-        <div class="vpc"><div class="lbl">Your Price</div><div class="val" style="color:var(--gold-dark)">${v.Your_Price||"—"}</div></div>
-        <div class="vpc"><div class="lbl">Advance</div><div class="val" style="color:${v.Advance_Paid==='paid'?'var(--green)':'var(--red)'}">${v.Advance_Paid||"pending"}</div></div>
-      </div>
-      <button class="btn btn-outline btn-sm" onclick="msgVendor('${v.Vendor_ID}')">💬  Message Vendor</button>
-    </div>`).join("")
+    ?APP.currentEventVendors.map((v,vi)=>{
+      const advColor=v.Advance_Paid&&v.Advance_Paid!=='—'&&v.Advance_Paid!=='pending'?'var(--green)':'var(--red)';
+      const balColor=v.Balance_Paid&&v.Balance_Paid!=='—'?'var(--green)':'var(--muted)';
+      return `<div class="vendor-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+          <div style="font-family:var(--serif);font-size:16px">${v.Agency_Name||v.Vendor_ID}</div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <span class="tag" style="background:#2C528218;color:#2C5282;border:1px solid #2C528230">${v.Status||"pending"}</span>
+            <button onclick="toggleVendorEdit(${vi})" style="background:none;border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-size:11px;color:var(--muted);cursor:pointer">✏️</button>
+          </div>
+        </div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:12px">${v.Items||"—"}</div>
+        <div class="gold-line"></div>
+        <div class="vendor-price-row">
+          <div class="vpc"><div class="lbl">Quoted Cost</div><div class="val">${v.Vendor_Cost||"—"}</div></div>
+          <div class="vpc"><div class="lbl">Advance Paid</div><div class="val" style="color:${advColor}">${v.Advance_Paid||"—"}</div></div>
+          <div class="vpc"><div class="lbl">Balance Paid</div><div class="val" style="color:${balColor}">${v.Balance_Paid||"—"}</div></div>
+        </div>
+        <div id="vedit_${vi}" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--faint)">
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Quoted Cost (₹)</label><input class="form-input" id="vc_cost_${vi}" placeholder="e.g. 45000" value="${v.Vendor_Cost||''}"></div>
+            <div class="form-group"><label class="form-label">Status</label>
+              <select class="form-select" id="vc_status_${vi}">
+                <option value="quote_pending" ${v.Status==='quote_pending'?'selected':''}>Quote Pending</option>
+                <option value="confirmed" ${v.Status==='confirmed'?'selected':''}>Confirmed</option>
+                <option value="order_placed" ${v.Status==='order_placed'?'selected':''}>Order Placed</option>
+                <option value="tasting_set" ${v.Status==='tasting_set'?'selected':''}>Tasting Set</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Advance Paid (₹)</label><input class="form-input" id="vc_adv_${vi}" placeholder="e.g. 10000" value="${v.Advance_Paid||''}"></div>
+            <div class="form-group"><label class="form-label">Balance Paid (₹)</label><input class="form-input" id="vc_bal_${vi}" placeholder="e.g. 35000" value="${v.Balance_Paid||''}"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Payment Date</label><input class="form-input" id="vc_date_${vi}" type="date" value="${v.Payment_Date||''}"></div>
+            <div class="form-group"><label class="form-label">Payment Mode</label>
+              <select class="form-select" id="vc_mode_${vi}">
+                <option value="">— Select —</option>
+                <option value="Cash" ${v.Payment_Mode==='Cash'?'selected':''}>Cash</option>
+                <option value="NEFT" ${v.Payment_Mode==='NEFT'?'selected':''}>NEFT</option>
+                <option value="UPI" ${v.Payment_Mode==='UPI'?'selected':''}>UPI</option>
+                <option value="Cheque" ${v.Payment_Mode==='Cheque'?'selected':''}>Cheque</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:4px">
+            <button class="btn btn-gold btn-sm" style="flex:2" onclick="saveVendorCost(${vi},'${v.Row_ID}')">Save</button>
+            <button class="btn btn-outline btn-sm" style="flex:1" onclick="toggleVendorEdit(${vi})">Cancel</button>
+          </div>
+          <div id="vc_msg_${vi}" style="margin-top:8px"></div>
+        </div>
+        <button class="btn btn-outline btn-sm" style="margin-top:10px" onclick="msgVendor('${v.Vendor_ID}')">💬  Message Vendor</button>
+      </div>`;
+    }).join("")
     :`<div class="empty-state"><div class="icon">🏪</div><p>No vendors assigned yet.</p></div>`;
 
   document.getElementById("eventDetail").innerHTML=`
@@ -784,6 +825,44 @@ function renderEventDetail() {
       <button class="tab-btn" onclick="switchTab('vendors',this)">🏪  Vendors</button>
     </div>
     <div id="tab-client" class="tab-content active">
+      <div class="card" style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div class="section-label" style="margin-bottom:0">Client Payment</div>
+          <button onclick="toggleClientPayEdit()" id="clientPayEditBtn" style="background:none;border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-size:11px;color:var(--muted);cursor:pointer">✏️ Edit</button>
+        </div>
+        <div id="clientPayView">
+          <div style="display:flex;justify-content:space-between;margin-bottom:10px">
+            <div class="vpc"><div class="lbl">Total Package</div><div class="val" style="color:var(--text)" id="cpv_total">${ev.Total_Package||"—"}</div></div>
+            <div class="vpc"><div class="lbl">Advance Recd</div><div class="val" style="color:var(--green)" id="cpv_adv">${ev.Advance_Recd||"—"}</div></div>
+            <div class="vpc"><div class="lbl">Balance Due</div><div class="val" style="color:var(--orange)" id="cpv_bal">${ev.Balance_Due||"—"}</div></div>
+          </div>
+          <div style="font-size:12px;color:var(--muted)">${ev.Payment_Mode?'Mode: '+ev.Payment_Mode:''} ${ev.Payment_Date?'· Date: '+ev.Payment_Date:''}</div>
+        </div>
+        <div id="clientPayEdit" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--faint)">
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Total Package (₹)</label><input class="form-input" id="cp_total" placeholder="e.g. 200000" value="${ev.Total_Package||''}"></div>
+            <div class="form-group"><label class="form-label">Advance Received (₹)</label><input class="form-input" id="cp_adv" placeholder="e.g. 50000" value="${ev.Advance_Recd!=='—'?ev.Advance_Recd||'':''}"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Balance Due (₹)</label><input class="form-input" id="cp_bal" placeholder="e.g. 150000" value="${ev.Balance_Due!=='—'?ev.Balance_Due||'':''}"></div>
+            <div class="form-group"><label class="form-label">Payment Mode</label>
+              <select class="form-select" id="cp_mode">
+                <option value="">— Select —</option>
+                <option value="Cash" ${ev.Payment_Mode==='Cash'?'selected':''}>Cash</option>
+                <option value="NEFT" ${ev.Payment_Mode==='NEFT'?'selected':''}>NEFT</option>
+                <option value="UPI" ${ev.Payment_Mode==='UPI'?'selected':''}>UPI</option>
+                <option value="Cheque" ${ev.Payment_Mode==='Cheque'?'selected':''}>Cheque</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group"><label class="form-label">Payment Date</label><input class="form-input" id="cp_date" type="date" value="${ev.Payment_Date||''}"></div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-gold btn-sm" style="flex:2" onclick="saveClientPayment()">Save</button>
+            <button class="btn btn-outline btn-sm" style="flex:1" onclick="toggleClientPayEdit()">Cancel</button>
+          </div>
+          <div id="cp_msg" style="margin-top:8px"></div>
+        </div>
+      </div>
       <div class="card"><div class="section-label">Menus Sent</div><div style="font-size:13px;color:var(--muted);padding:10px 0">No menus recorded yet.</div></div>
     </div>
     <div id="tab-vendors" class="tab-content">
@@ -1050,6 +1129,61 @@ function goStep(prefix,step,btn){
 function openModal(id){document.getElementById(id).classList.add("open");}
 function closeModal(id){document.getElementById(id).classList.remove("open");}
 function copyText(elId){const text=document.getElementById(elId)?.textContent||"";navigator.clipboard.writeText(text).then(()=>alert("Copied! Open WhatsApp and paste."));}
+
+// ── VENDOR COST EDIT ─────────────────────────────────────────
+function toggleVendorEdit(vi) {
+  const el=document.getElementById(`vedit_${vi}`);
+  el.style.display=el.style.display==='none'?'block':'none';
+}
+
+async function saveVendorCost(vi, rowId) {
+  const data={
+    Row_ID:     rowId,
+    Vendor_Cost:document.getElementById(`vc_cost_${vi}`).value,
+    Status:     document.getElementById(`vc_status_${vi}`).value,
+    Advance_Paid:document.getElementById(`vc_adv_${vi}`).value,
+    Balance_Paid:document.getElementById(`vc_bal_${vi}`).value,
+    Payment_Date:document.getElementById(`vc_date_${vi}`).value,
+    Payment_Mode:document.getElementById(`vc_mode_${vi}`).value,
+  };
+  const res=await apiWrite("updateEventVendor",data);
+  const msgEl=document.getElementById(`vc_msg_${vi}`);
+  if(res.success){
+    msgEl.innerHTML=`<div class="success-box"><div class="title">✓ Saved</div></div>`;
+    APP.currentEventVendors=await apiGet("getEventVendors","&event_id="+APP.currentEvent.Event_ID);
+    setTimeout(()=>{renderEventDetail();switchTab('vendors',document.querySelector('.tab-btn:nth-child(2)'));},800);
+  } else {
+    msgEl.innerHTML=`<div class="error-box"><div class="title">Error saving</div></div>`;
+  }
+}
+
+// ── CLIENT PAYMENT ────────────────────────────────────────────
+function toggleClientPayEdit() {
+  const edit=document.getElementById('clientPayEdit');
+  const btn=document.getElementById('clientPayEditBtn');
+  const isOpen=edit.style.display!=='none';
+  edit.style.display=isOpen?'none':'block';
+  btn.textContent=isOpen?'✏️ Edit':'✕ Close';
+}
+
+async function saveClientPayment() {
+  const res=await apiWrite("updateEvent",{
+    Event_ID:    APP.currentEvent.Event_ID,
+    Total_Package:document.getElementById('cp_total').value,
+    Advance_Recd: document.getElementById('cp_adv').value,
+    Balance_Due:  document.getElementById('cp_bal').value,
+    Payment_Mode: document.getElementById('cp_mode').value,
+    Payment_Date: document.getElementById('cp_date').value,
+  });
+  if(res.success){
+    document.getElementById('cp_msg').innerHTML=`<div class="success-box"><div class="title">✓ Payment Updated</div></div>`;
+    await loadEvents();
+    APP.currentEvent=APP.events.find(e=>e.Event_ID===APP.currentEvent.Event_ID);
+    setTimeout(()=>{renderEventDetail();},800);
+  } else {
+    document.getElementById('cp_msg').innerHTML=`<div class="error-box"><div class="title">Error saving</div></div>`;
+  }
+}
 </script>
 </body>
 </html>
