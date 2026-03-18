@@ -556,11 +556,13 @@ const MONTHS = ["January","February","March","April","May","June","July","August
 
 let APP = {
   vendors:[], events:[], tasks:[], settings:{},
+  menuItems:[], vendorMenuItems:[],
   currentEvent:null, currentEventVendors:[],
   tastingItems:[], tastingVenueType:"client",
   menuAttached:false, menuFileName:"",
   clientSent:false, vendorsSent:{},
-  currentUser:""
+  currentUser:"",
+  assignSelectedItems:[]
 };
 
 // ── API ───────────────────────────────────────────────────────
@@ -600,13 +602,14 @@ async function checkPin() {
 // ── INIT ──────────────────────────────────────────────────────
 async function initApp() {
   setTodayHeader();
-  await Promise.all([loadSettings(), loadVendors(), loadEvents(), loadTasks()]);
+  await Promise.all([loadSettings(), loadVendors(), loadEvents(), loadTasks(), loadMenuItems()]);
   renderToday(); renderVendors();
 }
-async function loadSettings() { APP.settings = await apiGet("getSettings"); }
-async function loadVendors()  { APP.vendors  = await apiGet("getVendors");  }
-async function loadEvents()   { APP.events   = await apiGet("getEvents");   }
-async function loadTasks()    { APP.tasks    = await apiGet("getTasks");    }
+async function loadSettings()   { APP.settings  = await apiGet("getSettings"); }
+async function loadVendors()    { APP.vendors   = await apiGet("getVendors");  }
+async function loadEvents()     { APP.events    = await apiGet("getEvents");   }
+async function loadTasks()      { APP.tasks     = await apiGet("getTasks");    }
+async function loadMenuItems()  { APP.menuItems = await apiGet("getMenuItems"); }
 
 // ── NAV ───────────────────────────────────────────────────────
 function switchScreen(name, btn) {
@@ -1069,9 +1072,25 @@ function openPriceQuote(){
 // ── VENDOR MSG ────────────────────────────────────────────────
 function msgVendor(vendorId){
   const vendor=APP.vendors.find(v=>v.Vendor_ID===vendorId);if(!vendor)return;
-  if(vendor.WhatsApp_Group_Link)window.open(vendor.WhatsApp_Group_Link,"_blank");
-  else if(vendor.Contact_Number)window.open(`https://wa.me/91${vendor.Contact_Number}`,"_blank");
-  else alert("No WhatsApp contact found for this vendor.");
+  // Find this vendor's items in current event
+  const evVendor=APP.currentEventVendors.find(v=>v.Vendor_ID===vendorId);
+  const ev=APP.currentEvent;
+  const sig=APP.settings.Signature||"UVI Luxury Catering & Decor";
+  let msg="";
+  if(evVendor&&evVendor.Items&&evVendor.Items!=="—"){
+    const itemList=evVendor.Items.split("+").map(i=>`• ${i.trim()}`).join("\n");
+    msg=`Dear ${(vendor.Agency_Name||"").split(" ")[0]},\n\nWe are planning *${ev.Occasion}* for *${ev.Client_Name}* on *${ev.Event_Date}* (${ev.Pax} pax).\n\nKindly share your best quote for:\n${itemList}\n\nPlease revert at the earliest.\n\n*${sig}*`;
+  } else {
+    msg=`Dear ${(vendor.Agency_Name||"").split(" ")[0]},\n\nRegarding *${ev.Occasion}* — ${ev.Client_Name} on ${ev.Event_Date}.\n\n*${sig}*`;
+  }
+  navigator.clipboard.writeText(msg).then(()=>{
+    const wa=vendor.WhatsApp_Group_Link||(vendor.Contact_Number?`https://wa.me/91${vendor.Contact_Number}`:"");
+    if(wa) window.open(wa,"_blank");
+    else alert("Message copied! Open WhatsApp manually.");
+  }).catch(()=>{
+    const wa=vendor.WhatsApp_Group_Link||(vendor.Contact_Number?`https://wa.me/91${vendor.Contact_Number}`:"");
+    if(wa) window.open(wa,"_blank");
+  });
 }
 
 // ── VENDORS ───────────────────────────────────────────────────
@@ -1101,20 +1120,125 @@ async function saveNewVendor(){
 }
 
 // ── ASSIGN VENDOR ─────────────────────────────────────────────
-function showAssignVendor(){
+async function showAssignVendor(){
   const existing=document.getElementById("assignVendorForm");if(existing)existing.remove();
   const div=document.createElement("div");div.className="card";div.id="assignVendorForm";
   div.innerHTML=`<div class="section-label" style="margin-bottom:12px">Assign Vendor</div>
-    <div class="form-group"><label class="form-label">Select Vendor</label><select class="form-select" id="assignVendorSelect">${APP.vendors.map(v=>`<option value="${v.Vendor_ID}">${v.Agency_Name}</option>`).join("")}</select></div>
-    <div class="form-group"><label class="form-label">Items</label><input class="form-input" id="assignItems" placeholder="e.g. Macarons + Opera Cake"></div>
-    <button class="btn btn-gold btn-sm" onclick="saveAssignVendor()">Assign</button>`;
+    <div class="form-group"><label class="form-label">Select Vendor</label>
+      <select class="form-select" id="assignVendorSelect" onchange="loadVendorItems()">${APP.vendors.map(v=>`<option value="${v.Vendor_ID}">${v.Agency_Name}</option>`).join("")}</select>
+    </div>
+    <div id="vendorItemsSection">
+      <div class="section-label" style="margin-bottom:8px">Vendor's Standard Items</div>
+      <div id="vendorItemChips" style="margin-bottom:12px"><div style="font-size:12px;color:var(--muted)">Loading...</div></div>
+      <div class="section-label" style="margin-bottom:8px">Selected Items</div>
+      <div id="assignSelectedList" style="margin-bottom:10px"></div>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <input class="form-input" id="assignNewItem" placeholder="Type item manually + Enter" onkeydown="if(event.key==='Enter')addAssignItem()">
+        <button onclick="addAssignItem()" style="background:var(--gold);border:none;border-radius:10px;padding:9px 14px;color:#fff;font-weight:700;cursor:pointer;font-size:16px">+</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-gold btn-sm" style="flex:2" onclick="saveAssignVendor()">Assign & Request Quote</button>
+      <button class="btn btn-outline btn-sm" style="flex:1" onclick="document.getElementById('assignVendorForm').remove()">Cancel</button>
+    </div>
+    <div id="assignMsg" style="margin-top:8px"></div>`;
   document.getElementById("tab-vendors").appendChild(div);
+  APP.assignSelectedItems=[];
+  loadVendorItems();
 }
+
+async function loadVendorItems(){
+  const vendorId=document.getElementById("assignVendorSelect")?.value;
+  if(!vendorId)return;
+  const items=await apiGet("getVendorMenu","&vendor_id="+vendorId);
+  APP.vendorMenuItems=items;
+  renderVendorItemChips();
+}
+
+function renderVendorItemChips(){
+  const chips=APP.vendorMenuItems;
+  const el=document.getElementById("vendorItemChips");
+  if(!el)return;
+  if(!chips.length){
+    el.innerHTML=`<div style="font-size:12px;color:var(--muted)">No standard items on file. Type items manually below.</div>`;
+    return;
+  }
+  el.innerHTML=chips.map(item=>
+    `<span class="chip ${APP.assignSelectedItems.includes(item.Item_Name)?"selected":""}"
+      onclick="toggleAssignItem('${item.Item_Name.replace(/'/g,"\'")}')">
+      ${APP.assignSelectedItems.includes(item.Item_Name)?"✓ ":""}${item.Item_Name}
+    </span>`
+  ).join("");
+}
+
+function toggleAssignItem(name){
+  if(APP.assignSelectedItems.includes(name))
+    APP.assignSelectedItems=APP.assignSelectedItems.filter(i=>i!==name);
+  else APP.assignSelectedItems.push(name);
+  renderVendorItemChips();
+  renderAssignSelected();
+}
+
+function addAssignItem(){
+  const val=document.getElementById("assignNewItem")?.value.trim();
+  if(val&&!APP.assignSelectedItems.includes(val)){
+    APP.assignSelectedItems.push(val);
+    renderVendorItemChips();
+    renderAssignSelected();
+  }
+  if(document.getElementById("assignNewItem")) document.getElementById("assignNewItem").value="";
+}
+
+function renderAssignSelected(){
+  const el=document.getElementById("assignSelectedList");
+  if(!el)return;
+  el.innerHTML=APP.assignSelectedItems.map((item,i)=>
+    `<div class="selected-item"><span>• ${item}</span>
+      <button class="remove-btn" onclick="removeAssignItem(${i})">×</button>
+    </div>`
+  ).join("");
+}
+
+function removeAssignItem(i){
+  APP.assignSelectedItems.splice(i,1);
+  renderVendorItemChips();
+  renderAssignSelected();
+}
+
 async function saveAssignVendor(){
+  if(!APP.assignSelectedItems.length){alert("Please select or add at least one item.");return;}
   const vendorId=document.getElementById("assignVendorSelect").value;
   const vendor=APP.vendors.find(v=>v.Vendor_ID===vendorId);
-  const res=await apiWrite("addEventVendor",{Event_ID:APP.currentEvent.Event_ID,Vendor_ID:vendorId,Agency_Name:vendor?.Agency_Name||"",Items:document.getElementById("assignItems").value,Status:"quote_pending"});
-  if(res.success){APP.currentEventVendors=await apiGet("getEventVendors","&event_id="+APP.currentEvent.Event_ID);renderEventDetail();}
+  const itemsStr=APP.assignSelectedItems.join(" + ");
+  const res=await apiWrite("addEventVendor",{
+    Event_ID:APP.currentEvent.Event_ID,
+    Vendor_ID:vendorId,
+    Agency_Name:vendor?.Agency_Name||"",
+    Items:itemsStr,
+    Status:"quote_pending"
+  });
+  if(res.success){
+    // Build and open WhatsApp quote request
+    const ev=APP.currentEvent;
+    const sig=APP.settings.Signature||"UVI Luxury Catering & Decor";
+    const itemList=APP.assignSelectedItems.map(i=>`• ${i}`).join("\n");
+    const msg=`Dear ${(vendor?.Agency_Name||"").split(" ")[0]},\n\nWe are planning *${ev.Occasion}* for *${ev.Client_Name}* on *${ev.Event_Date}* (${ev.Pax} pax).\n\nKindly share your best quote for:\n${itemList}\n\nPlease revert at the earliest.\n\n*${sig}*`;
+    
+    document.getElementById("assignMsg").innerHTML=`<div class="success-box"><div class="title">✓ Vendor Assigned</div><div class="sub">Opening WhatsApp to send quote request...</div></div>`;
+    
+    // Copy message and open WhatsApp
+    navigator.clipboard.writeText(msg).then(()=>{
+      setTimeout(()=>{
+        const wa=vendor?.WhatsApp_Group_Link||
+          (vendor?.Contact_Number?`https://wa.me/91${vendor.Contact_Number}`:"");
+        if(wa) window.open(wa,"_blank");
+        else alert("Message copied! Open WhatsApp manually and paste.");
+      },600);
+    });
+
+    APP.currentEventVendors=await apiGet("getEventVendors","&event_id="+APP.currentEvent.Event_ID);
+    setTimeout(()=>renderEventDetail(),1500);
+  }
 }
 
 // ── STEP NAV ──────────────────────────────────────────────────
