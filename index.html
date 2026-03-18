@@ -23,7 +23,7 @@
 body{font-family:var(--sans);background:var(--bg);color:var(--text);max-width:480px;margin:0 auto;min-height:100vh}
 ::-webkit-scrollbar{display:none}
 
-/* PIN SCREEN */
+/* PIN */
 #pinScreen{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 24px}
 .pin-logo{margin-bottom:24px;text-align:center}
 .pin-logo h1{font-family:var(--serif);font-size:28px;color:var(--gold-dark);letter-spacing:3px}
@@ -51,7 +51,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);max-width:48
 .nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--surface);border-top:1px solid var(--border);box-shadow:0 -2px 10px rgba(0,0,0,0.07);display:flex;z-index:100}
 .nav-btn{flex:1;padding:11px 4px 6px;background:transparent;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
 .nav-btn .icon{font-size:20px;transition:all 0.2s}
-.nav-btn .label{font-size:9px;text-transform:uppercase;letter-spacing:1.2px;font-weight:500;color:var(--muted);transition:all 0.2s}
+.nav-btn .label{font-size:9px;text-transform:uppercase;letter-spacing:1.2px;font-weight:500;color:var(--muted)}
 .nav-btn.active .label{color:var(--gold-dark);font-weight:700}
 .nav-btn .underline{width:20px;height:2.5px;background:var(--gold);border-radius:2px;display:none}
 .nav-btn.active .underline{display:block}
@@ -81,6 +81,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);max-width:48
 .btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:#fff;box-shadow:0 2px 10px rgba(201,168,76,0.25)}
 .btn-gold:active{transform:scale(0.98)}
 .btn-outline{background:transparent;border:1.5px solid var(--gold-border);color:var(--gold-dark)}
+.btn-danger{background:transparent;border:1.5px solid rgba(192,57,43,0.3);color:var(--red)}
 .btn-sm{padding:9px 16px;font-size:13px}
 
 /* PIPELINE */
@@ -125,6 +126,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);max-width:48
 
 /* EVENTS */
 .event-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:14px;cursor:pointer;position:relative;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.06);transition:box-shadow 0.2s}
+.event-card.cancelled{opacity:0.5;border-color:var(--red)}
 .event-card:active{box-shadow:0 1px 4px rgba(0,0,0,0.08)}
 .event-left-bar{position:absolute;left:0;top:0;bottom:0;width:5px;border-radius:14px 0 0 14px}
 .event-inner{padding-left:12px}
@@ -134,8 +136,23 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);max-width:48
 .event-balance .amount{font-size:16px;color:var(--gold-dark);font-weight:700}
 .event-balance .label{font-size:10px;color:var(--muted)}
 
-/* EVENT DETAIL */
-.back-btn{background:none;border:none;color:var(--gold-dark);font-size:14px;cursor:pointer;padding:0 0 16px;font-family:var(--serif);display:flex;align-items:center;gap:5px}
+/* EVENT DETAIL HEADER */
+.detail-topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.back-btn{background:none;border:none;color:var(--gold-dark);font-size:14px;cursor:pointer;padding:0;font-family:var(--serif);display:flex;align-items:center;gap:5px}
+.menu-btn{background:none;border:1px solid var(--border);border-radius:8px;width:36px;height:36px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;color:var(--muted);position:relative}
+.dropdown{position:absolute;top:40px;right:0;background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.12);z-index:50;min-width:180px;overflow:hidden;display:none}
+.dropdown.open{display:block}
+.dropdown-item{padding:13px 16px;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:background 0.15s;border:none;background:none;width:100%;text-align:left;font-family:var(--sans)}
+.dropdown-item:hover{background:var(--faint)}
+.dropdown-item.danger{color:var(--red)}
+
+/* CANCELLED BANNER */
+.cancelled-banner{background:rgba(192,57,43,0.08);border:1px solid rgba(192,57,43,0.25);border-radius:10px;padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.cancelled-banner .icon{font-size:20px}
+.cancelled-banner .text{font-size:14px;color:var(--red);font-weight:600}
+.cancelled-banner .sub{font-size:12px;color:var(--muted);margin-top:2px}
+
+/* FIN */
 .fin-row{display:flex;gap:10px;margin-top:14px}
 .fin-card{flex:1;background:var(--card-alt);border-radius:10px;padding:12px 14px}
 .fin-card .amount{font-size:17px;font-weight:700}
@@ -164,10 +181,12 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);max-width:48
 /* WA PREVIEW */
 .wa-preview{background:#E8F5E9;border:1px solid #C8E6C9;border-radius:12px;padding:14px;font-size:13px;color:#1B5E20;line-height:1.8;font-family:var(--sans);white-space:pre-line;margin-bottom:14px}
 
-/* SUCCESS */
+/* SUCCESS / ERROR */
 .success-box{background:#E8F5E9;border:1px solid #A5D6A7;border-radius:12px;padding:14px 18px;text-align:center;margin-top:14px}
 .success-box .title{font-size:15px;color:var(--green);font-weight:700}
 .success-box .sub{font-size:12px;color:#388E3C;margin-top:4px}
+.error-box{background:rgba(192,57,43,0.08);border:1px solid rgba(192,57,43,0.25);border-radius:12px;padding:14px 18px;text-align:center;margin-top:14px}
+.error-box .title{font-size:14px;color:var(--red);font-weight:600}
 
 /* VENDORS */
 .filter-row{display:flex;gap:6px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px}
@@ -175,8 +194,6 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);max-width:48
 .filter-btn.active{border-color:var(--gold);background:var(--gold-glow);color:var(--gold-dark);font-weight:700}
 .vendor-list-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:10px;display:flex;gap:14px;align-items:center;box-shadow:0 1px 5px rgba(0,0,0,0.04)}
 .vendor-emoji-box{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;background:rgba(201,168,76,0.12);border:1.5px solid rgba(201,168,76,0.25)}
-.vendor-list-name{font-size:15px;color:var(--text)}
-.vendor-list-sub{font-size:12px;color:var(--muted);margin-top:2px}
 
 /* MODAL */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;display:none;align-items:flex-end;justify-content:center}
@@ -187,12 +204,17 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);max-width:48
 .modal-title{font-family:var(--serif);font-size:20px;color:var(--text)}
 .modal-close{background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer}
 
+/* CONFIRM MODAL */
+.confirm-modal{background:var(--surface);border-radius:20px;padding:24px;width:calc(100% - 40px);max-width:400px;margin:auto;animation:fadeIn 0.2s ease}
+@keyframes fadeIn{from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:scale(1)}}
+.modal-overlay.center{align-items:center}
+
 /* STEP TABS */
 .step-tabs{display:flex;gap:6px;margin-bottom:20px}
 .step-tab{flex:1;padding:10px 6px;border-radius:10px;border:none;cursor:pointer;font-size:12px;font-family:var(--sans);transition:all 0.2s;background:var(--card-alt);color:var(--muted);border-bottom:2.5px solid transparent}
 .step-tab.active{background:var(--surface);color:var(--gold-dark);font-weight:700;border-bottom-color:var(--gold);box-shadow:0 1px 5px rgba(0,0,0,0.07)}
 
-/* ATTACH BOX */
+/* ATTACH */
 .attach-box{border:2px dashed var(--gold-border);border-radius:12px;padding:22px;text-align:center;cursor:pointer;background:var(--bg);margin-bottom:14px;transition:all 0.2s}
 .attach-box:hover{background:var(--card-alt)}
 
@@ -243,10 +265,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);max-width:48
   </div>
   <div style="font-size:14px;color:var(--muted);margin-bottom:8px">Enter your PIN</div>
   <div class="pin-dots">
-    <div class="pin-dot" id="pd0"></div>
-    <div class="pin-dot" id="pd1"></div>
-    <div class="pin-dot" id="pd2"></div>
-    <div class="pin-dot" id="pd3"></div>
+    <div class="pin-dot" id="pd0"></div><div class="pin-dot" id="pd1"></div>
+    <div class="pin-dot" id="pd2"></div><div class="pin-dot" id="pd3"></div>
   </div>
   <div class="pin-error" id="pinError"></div>
   <div class="pin-grid">
@@ -265,10 +285,9 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);max-width:48
   </div>
 </div>
 
-<!-- MAIN APP (hidden until PIN) -->
+<!-- MAIN APP -->
 <div id="mainApp" style="display:none">
 
-<!-- HEADER -->
 <div class="header">
   <div class="header-brand">
     <svg width="40" height="40" viewBox="0 0 40 40">
@@ -276,8 +295,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);max-width:48
       <text x="20" y="25" text-anchor="middle" fill="#A8841E" style="font-size:13px;font-family:'Playfair Display',serif;font-weight:700;letter-spacing:1px">UVI</text>
     </svg>
     <div class="header-brand-text">
-      <h1>UVI</h1>
-      <p>Luxury Catering & Decor</p>
+      <h1>UVI</h1><p>Luxury Catering & Decor</p>
     </div>
   </div>
   <div class="header-right">
@@ -294,18 +312,9 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);max-width:48
     <div class="summary" id="todaySummary">Loading...</div>
   </div>
   <div class="stat-row">
-    <div class="stat-card" style="border-top-color:#C0392B">
-      <div class="n" id="statOverdue" style="color:#C0392B">—</div>
-      <div class="l">Overdue</div>
-    </div>
-    <div class="stat-card" style="border-top-color:#A8841E">
-      <div class="n" id="statToday" style="color:#A8841E">—</div>
-      <div class="l">Today</div>
-    </div>
-    <div class="stat-card" style="border-top-color:#553C9A">
-      <div class="n" id="statTomorrow" style="color:#553C9A">—</div>
-      <div class="l">Tomorrow</div>
-    </div>
+    <div class="stat-card" style="border-top-color:#C0392B"><div class="n" id="statOverdue" style="color:#C0392B">—</div><div class="l">Overdue</div></div>
+    <div class="stat-card" style="border-top-color:#A8841E"><div class="n" id="statToday" style="color:#A8841E">—</div><div class="l">Today</div></div>
+    <div class="stat-card" style="border-top-color:#553C9A"><div class="n" id="statTomorrow" style="color:#553C9A">—</div><div class="l">Tomorrow</div></div>
   </div>
   <div id="taskList"><div class="loading"><div class="spinner"></div><p>Loading tasks...</p></div></div>
 </div>
@@ -338,31 +347,19 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);max-width:48
   <div id="vendorList"><div class="loading"><div class="spinner"></div><p>Loading vendors...</p></div></div>
 </div>
 
-<!-- FAB -->
 <button class="fab" id="fabNewEvent" onclick="openModal('modal-newEvent')">+</button>
 
-<!-- NAV -->
 <nav class="nav">
-  <button class="nav-btn active" onclick="switchScreen('today',this)">
-    <span class="icon">◉</span><span class="label">Today</span><div class="underline"></div>
-  </button>
-  <button class="nav-btn" onclick="switchScreen('events',this)">
-    <span class="icon">◈</span><span class="label">Events</span><div class="underline"></div>
-  </button>
-  <button class="nav-btn" onclick="switchScreen('vendors',this)">
-    <span class="icon">◎</span><span class="label">Vendors</span><div class="underline"></div>
-  </button>
+  <button class="nav-btn active" onclick="switchScreen('today',this)"><span class="icon">◉</span><span class="label">Today</span><div class="underline"></div></button>
+  <button class="nav-btn" onclick="switchScreen('events',this)"><span class="icon">◈</span><span class="label">Events</span><div class="underline"></div></button>
+  <button class="nav-btn" onclick="switchScreen('vendors',this)"><span class="icon">◎</span><span class="label">Vendors</span><div class="underline"></div></button>
 </nav>
-
-</div><!-- end mainApp -->
+</div>
 
 <!-- MODALS -->
 <div class="modal-overlay" id="modal-newEvent">
   <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title">New Event</div>
-      <button class="modal-close" onclick="closeModal('modal-newEvent')">×</button>
-    </div>
+    <div class="modal-header"><div class="modal-title">New Event</div><button class="modal-close" onclick="closeModal('modal-newEvent')">×</button></div>
     <div class="form-group"><label class="form-label">Client Name *</label><input class="form-input" id="new-client" placeholder="e.g. Mehta Family"></div>
     <div class="form-group">
       <label class="form-label">Occasion</label>
@@ -379,6 +376,54 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);max-width:48
     <div class="form-group"><label class="form-label">Notes</label><input class="form-input" id="new-notes" placeholder="Any special requirements"></div>
     <button class="btn btn-gold" onclick="saveNewEvent()" id="saveEventBtn">Create Event</button>
     <div id="newEventMsg" style="margin-top:10px"></div>
+  </div>
+</div>
+
+<!-- EDIT EVENT MODAL -->
+<div class="modal-overlay" id="modal-editEvent">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">Edit Event</div><button class="modal-close" onclick="closeModal('modal-editEvent')">×</button></div>
+    <div class="form-group"><label class="form-label">Occasion</label>
+      <select class="form-select" id="edit-occasion">
+        <option>Wedding Reception</option><option>Wedding Lunch</option><option>Sangeet</option>
+        <option>Haldi</option><option>Mehendi</option><option>Corporate Dinner</option>
+        <option>Birthday Gala</option><option>Anniversary</option><option>Other</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Event Date</label><input class="form-input" id="edit-date" type="date"></div>
+      <div class="form-group"><label class="form-label">Guests</label><input class="form-input" id="edit-pax" type="number"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Advance Received</label><input class="form-input" id="edit-advance" placeholder="e.g. ₹50,000"></div>
+      <div class="form-group"><label class="form-label">Balance Due</label><input class="form-input" id="edit-balance" placeholder="e.g. ₹1,50,000"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Stage (1–6)</label>
+      <select class="form-select" id="edit-stage">
+        <option value="1">1 — Menu Quote</option>
+        <option value="2">2 — Vendor Costs</option>
+        <option value="3">3 — Price Quote</option>
+        <option value="4">4 — Tasting</option>
+        <option value="5">5 — Advance & Confirm</option>
+        <option value="6">6 — Final Orders</option>
+      </select>
+    </div>
+    <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="edit-notes" rows="2"></textarea></div>
+    <button class="btn btn-gold" onclick="saveEditEvent()" id="saveEditBtn">Save Changes</button>
+    <div id="editEventMsg" style="margin-top:10px"></div>
+  </div>
+</div>
+
+<!-- CANCEL CONFIRM MODAL -->
+<div class="modal-overlay center" id="modal-cancelConfirm">
+  <div class="confirm-modal">
+    <div style="font-size:28px;text-align:center;margin-bottom:12px">⚠️</div>
+    <div style="font-family:var(--serif);font-size:18px;color:var(--text);text-align:center;margin-bottom:8px">Cancel Event?</div>
+    <div style="font-size:13px;color:var(--muted);text-align:center;margin-bottom:24px" id="cancelConfirmText">This will mark the event as cancelled. The record will be kept for reference.</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <button class="btn btn-danger" onclick="confirmCancelEvent()">Yes — Mark as Cancelled</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-cancelConfirm')">No — Keep Event</button>
+    </div>
   </div>
 </div>
 
@@ -413,8 +458,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);max-width:48
     </div>
     <div id="menu-step-2" style="display:none">
       <div class="wa-preview" id="menuWAPreview"></div>
-      <div class="form-group">
-        <label class="form-label">Edit note:</label>
+      <div class="form-group"><label class="form-label">Edit note:</label>
         <textarea class="form-textarea" id="menuNote" rows="3" oninput="updateMenuPreview()">Please review the menu and share your feedback. Happy to arrange a tasting for selected items.</textarea>
       </div>
       <button class="btn btn-gold" onclick="goStep('menu',3,null)">Next →</button>
@@ -461,8 +505,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);max-width:48
     <div id="tasting-step-3" style="display:none">
       <div class="card" style="margin-bottom:12px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-          <strong style="font-size:15px">👤 Message to Client</strong>
-          <span id="clientSentTag"></span>
+          <strong style="font-size:15px">👤 Message to Client</strong><span id="clientSentTag"></span>
         </div>
         <div class="wa-preview" id="tastingClientMsg"></div>
         <div class="sent-row">
@@ -499,14 +542,12 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);max-width:48
 </div>
 
 <script>
-// ── CONFIG ────────────────────────────────────────────────────
 const API = "https://script.google.com/macros/s/AKfycbzKaypHQmy6cQEhLTVT_O3dzsyAkw9TCQyJ5IDoWjTdbCxsIzZl1-Vu3llHYPzGi7V39w/exec";
 const STAGE_COLORS = ["","#3B5BDB","#D4500A","#B7900A","#862E62","#553C9A","#C9A84C"];
 const STAGE_LABELS = ["","Menu Quote","Vendor Costs","Price Quote","Tasting","Advance & Confirm","Final Orders"];
 const DAYS   = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
-// ── STATE ─────────────────────────────────────────────────────
 let APP = {
   vendors:[], events:[], tasks:[], settings:{},
   currentEvent:null, currentEventVendors:[],
@@ -516,13 +557,11 @@ let APP = {
   currentUser:""
 };
 
-// ── API — ALL VIA GET (CORS FIX) ──────────────────────────────
+// ── API ───────────────────────────────────────────────────────
 async function apiGet(action, params="") {
   const r = await fetch(`${API}?action=${action}${params}`);
   return r.json();
 }
-
-// All writes use GET with encoded data param
 async function apiWrite(action, data) {
   const encoded = encodeURIComponent(JSON.stringify(data));
   const r = await fetch(`${API}?action=${action}&d=${encoded}`);
@@ -531,38 +570,24 @@ async function apiWrite(action, data) {
 
 // ── PIN ───────────────────────────────────────────────────────
 let pinValue = "";
-
 function pinPress(d) {
   if (pinValue.length >= 4) return;
-  pinValue += d;
-  updatePinDots();
+  pinValue += d; updatePinDots();
   if (pinValue.length === 4) setTimeout(checkPin, 200);
 }
-
-function pinDel() {
-  pinValue = pinValue.slice(0,-1);
-  updatePinDots();
-  document.getElementById("pinError").textContent = "";
-}
-
-function updatePinDots() {
-  for (let i=0;i<4;i++) {
-    document.getElementById("pd"+i).classList.toggle("filled", i < pinValue.length);
-  }
-}
-
+function pinDel() { pinValue = pinValue.slice(0,-1); updatePinDots(); document.getElementById("pinError").textContent=""; }
+function updatePinDots() { for(let i=0;i<4;i++) document.getElementById("pd"+i).classList.toggle("filled", i<pinValue.length); }
 async function checkPin() {
-  const res = await apiGet("checkPin", "&pin="+pinValue);
+  const res = await apiGet("checkPin","&pin="+pinValue);
   if (res.success) {
     APP.currentUser = res.name;
-    document.getElementById("pinScreen").style.display = "none";
-    document.getElementById("mainApp").style.display = "block";
-    document.getElementById("userBadge").textContent = res.name;
+    document.getElementById("pinScreen").style.display="none";
+    document.getElementById("mainApp").style.display="block";
+    document.getElementById("userBadge").textContent=res.name;
     initApp();
   } else {
-    document.getElementById("pinError").textContent = "Incorrect PIN. Try again.";
-    pinValue = "";
-    updatePinDots();
+    document.getElementById("pinError").textContent="Incorrect PIN. Try again.";
+    pinValue=""; updatePinDots();
   }
 }
 
@@ -570,10 +595,8 @@ async function checkPin() {
 async function initApp() {
   setTodayHeader();
   await Promise.all([loadSettings(), loadVendors(), loadEvents(), loadTasks()]);
-  renderToday();
-  renderVendors();
+  renderToday(); renderVendors();
 }
-
 async function loadSettings() { APP.settings = await apiGet("getSettings"); }
 async function loadVendors()  { APP.vendors  = await apiGet("getVendors");  }
 async function loadEvents()   { APP.events   = await apiGet("getEvents");   }
@@ -581,19 +604,17 @@ async function loadTasks()    { APP.tasks    = await apiGet("getTasks");    }
 
 // ── NAV ───────────────────────────────────────────────────────
 function switchScreen(name, btn) {
-  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-  document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active"));
   document.getElementById("screen-"+name).classList.add("active");
   btn.classList.add("active");
-  const fab = document.getElementById("fabNewEvent");
-  fab.style.display = name === "events" ? "flex" : "none";
-  if (name === "events")  { renderEvents(); showEventList(); }
-  if (name === "vendors") renderVendors();
+  document.getElementById("fabNewEvent").style.display = name==="events"?"flex":"none";
+  if (name==="events") { renderEvents(); showEventList(); }
+  if (name==="vendors") renderVendors();
 }
-
 function showEventList() {
-  document.getElementById("eventList").style.display = "block";
-  document.getElementById("eventDetail").style.display = "none";
+  document.getElementById("eventList").style.display="block";
+  document.getElementById("eventDetail").style.display="none";
 }
 
 // ── TODAY ─────────────────────────────────────────────────────
@@ -602,40 +623,30 @@ function setTodayHeader() {
   document.getElementById("todayDay").textContent  = DAYS[now.getDay()].toUpperCase();
   document.getElementById("todayDate").textContent = `${now.getDate()} ${MONTHS[now.getMonth()]} ${now.getFullYear()}`;
 }
-
 function renderToday() {
-  const tasks    = APP.tasks || [];
-  const overdue  = tasks.filter(t => t.urgency==="overdue");
-  const today    = tasks.filter(t => t.urgency==="today");
-  const tomorrow = tasks.filter(t => t.urgency==="tomorrow");
-  const future   = tasks.filter(t => t.urgency==="future");
-
+  const tasks    = APP.tasks||[];
+  const overdue  = tasks.filter(t=>t.urgency==="overdue");
+  const today    = tasks.filter(t=>t.urgency==="today");
+  const tomorrow = tasks.filter(t=>t.urgency==="tomorrow");
+  const future   = tasks.filter(t=>t.urgency==="future");
   document.getElementById("statOverdue").textContent  = overdue.length;
   document.getElementById("statToday").textContent    = today.length;
   document.getElementById("statTomorrow").textContent = tomorrow.length;
-  document.getElementById("todaySummary").textContent = `${tasks.length} actions across ${APP.events.length} active events`;
-
-  const badge = document.getElementById("overdueBadge");
-  if (overdue.length) { badge.style.display="block"; badge.textContent=overdue.length+" Overdue"; }
-  else badge.style.display="none";
-
-  let html = "";
-  if (overdue.length)  html += renderTaskSection("OVERDUE",  "#C0392B", overdue);
-  if (today.length)    html += renderTaskSection("TODAY",    "#A8841E", today);
-  if (tomorrow.length) html += renderTaskSection("TOMORROW", "#553C9A", tomorrow);
-  if (future.length)   html += renderTaskSection("UPCOMING", "#8A7A65", future);
-  if (!tasks.length)   html = `<div class="empty-state"><div class="icon">✅</div><p>No tasks yet. Create an event to get started.</p></div>`;
-  document.getElementById("taskList").innerHTML = html;
+  document.getElementById("todaySummary").textContent = `${tasks.length} actions across ${APP.events.filter(e=>parseInt(e.Stage)>0).length} active events`;
+  const badge=document.getElementById("overdueBadge");
+  if (overdue.length){badge.style.display="block";badge.textContent=overdue.length+" Overdue";}else badge.style.display="none";
+  let html="";
+  if (overdue.length)  html+=renderTaskSection("OVERDUE","#C0392B",overdue);
+  if (today.length)    html+=renderTaskSection("TODAY","#A8841E",today);
+  if (tomorrow.length) html+=renderTaskSection("TOMORROW","#553C9A",tomorrow);
+  if (future.length)   html+=renderTaskSection("UPCOMING","#8A7A65",future);
+  if (!tasks.length)   html=`<div class="empty-state"><div class="icon">✅</div><p>No tasks yet. Create an event to get started.</p></div>`;
+  document.getElementById("taskList").innerHTML=html;
 }
-
-function renderTaskSection(label, color, tasks) {
+function renderTaskSection(label,color,tasks) {
   return `<div class="task-section">
-    <div class="task-section-head">
-      <div class="task-section-bar" style="background:${color}"></div>
-      <div class="task-section-title" style="color:${color}">${label} (${tasks.length})</div>
-    </div>
-    ${tasks.map(t => `
-    <div class="task-row">
+    <div class="task-section-head"><div class="task-section-bar" style="background:${color}"></div><div class="task-section-title" style="color:${color}">${label} (${tasks.length})</div></div>
+    ${tasks.map(t=>`<div class="task-row">
       <div class="task-time" style="color:${color}">${t.Due_Date||"—"}</div>
       <div class="task-bar" style="background:${color}"></div>
       <div class="task-body">
@@ -649,25 +660,26 @@ function renderTaskSection(label, color, tasks) {
     </div>`).join("")}
   </div>`;
 }
-
-async function doneTask(rowId, btn) {
-  btn.textContent="✓"; btn.style.color="var(--green)";
-  await apiWrite("completeTask", { Row_ID: rowId });
+async function doneTask(rowId,btn) {
+  btn.textContent="✓";btn.style.color="var(--green)";
+  await apiWrite("completeTask",{Row_ID:rowId});
   await loadTasks(); renderToday();
 }
 
 // ── EVENTS ────────────────────────────────────────────────────
 function renderEvents() {
-  const events = APP.events || [];
-  document.getElementById("eventCount").textContent = `${events.length} active in pipeline`;
-  if (!events.length) {
-    document.getElementById("eventList").innerHTML = `<div class="empty-state"><div class="icon">📋</div><p>No events yet. Tap + to create your first event.</p></div>`;
+  const events = APP.events||[];
+  const active = events.filter(e=>parseInt(e.Stage)>0);
+  document.getElementById("eventCount").textContent=`${active.length} active · ${events.length-active.length} cancelled`;
+  if (!events.length){
+    document.getElementById("eventList").innerHTML=`<div class="empty-state"><div class="icon">📋</div><p>No events yet. Tap + to create your first event.</p></div>`;
     return;
   }
-  document.getElementById("eventList").innerHTML = events.map(ev => {
-    const stage = parseInt(ev.Stage)||1;
-    const color = STAGE_COLORS[stage];
-    return `<div class="event-card" onclick="openEvent('${ev.Event_ID}')">
+  document.getElementById("eventList").innerHTML=events.map(ev=>{
+    const stage=parseInt(ev.Stage)||1;
+    const cancelled=stage===0;
+    const color=cancelled?"#C0392B":(STAGE_COLORS[stage]||STAGE_COLORS[1]);
+    return `<div class="event-card ${cancelled?"cancelled":""}" onclick="openEvent('${ev.Event_ID}')">
       <div class="event-left-bar" style="background:${color}"></div>
       <div class="event-inner">
         <div style="display:flex;justify-content:space-between;align-items:flex-start">
@@ -675,13 +687,12 @@ function renderEvents() {
           <div style="font-size:12px;color:var(--muted)">${ev.Event_Date||""}</div>
         </div>
         <div class="event-sub">${ev.Occasion||""} · ${ev.Pax||0} guests</div>
-        ${renderPipeline(stage)}
+        ${cancelled
+          ? `<span class="tag" style="background:rgba(192,57,43,0.1);color:var(--red);border:1px solid rgba(192,57,43,0.3)">Cancelled</span>`
+          : renderPipeline(stage)}
         <div class="event-footer">
-          <span class="tag" style="background:${color}18;color:${color};border:1px solid ${color}30">Stage ${stage}: ${STAGE_LABELS[stage]}</span>
-          <div class="event-balance">
-            <div class="amount">${ev.Balance_Due||"—"}</div>
-            <div class="label">balance due</div>
-          </div>
+          ${!cancelled?`<span class="tag" style="background:${color}18;color:${color};border:1px solid ${color}30">Stage ${stage}: ${STAGE_LABELS[stage]}</span>`:`<span></span>`}
+          <div class="event-balance"><div class="amount">${ev.Balance_Due||"—"}</div><div class="label">balance due</div></div>
         </div>
       </div>
     </div>`;
@@ -689,70 +700,79 @@ function renderEvents() {
 }
 
 function renderPipeline(current) {
-  let html = `<div class="pipeline">`;
-  for (let i=1;i<=6;i++) {
-    const color = STAGE_COLORS[i];
-    const isCurrent = i===current, isDone = i<current;
-    html += `<div class="pip-item">
-      <div class="pip-dot-wrap">
-        <div class="pip-dot ${isCurrent?"current":isDone?"done":""}" style="--sc:${color}"></div>
-        ${isCurrent?`<div class="pip-label" style="color:${color}">${STAGE_LABELS[i].replace(" ","\n")}</div>`:""}
-      </div>
-      ${i<6?`<div class="pip-line ${isDone?"done":""}"></div>`:""}
-    </div>`;
+  let html=`<div class="pipeline">`;
+  for(let i=1;i<=6;i++){
+    const color=STAGE_COLORS[i];
+    const isCurrent=i===current,isDone=i<current;
+    html+=`<div class="pip-item"><div class="pip-dot-wrap">
+      <div class="pip-dot ${isCurrent?"current":isDone?"done":""}" style="--sc:${color}"></div>
+      ${isCurrent?`<div class="pip-label" style="color:${color}">${STAGE_LABELS[i].replace(" ","\n")}</div>`:""}
+    </div>${i<6?`<div class="pip-line ${isDone?"done":""}"></div>`:""}</div>`;
   }
   return html+`</div>`;
 }
 
 async function openEvent(eventId) {
-  APP.currentEvent = APP.events.find(e => e.Event_ID===eventId);
+  APP.currentEvent=APP.events.find(e=>e.Event_ID===eventId);
   if (!APP.currentEvent) return;
-  APP.currentEventVendors = await apiGet("getEventVendors","&event_id="+eventId);
+  APP.currentEventVendors=await apiGet("getEventVendors","&event_id="+eventId);
   renderEventDetail();
   document.getElementById("eventList").style.display="none";
   document.getElementById("eventDetail").style.display="block";
 }
 
 function renderEventDetail() {
-  const ev    = APP.currentEvent;
-  const stage = parseInt(ev.Stage)||1;
-  const color = STAGE_COLORS[stage];
+  const ev=APP.currentEvent;
+  const stage=parseInt(ev.Stage)||1;
+  const cancelled=stage===0;
+  const color=cancelled?"#C0392B":(STAGE_COLORS[stage]||STAGE_COLORS[1]);
 
-  let actions = "";
-  if (stage===1) actions += `<button class="btn btn-gold" onclick="openSendMenu()">📎  Send Menu Quote to Client</button>`;
-  if (stage===3) actions += `<button class="btn btn-gold" onclick="openPriceQuote()">💰  Send Price Quote to Client</button>`;
-  if (stage>=2)  actions += `<button class="btn btn-outline" style="margin-top:8px" onclick="openTasting()">🍽️  Set Up Tasting</button>`;
+  let actions="";
+  if (!cancelled){
+    if (stage===1) actions+=`<button class="btn btn-gold" onclick="openSendMenu()">📎  Send Menu Quote to Client</button>`;
+    if (stage===3) actions+=`<button class="btn btn-gold" onclick="openPriceQuote()">💰  Send Price Quote to Client</button>`;
+    if (stage>=2)  actions+=`<button class="btn btn-outline" style="margin-top:8px" onclick="openTasting()">🍽️  Set Up Tasting</button>`;
+  }
 
-  const vendorCards = APP.currentEventVendors.length
-    ? APP.currentEventVendors.map(v => `
-      <div class="vendor-card">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
-          <div style="font-family:var(--serif);font-size:16px">${v.Agency_Name||v.Vendor_ID}</div>
-          <span class="tag" style="background:#2C528218;color:#2C5282;border:1px solid #2C528230">${v.Status||"pending"}</span>
+  const vendorCards=APP.currentEventVendors.length
+    ?APP.currentEventVendors.map(v=>`<div class="vendor-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+        <div style="font-family:var(--serif);font-size:16px">${v.Agency_Name||v.Vendor_ID}</div>
+        <span class="tag" style="background:#2C528218;color:#2C5282;border:1px solid #2C528230">${v.Status||"pending"}</span>
+      </div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:12px">${v.Items||"—"}</div>
+      <div class="gold-line"></div>
+      <div class="vendor-price-row">
+        <div class="vpc"><div class="lbl">Vendor Cost</div><div class="val">${v.Vendor_Cost||"—"}</div></div>
+        <div class="vpc"><div class="lbl">Your Price</div><div class="val" style="color:var(--gold-dark)">${v.Your_Price||"—"}</div></div>
+        <div class="vpc"><div class="lbl">Advance</div><div class="val" style="color:${v.Advance_Paid==='paid'?'var(--green)':'var(--red)'}">${v.Advance_Paid||"pending"}</div></div>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="msgVendor('${v.Vendor_ID}')">💬  Message Vendor</button>
+    </div>`).join("")
+    :`<div class="empty-state"><div class="icon">🏪</div><p>No vendors assigned yet.</p></div>`;
+
+  document.getElementById("eventDetail").innerHTML=`
+    <div class="detail-topbar">
+      <button class="back-btn" onclick="showEventList()">← All Events</button>
+      ${!cancelled?`<div style="position:relative">
+        <button class="menu-btn" onclick="toggleDropdown(this)" id="eventMenuBtn">⋮</button>
+        <div class="dropdown" id="eventDropdown">
+          <button class="dropdown-item" onclick="openEditEvent()">✏️ Edit Event</button>
+          <button class="dropdown-item danger" onclick="openCancelConfirm()">🚫 Cancel Event</button>
         </div>
-        <div style="font-size:13px;color:var(--muted);margin-bottom:12px">${v.Items||"—"}</div>
-        <div class="gold-line"></div>
-        <div class="vendor-price-row">
-          <div class="vpc"><div class="lbl">Vendor Cost</div><div class="val">${v.Vendor_Cost||"—"}</div></div>
-          <div class="vpc"><div class="lbl">Your Price</div><div class="val" style="color:var(--gold-dark)">${v.Your_Price||"—"}</div></div>
-          <div class="vpc"><div class="lbl">Advance</div><div class="val" style="color:${v.Advance_Paid==='paid'?'var(--green)':'var(--red)'}">${v.Advance_Paid||"pending"}</div></div>
-        </div>
-        <button class="btn btn-outline btn-sm" onclick="msgVendor('${v.Vendor_ID}')">💬  Message Vendor</button>
-      </div>`).join("")
-    : `<div class="empty-state"><div class="icon">🏪</div><p>No vendors assigned yet.</p></div>`;
-
-  document.getElementById("eventDetail").innerHTML = `
-    <button class="back-btn" onclick="showEventList()">← All Events</button>
+      </div>`:""}
+    </div>
+    ${cancelled?`<div class="cancelled-banner"><div class="icon">🚫</div><div><div class="text">Event Cancelled</div><div class="sub">This event has been cancelled. Record is kept for reference.</div></div></div>`:""}
     <div class="card" style="margin-bottom:14px">
       <div style="font-family:var(--serif);font-size:22px;color:var(--text)">${ev.Client_Name}</div>
       <div style="font-size:13px;color:var(--muted);margin-bottom:16px">${ev.Occasion} · ${ev.Event_Date} · ${ev.Pax} pax</div>
-      ${renderPipeline(stage)}
+      ${!cancelled?renderPipeline(stage):""}
       <div class="fin-row">
         <div class="fin-card"><div class="amount" style="color:var(--green)">${ev.Advance_Recd||"—"}</div><div class="label">Advance Received</div></div>
         <div class="fin-card"><div class="amount" style="color:var(--orange)">${ev.Balance_Due||"—"}</div><div class="label">Balance Due</div></div>
       </div>
     </div>
-    <div class="action-btns">${actions}</div>
+    ${actions?`<div class="action-btns">${actions}</div>`:""}
     <div class="tabs">
       <button class="tab-btn active" onclick="switchTab('client',this)">👤  Client</button>
       <button class="tab-btn" onclick="switchTab('vendors',this)">🏪  Vendors</button>
@@ -762,83 +782,142 @@ function renderEventDetail() {
     </div>
     <div id="tab-vendors" class="tab-content">
       ${vendorCards}
-      <button class="btn btn-outline" onclick="showAssignVendor()" style="margin-top:4px">+ Assign Vendor to Event</button>
+      ${!cancelled?`<button class="btn btn-outline" onclick="showAssignVendor()" style="margin-top:4px">+ Assign Vendor to Event</button>`:""}
     </div>`;
 }
 
-function switchTab(name, btn) {
-  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-  document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+function toggleDropdown(btn) {
+  const dd=document.getElementById("eventDropdown");
+  dd.classList.toggle("open");
+  document.addEventListener("click", function closeDD(e){
+    if (!btn.contains(e.target)){dd.classList.remove("open");document.removeEventListener("click",closeDD);}
+  });
+}
+
+function switchTab(name,btn) {
+  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+  document.querySelectorAll(".tab-content").forEach(c=>c.classList.remove("active"));
   btn.classList.add("active");
   document.getElementById("tab-"+name).classList.add("active");
 }
 
+// ── EDIT EVENT ────────────────────────────────────────────────
+function openEditEvent() {
+  document.getElementById("eventDropdown").classList.remove("open");
+  const ev=APP.currentEvent;
+  document.getElementById("edit-occasion").value=ev.Occasion||"Wedding Reception";
+  document.getElementById("edit-date").value=ev.Event_Date||"";
+  document.getElementById("edit-pax").value=ev.Pax||"";
+  document.getElementById("edit-advance").value=ev.Advance_Recd||"";
+  document.getElementById("edit-balance").value=ev.Balance_Due||"";
+  document.getElementById("edit-stage").value=ev.Stage||1;
+  document.getElementById("edit-notes").value=ev.Notes||"";
+  document.getElementById("editEventMsg").innerHTML="";
+  openModal("modal-editEvent");
+}
+
+async function saveEditEvent() {
+  const btn=document.getElementById("saveEditBtn");
+  btn.textContent="Saving..."; btn.disabled=true;
+  const res=await apiWrite("updateEvent",{
+    Event_ID:   APP.currentEvent.Event_ID,
+    Occasion:   document.getElementById("edit-occasion").value,
+    Event_Date: document.getElementById("edit-date").value,
+    Pax:        document.getElementById("edit-pax").value,
+    Advance_Recd: document.getElementById("edit-advance").value,
+    Balance_Due:  document.getElementById("edit-balance").value,
+    Stage:      document.getElementById("edit-stage").value,
+    Notes:      document.getElementById("edit-notes").value
+  });
+  if (res.success){
+    document.getElementById("editEventMsg").innerHTML=`<div class="success-box"><div class="title">✓ Event Updated</div></div>`;
+    await loadEvents();
+    APP.currentEvent=APP.events.find(e=>e.Event_ID===APP.currentEvent.Event_ID);
+    renderEventDetail();
+    setTimeout(()=>closeModal("modal-editEvent"),1200);
+  } else {
+    document.getElementById("editEventMsg").innerHTML=`<div class="error-box"><div class="title">Error: ${res.error||"Unknown"}</div></div>`;
+  }
+  btn.textContent="Save Changes"; btn.disabled=false;
+}
+
+// ── CANCEL EVENT ──────────────────────────────────────────────
+function openCancelConfirm() {
+  document.getElementById("eventDropdown").classList.remove("open");
+  document.getElementById("cancelConfirmText").textContent=`Cancel "${APP.currentEvent.Client_Name} — ${APP.currentEvent.Occasion}"? The record will be kept for reference.`;
+  openModal("modal-cancelConfirm");
+}
+
+async function confirmCancelEvent() {
+  const res=await apiWrite("updateEvent",{
+    Event_ID: APP.currentEvent.Event_ID,
+    Stage: 0
+  });
+  if (res.success){
+    closeModal("modal-cancelConfirm");
+    await loadEvents();
+    APP.currentEvent=APP.events.find(e=>e.Event_ID===APP.currentEvent.Event_ID);
+    renderEventDetail();
+    renderEvents();
+  }
+}
+
 // ── NEW EVENT ─────────────────────────────────────────────────
 async function saveNewEvent() {
-  const client = document.getElementById("new-client").value.trim();
-  if (!client) { alert("Client name is required"); return; }
-  const btn = document.getElementById("saveEventBtn");
-  btn.textContent = "Saving..."; btn.disabled = true;
+  const client=document.getElementById("new-client").value.trim();
+  if (!client){alert("Client name is required");return;}
+  const btn=document.getElementById("saveEventBtn");
+  btn.textContent="Saving..."; btn.disabled=true;
   try {
-    const res = await apiWrite("addEvent", {
-      Client_Name: client,
-      Occasion:    document.getElementById("new-occasion").value,
-      Event_Date:  document.getElementById("new-date").value,
-      Pax:         document.getElementById("new-pax").value||0,
-      Notes:       document.getElementById("new-notes").value,
-      Stage: 1
+    const res=await apiWrite("addEvent",{
+      Client_Name:client,
+      Occasion:document.getElementById("new-occasion").value,
+      Event_Date:document.getElementById("new-date").value,
+      Pax:document.getElementById("new-pax").value||0,
+      Notes:document.getElementById("new-notes").value,
+      Stage:1
     });
-    if (res.success) {
-      document.getElementById("newEventMsg").innerHTML = `<div class="success-box"><div class="title">✓ Event Created</div><div class="sub">ID: ${res.Event_ID} · Tasks auto-generated.</div></div>`;
+    if (res.success){
+      document.getElementById("newEventMsg").innerHTML=`<div class="success-box"><div class="title">✓ Event Created</div><div class="sub">ID: ${res.Event_ID} · Tasks auto-generated.</div></div>`;
       await loadEvents(); await loadTasks();
       renderEvents(); renderToday();
-      setTimeout(() => { closeModal("modal-newEvent"); document.getElementById("newEventMsg").innerHTML=""; }, 1500);
+      setTimeout(()=>{closeModal("modal-newEvent");document.getElementById("newEventMsg").innerHTML="";},1500);
     } else {
-      document.getElementById("newEventMsg").innerHTML = `<div style="color:var(--red);font-size:13px;margin-top:8px">Error: ${res.error||"Unknown error"}</div>`;
+      document.getElementById("newEventMsg").innerHTML=`<div class="error-box"><div class="title">Error: ${res.error||"Unknown"}</div></div>`;
     }
-  } catch(e) {
-    document.getElementById("newEventMsg").innerHTML = `<div style="color:var(--red);font-size:13px;margin-top:8px">Connection error. Check internet.</div>`;
+  } catch(e){
+    document.getElementById("newEventMsg").innerHTML=`<div class="error-box"><div class="title">Connection error. Check internet.</div></div>`;
   }
-  btn.textContent = "Create Event"; btn.disabled = false;
+  btn.textContent="Create Event"; btn.disabled=false;
 }
 
 // ── SEND MENU ─────────────────────────────────────────────────
-function openSendMenu() {
-  APP.menuAttached=false; APP.menuFileName="";
+function openSendMenu(){
+  APP.menuAttached=false;APP.menuFileName="";
   document.getElementById("menuAttachIcon").textContent="📁";
   document.getElementById("menuAttachText").textContent="Tap to attach menu PDF";
-  goStep("menu",1,null); updateMenuPreview();
-  openModal("modal-sendMenu");
+  goStep("menu",1,null);updateMenuPreview();openModal("modal-sendMenu");
 }
-
-function menuAttachClick() {
+function menuAttachClick(){
   APP.menuAttached=true;
   APP.menuFileName=`${APP.currentEvent.Client_Name.replace(/ /g,"_")}_Menu_${document.getElementById("menuVersion").value}.pdf`;
   document.getElementById("menuAttachIcon").textContent="📎";
   document.getElementById("menuAttachText").textContent=APP.menuFileName;
 }
-
-function updateMenuPreview() {
-  const ev=APP.currentEvent; if (!ev) return;
+function updateMenuPreview(){
+  const ev=APP.currentEvent;if(!ev)return;
   const note=document.getElementById("menuNote")?.value||"";
   const meal=document.getElementById("menuMeal")?.value||"";
-  const ver =document.getElementById("menuVersion")?.value||"V1";
-  const sig =APP.settings.Signature||"UVI Luxury Catering & Decor";
+  const ver=document.getElementById("menuVersion")?.value||"V1";
+  const sig=APP.settings.Signature||"UVI Luxury Catering & Decor";
   APP._menuMsg=`Dear ${(ev.Client_Name||"").split(" ")[0]},\n\nPlease find attached the menu proposal for your *${ev.Occasion}*.\n\n📅 Date: ${ev.Event_Date}\n👥 Guests: ${ev.Pax} pax\n🍽️ Meal: ${meal} (${ver})\n\n${note}\n\nWarm regards,\n*${sig}*`;
-  const el=document.getElementById("menuWAPreview"); if (el) el.textContent=APP._menuMsg;
+  const el=document.getElementById("menuWAPreview");if(el)el.textContent=APP._menuMsg;
 }
-
-function copyMenuMsg() {
-  navigator.clipboard.writeText(APP._menuMsg||"").then(()=>alert("Message copied! Open WhatsApp and paste."));
-}
-
-async function markMenuSent() {
+function copyMenuMsg(){navigator.clipboard.writeText(APP._menuMsg||"").then(()=>alert("Message copied! Open WhatsApp and paste."));}
+async function markMenuSent(){
   const ev=APP.currentEvent;
-  const res=await apiWrite("addMenuSent",{
-    Event_ID:ev.Event_ID, Meal_Function:document.getElementById("menuMeal").value,
-    Version:document.getElementById("menuVersion").value, File_Name:APP.menuFileName||"Menu.pdf", Drive_Link:""
-  });
-  if (res.success) {
+  const res=await apiWrite("addMenuSent",{Event_ID:ev.Event_ID,Meal_Function:document.getElementById("menuMeal").value,Version:document.getElementById("menuVersion").value,File_Name:APP.menuFileName||"Menu.pdf",Drive_Link:""});
+  if(res.success){
     document.getElementById("menuSentMsg").innerHTML=`<div class="success-box"><div class="title">✓ Menu Quote Recorded</div><div class="sub">Follow-up reminder set for 2 days.</div></div>`;
     document.getElementById("menuMarkSentBtn").textContent="✓ Recorded";
     document.getElementById("menuMarkSentBtn").style.background="#E8F5E9";
@@ -849,47 +928,21 @@ async function markMenuSent() {
 }
 
 // ── TASTING ───────────────────────────────────────────────────
-function openTasting() {
-  APP.tastingItems=[]; APP.tastingVenueType="client";
+function openTasting(){
+  APP.tastingItems=[];APP.tastingVenueType="client";
   document.querySelectorAll(".radio-option").forEach(r=>r.classList.remove("selected"));
-  renderTastingChips(); renderTastingSelected();
-  goStep("tasting",1,null); openModal("modal-tasting");
+  renderTastingChips();renderTastingSelected();goStep("tasting",1,null);openModal("modal-tasting");
 }
-
-function selectVenue(el, type) {
-  document.querySelectorAll(".radio-option").forEach(r=>r.classList.remove("selected"));
-  el.classList.add("selected"); APP.tastingVenueType=type;
-}
-
-function renderTastingChips() {
+function selectVenue(el,type){document.querySelectorAll(".radio-option").forEach(r=>r.classList.remove("selected"));el.classList.add("selected");APP.tastingVenueType=type;}
+function renderTastingChips(){
   const chips=[...new Set(APP.currentEventVendors.flatMap(v=>(v.Items||"").split("+").map(i=>i.trim())).filter(Boolean))];
-  document.getElementById("tastingQuickChips").innerHTML=chips.map(item=>
-    `<span class="chip ${APP.tastingItems.includes(item)?"selected":""}" onclick="toggleTastingChip(this,'${item}')">${APP.tastingItems.includes(item)?"✓ ":""}${item}</span>`
-  ).join("");
+  document.getElementById("tastingQuickChips").innerHTML=chips.map(item=>`<span class="chip ${APP.tastingItems.includes(item)?"selected":""}" onclick="toggleTastingChip(this,'${item}')">${APP.tastingItems.includes(item)?"✓ ":""}${item}</span>`).join("");
 }
-
-function toggleTastingChip(el, item) {
-  if (APP.tastingItems.includes(item)) APP.tastingItems=APP.tastingItems.filter(i=>i!==item);
-  else APP.tastingItems.push(item);
-  renderTastingChips(); renderTastingSelected();
-}
-
-function addTastingItem() {
-  const val=document.getElementById("tastingNewItem").value.trim();
-  if (val&&!APP.tastingItems.includes(val)){APP.tastingItems.push(val);renderTastingSelected();renderTastingChips();}
-  document.getElementById("tastingNewItem").value="";
-}
-
-function renderTastingSelected() {
-  document.getElementById("tastingSelectedItems").innerHTML=APP.tastingItems.length
-    ?`<div class="section-label">Selected (${APP.tastingItems.length}):</div>`+
-      APP.tastingItems.map((item,i)=>`<div class="selected-item"><span>🍽️ ${item}</span><button class="remove-btn" onclick="removeTastingItem(${i})">×</button></div>`).join("")
-    :"";
-}
-
+function toggleTastingChip(el,item){if(APP.tastingItems.includes(item))APP.tastingItems=APP.tastingItems.filter(i=>i!==item);else APP.tastingItems.push(item);renderTastingChips();renderTastingSelected();}
+function addTastingItem(){const val=document.getElementById("tastingNewItem").value.trim();if(val&&!APP.tastingItems.includes(val)){APP.tastingItems.push(val);renderTastingSelected();renderTastingChips();}document.getElementById("tastingNewItem").value="";}
+function renderTastingSelected(){document.getElementById("tastingSelectedItems").innerHTML=APP.tastingItems.length?`<div class="section-label">Selected (${APP.tastingItems.length}):</div>`+APP.tastingItems.map((item,i)=>`<div class="selected-item"><span>🍽️ ${item}</span><button class="remove-btn" onclick="removeTastingItem(${i})">×</button></div>`).join(""):"";}
 function removeTastingItem(i){APP.tastingItems.splice(i,1);renderTastingSelected();renderTastingChips();}
-
-function buildTastingMsgs() {
+function buildTastingMsgs(){
   const ev=APP.currentEvent;
   const date=document.getElementById("tastingDate").value;
   const time=document.getElementById("tastingTime").value;
@@ -912,51 +965,27 @@ function buildTastingMsgs() {
       </div>
     </div>`;
   }).join("");
-  APP.clientSent=false; APP.vendorsSent={};
+  APP.clientSent=false;APP.vendorsSent={};
 }
-
-function markClientSent(){
-  APP.clientSent=true;
-  document.getElementById("clientMarkBtn").className="mark-btn done";
-  document.getElementById("clientMarkBtn").textContent="✓ Done";
-  document.getElementById("clientSentTag").innerHTML=`<span class="tag" style="background:#2E7D5218;color:#2E7D52;border:1px solid #2E7D5230">✓ Sent</span>`;
-  checkAllSent();
-}
-
-function markVendorSent(i){
-  APP.vendorsSent[i]=true;
-  document.getElementById(`vendorMarkBtn_${i}`).className="mark-btn done";
-  document.getElementById(`vendorMarkBtn_${i}`).textContent="✓ Done";
-  document.getElementById(`vendorSentTag_${i}`).innerHTML=`<span class="tag" style="background:#2E7D5218;color:#2E7D52;border:1px solid #2E7D5230">✓ Sent</span>`;
-  checkAllSent();
-}
-
-function checkAllSent(){
-  if (APP.clientSent&&Object.keys(APP.vendorsSent).length>=APP.currentEventVendors.length){
-    document.getElementById("tastingAllSentMsg").innerHTML=`<div class="success-box"><div class="title">✓ Tasting Fully Coordinated</div><div class="sub">All messages sent. Reminder set for tasting day.</div></div>`;
-    apiWrite("addTasting",{Event_ID:APP.currentEvent.Event_ID,Tasting_Date:document.getElementById("tastingDate").value,Time:document.getElementById("tastingTime").value,Venue_Type:APP.tastingVenueType,Venue:document.getElementById("tastingVenue").value,Items:APP.tastingItems.join(", "),Client_Msg_Sent:"Y",Vendors_Msg_Sent:"Y"});
-    apiWrite("updateEvent",{Event_ID:APP.currentEvent.Event_ID,Stage:4});
-  }
-}
-
+function markClientSent(){APP.clientSent=true;document.getElementById("clientMarkBtn").className="mark-btn done";document.getElementById("clientMarkBtn").textContent="✓ Done";document.getElementById("clientSentTag").innerHTML=`<span class="tag" style="background:#2E7D5218;color:#2E7D52;border:1px solid #2E7D5230">✓ Sent</span>`;checkAllSent();}
+function markVendorSent(i){APP.vendorsSent[i]=true;document.getElementById(`vendorMarkBtn_${i}`).className="mark-btn done";document.getElementById(`vendorMarkBtn_${i}`).textContent="✓ Done";document.getElementById(`vendorSentTag_${i}`).innerHTML=`<span class="tag" style="background:#2E7D5218;color:#2E7D52;border:1px solid #2E7D5230">✓ Sent</span>`;checkAllSent();}
+function checkAllSent(){if(APP.clientSent&&Object.keys(APP.vendorsSent).length>=APP.currentEventVendors.length){document.getElementById("tastingAllSentMsg").innerHTML=`<div class="success-box"><div class="title">✓ Tasting Fully Coordinated</div><div class="sub">All messages sent. Reminder set for tasting day.</div></div>`;apiWrite("addTasting",{Event_ID:APP.currentEvent.Event_ID,Tasting_Date:document.getElementById("tastingDate").value,Time:document.getElementById("tastingTime").value,Venue_Type:APP.tastingVenueType,Venue:document.getElementById("tastingVenue").value,Items:APP.tastingItems.join(", "),Client_Msg_Sent:"Y",Vendors_Msg_Sent:"Y"});apiWrite("updateEvent",{Event_ID:APP.currentEvent.Event_ID,Stage:4});}}
 function copyVendorMsg(i){navigator.clipboard.writeText(APP[`_tvm_${i}`]||"").then(()=>alert("Copied! Paste on WhatsApp."));}
 
 // ── PRICE QUOTE ───────────────────────────────────────────────
 function openPriceQuote(){
-  const ev=APP.currentEvent;
-  const vendors=APP.currentEventVendors;
+  const ev=APP.currentEvent;const vendors=APP.currentEventVendors;
   const total=vendors.reduce((s,v)=>s+(parseInt((v.Your_Price||"0").replace(/[₹,]/g,""))||0),0);
   const sig=APP.settings.Signature||"UVI Luxury Catering & Decor";
   const msg=`Dear ${(ev.Client_Name||"").split(" ")[0]},\n\nPlease find our *Final Price Quote* for your ${ev.Occasion}.\n\n📅 Date: ${ev.Event_Date}\n👥 Guests: ${ev.Pax} pax\n💰 Total Package: ₹${total.toLocaleString()}\n\nThis includes full coordination, setup & our quality guarantee. Valid for 48 hours.\n\nKindly confirm to proceed.\n\n*${sig}*`;
   navigator.clipboard.writeText(msg).then(()=>alert("Price quote copied! Paste on WhatsApp to client."));
 }
 
-// ── MSG VENDOR ────────────────────────────────────────────────
+// ── VENDOR MSG ────────────────────────────────────────────────
 function msgVendor(vendorId){
-  const vendor=APP.vendors.find(v=>v.Vendor_ID===vendorId);
-  if (!vendor) return;
-  if (vendor.WhatsApp_Group_Link) window.open(vendor.WhatsApp_Group_Link,"_blank");
-  else if (vendor.Contact_Number) window.open(`https://wa.me/91${vendor.Contact_Number}`,"_blank");
+  const vendor=APP.vendors.find(v=>v.Vendor_ID===vendorId);if(!vendor)return;
+  if(vendor.WhatsApp_Group_Link)window.open(vendor.WhatsApp_Group_Link,"_blank");
+  else if(vendor.Contact_Number)window.open(`https://wa.me/91${vendor.Contact_Number}`,"_blank");
   else alert("No WhatsApp contact found for this vendor.");
 }
 
@@ -966,89 +995,55 @@ function renderVendors(){
   const vendors=APP.vendors||[];
   const cuisines=[...new Set(vendors.map(v=>v.Cuisine).filter(Boolean))];
   document.getElementById("vendorCount").textContent=`${vendors.length} partners`;
-  const allFilters=["All",...cuisines.slice(0,7)];
-  document.getElementById("cuisineFilters").innerHTML=allFilters.map(c=>
-    `<button class="filter-btn ${vendorFilter===c?"active":""}" onclick="setVendorFilter('${c}')">${c}</button>`
-  ).join("");
-  const emojiMap={Sweets:"🍰",Dessert:"🎂",Chaat:"🥘",Italian:"🍝","Indian Food":"🍛",Crockery:"🍽️","Welcome Drink":"🥤",Multi:"⭐","Coffee Bar":"☕",Mediterranean:"🫒",Srikhand:"🍨",Snacks:"🥨",Farsan:"🧆","Gujarati Live Counter":"🍱"};
+  document.getElementById("cuisineFilters").innerHTML=["All",...cuisines.slice(0,7)].map(c=>`<button class="filter-btn ${vendorFilter===c?"active":""}" onclick="setVendorFilter('${c}')">${c}</button>`).join("");
+  const emojiMap={Sweets:"🍰",Dessert:"🎂",Chaat:"🥘",Italian:"🍝","Indian Food":"🍛",Crockery:"🍽️","Welcome Drink":"🥤",Multi:"⭐","Coffee Bar":"☕",Mediterranean:"🫒",Snacks:"🥨",Farsan:"🧆","Gujarati Live Counter":"🍱"};
   const shown=vendorFilter==="All"?vendors:vendors.filter(v=>v.Cuisine===vendorFilter);
-  document.getElementById("vendorList").innerHTML=shown.map(v=>`
-    <div class="vendor-list-card">
-      <div class="vendor-emoji-box">${emojiMap[v.Cuisine]||"🏪"}</div>
-      <div style="flex:1">
-        <div class="vendor-list-name">${v.Agency_Name}</div>
-        <div class="vendor-list-sub">${v.Cuisine||""} · ${v.Base_City||""}</div>
-      </div>
-      <div style="text-align:right">
-        <div style="font-size:11px;color:var(--gold)">★★★★★</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px">${v.Contact_Person||""}</div>
-        ${v.Contact_Number?`<button onclick="window.open('https://wa.me/91${v.Contact_Number}','_blank')" style="margin-top:5px;background:none;border:1px solid #25D36640;color:#25D366;border-radius:6px;padding:3px 8px;font-size:10px;cursor:pointer">WhatsApp</button>`:""}
-      </div>
-    </div>`).join("");
+  document.getElementById("vendorList").innerHTML=shown.map(v=>`<div class="vendor-list-card">
+    <div class="vendor-emoji-box">${emojiMap[v.Cuisine]||"🏪"}</div>
+    <div style="flex:1"><div style="font-size:15px;color:var(--text)">${v.Agency_Name}</div><div style="font-size:12px;color:var(--muted);margin-top:2px">${v.Cuisine||""} · ${v.Base_City||""}</div></div>
+    <div style="text-align:right">
+      <div style="font-size:11px;color:var(--gold)">★★★★★</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px">${v.Contact_Person||""}</div>
+      ${v.Contact_Number?`<button onclick="window.open('https://wa.me/91${v.Contact_Number}','_blank')" style="margin-top:5px;background:none;border:1px solid #25D36640;color:#25D366;border-radius:6px;padding:3px 8px;font-size:10px;cursor:pointer">WhatsApp</button>`:""}
+    </div>
+  </div>`).join("");
 }
-
 function setVendorFilter(f){vendorFilter=f;renderVendors();}
-
 async function saveNewVendor(){
-  const name=document.getElementById("av-name").value.trim();
-  if (!name){alert("Agency name is required");return;}
-  const res=await apiWrite("addVendor",{
-    Agency_Name:name, Cuisine:document.getElementById("av-cuisine").value,
-    Contact_Person:document.getElementById("av-contact").value, Designation:document.getElementById("av-desig").value,
-    Contact_Number:document.getElementById("av-phone").value, Contact_Person_2:document.getElementById("av-contact2").value,
-    Contact_Number_2:document.getElementById("av-phone2").value, Base_City:document.getElementById("av-city").value,
-    WhatsApp_Group_Link:document.getElementById("av-walink").value, Active:"Y"
-  });
-  if (res.success){
-    document.getElementById("addVendorMsg").innerHTML=`<div class="success-box"><div class="title">✓ Vendor Added</div></div>`;
-    await loadVendors(); renderVendors();
-    setTimeout(()=>closeModal("modal-addVendor"),1200);
-  }
+  const name=document.getElementById("av-name").value.trim();if(!name){alert("Agency name is required");return;}
+  const res=await apiWrite("addVendor",{Agency_Name:name,Cuisine:document.getElementById("av-cuisine").value,Contact_Person:document.getElementById("av-contact").value,Designation:document.getElementById("av-desig").value,Contact_Number:document.getElementById("av-phone").value,Contact_Person_2:document.getElementById("av-contact2").value,Contact_Number_2:document.getElementById("av-phone2").value,Base_City:document.getElementById("av-city").value,WhatsApp_Group_Link:document.getElementById("av-walink").value,Active:"Y"});
+  if(res.success){document.getElementById("addVendorMsg").innerHTML=`<div class="success-box"><div class="title">✓ Vendor Added</div></div>`;await loadVendors();renderVendors();setTimeout(()=>closeModal("modal-addVendor"),1200);}
 }
 
 // ── ASSIGN VENDOR ─────────────────────────────────────────────
 function showAssignVendor(){
-  const vendorOptions=APP.vendors.map(v=>`<option value="${v.Vendor_ID}">${v.Agency_Name}</option>`).join("");
-  const existing=document.getElementById("assignVendorForm");
-  if (existing) existing.remove();
-  const div=document.createElement("div");
-  div.className="card"; div.id="assignVendorForm";
+  const existing=document.getElementById("assignVendorForm");if(existing)existing.remove();
+  const div=document.createElement("div");div.className="card";div.id="assignVendorForm";
   div.innerHTML=`<div class="section-label" style="margin-bottom:12px">Assign Vendor</div>
-    <div class="form-group"><label class="form-label">Select Vendor</label><select class="form-select" id="assignVendorSelect">${vendorOptions}</select></div>
+    <div class="form-group"><label class="form-label">Select Vendor</label><select class="form-select" id="assignVendorSelect">${APP.vendors.map(v=>`<option value="${v.Vendor_ID}">${v.Agency_Name}</option>`).join("")}</select></div>
     <div class="form-group"><label class="form-label">Items</label><input class="form-input" id="assignItems" placeholder="e.g. Macarons + Opera Cake"></div>
     <button class="btn btn-gold btn-sm" onclick="saveAssignVendor()">Assign</button>`;
   document.getElementById("tab-vendors").appendChild(div);
 }
-
 async function saveAssignVendor(){
   const vendorId=document.getElementById("assignVendorSelect").value;
   const vendor=APP.vendors.find(v=>v.Vendor_ID===vendorId);
-  const res=await apiWrite("addEventVendor",{
-    Event_ID:APP.currentEvent.Event_ID, Vendor_ID:vendorId,
-    Agency_Name:vendor?.Agency_Name||"", Items:document.getElementById("assignItems").value, Status:"quote_pending"
-  });
-  if (res.success){
-    APP.currentEventVendors=await apiGet("getEventVendors","&event_id="+APP.currentEvent.Event_ID);
-    renderEventDetail();
-  }
+  const res=await apiWrite("addEventVendor",{Event_ID:APP.currentEvent.Event_ID,Vendor_ID:vendorId,Agency_Name:vendor?.Agency_Name||"",Items:document.getElementById("assignItems").value,Status:"quote_pending"});
+  if(res.success){APP.currentEventVendors=await apiGet("getEventVendors","&event_id="+APP.currentEvent.Event_ID);renderEventDetail();}
 }
 
 // ── STEP NAV ──────────────────────────────────────────────────
 function goStep(prefix,step,btn){
   [1,2,3].forEach(i=>{const el=document.getElementById(`${prefix}-step-${i}`);if(el)el.style.display=i===step?"block":"none";});
-  if (btn){document.querySelectorAll(".step-tab").forEach(b=>b.classList.remove("active"));btn.classList.add("active");}
-  if (prefix==="menu"&&step===2) updateMenuPreview();
-  if (prefix==="tasting"&&step===3) buildTastingMsgs();
+  if(btn){document.querySelectorAll(".step-tab").forEach(b=>b.classList.remove("active"));btn.classList.add("active");}
+  if(prefix==="menu"&&step===2)updateMenuPreview();
+  if(prefix==="tasting"&&step===3)buildTastingMsgs();
 }
 
 // ── MODALS ────────────────────────────────────────────────────
 function openModal(id){document.getElementById(id).classList.add("open");}
 function closeModal(id){document.getElementById(id).classList.remove("open");}
-
-function copyText(elId){
-  const text=document.getElementById(elId)?.textContent||"";
-  navigator.clipboard.writeText(text).then(()=>alert("Copied! Open WhatsApp and paste."));
-}
+function copyText(elId){const text=document.getElementById(elId)?.textContent||"";navigator.clipboard.writeText(text).then(()=>alert("Copied! Open WhatsApp and paste."));}
 </script>
 </body>
 </html>
