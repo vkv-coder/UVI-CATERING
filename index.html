@@ -349,6 +349,23 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);max-width:48
 
 <button class="fab" id="fabNewEvent" onclick="openModal('modal-newEvent')">+</button>
 
+<!-- WA MESSAGE PREVIEW MODAL -->
+<div class="modal-overlay" id="modal-waMsg">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">📋 WhatsApp Message</div>
+      <button class="modal-close" onclick="closeModal('modal-waMsg')">×</button>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:10px" id="waMsgRecipient"></div>
+    <div style="background:#E8F5E9;border:1px solid #C8E6C9;border-radius:12px;padding:14px;font-size:13px;color:#1B5E20;line-height:1.8;font-family:var(--sans);white-space:pre-line;margin-bottom:16px;max-height:300px;overflow-y:auto" id="waMsgText"></div>
+    <div style="background:rgba(201,168,76,0.1);border:1px solid var(--gold-border);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--gold-dark);margin-bottom:16px">
+      👆 Long press above to select all & copy<br>OR tap the button below
+    </div>
+    <button class="btn btn-gold" onclick="copyWAMsg()" id="copyWABtn" style="margin-bottom:10px">📋 Copy Message</button>
+    <button class="btn btn-outline" onclick="openWALink()" id="openWABtn">💬 Open WhatsApp</button>
+  </div>
+</div>
+
 <nav class="nav">
   <button class="nav-btn active" onclick="switchScreen('today',this)"><span class="icon">◉</span><span class="label">Today</span><div class="underline"></div></button>
   <button class="nav-btn" onclick="switchScreen('events',this)"><span class="icon">◈</span><span class="label">Events</span><div class="underline"></div></button>
@@ -471,7 +488,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);max-width:48
     </div>
     <div id="menu-step-3" style="display:none">
       <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Copy the message, open WhatsApp, send with the PDF attached. Then mark as sent.</p>
-      <button class="btn btn-gold" onclick="copyMenuMsg()" style="margin-bottom:10px">📋 Copy Message</button>
+      <button class="btn btn-gold" onclick="copyMenuMsg()" id="copyMenuBtn" style="margin-bottom:10px">📋 Copy Message</button>
       <button class="btn btn-outline" id="menuMarkSentBtn" onclick="markMenuSent()">✅ Mark as Sent — Record in App</button>
       <div id="menuSentMsg"></div>
     </div>
@@ -562,7 +579,8 @@ let APP = {
   menuAttached:false, menuFileName:"",
   clientSent:false, vendorsSent:{},
   currentUser:"",
-  assignSelectedItems:[]
+  assignSelectedItems:[],
+  _waMsg:"", _waLink:""
 };
 
 // ── API ───────────────────────────────────────────────────────
@@ -1001,7 +1019,19 @@ function updateMenuPreview(){
   APP._menuMsg=`Dear ${(ev.Client_Name||"").split(" ")[0]},\n\nPlease find attached the menu proposal for your *${ev.Occasion}*.\n\n📅 Date: ${ev.Event_Date}\n👥 Guests: ${ev.Pax} pax\n🍽️ Meal: ${meal} (${ver})\n\n${note}\n\nWarm regards,\n*${sig}*`;
   const el=document.getElementById("menuWAPreview");if(el)el.textContent=APP._menuMsg;
 }
-function copyMenuMsg(){navigator.clipboard.writeText(APP._menuMsg||"").then(()=>alert("Message copied! Open WhatsApp and paste."));}
+function copyMenuMsg(){
+  if(APP._menuMsg){
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(APP._menuMsg).then(()=>document.getElementById("copyMenuBtn").textContent="✓ Copied!").catch(()=>fallbackCopyStr(APP._menuMsg));
+    } else { fallbackCopyStr(APP._menuMsg); }
+  }
+}
+function fallbackCopyStr(text){
+  const ta=document.createElement("textarea");ta.value=text;ta.style.position="fixed";ta.style.opacity="0";
+  document.body.appendChild(ta);ta.focus();ta.select();
+  try{document.execCommand("copy");alert("Copied!");}catch(e){alert("Please long-press the message and copy manually.");}
+  document.body.removeChild(ta);
+}
 async function markMenuSent(){
   const ev=APP.currentEvent;
   const res=await apiWrite("addMenuSent",{Event_ID:ev.Event_ID,Meal_Function:document.getElementById("menuMeal").value,Version:document.getElementById("menuVersion").value,File_Name:APP.menuFileName||"Menu.pdf",Drive_Link:""});
@@ -1072,7 +1102,6 @@ function openPriceQuote(){
 // ── VENDOR MSG ────────────────────────────────────────────────
 function msgVendor(vendorId){
   const vendor=APP.vendors.find(v=>v.Vendor_ID===vendorId);if(!vendor)return;
-  // Find this vendor's items in current event
   const evVendor=APP.currentEventVendors.find(v=>v.Vendor_ID===vendorId);
   const ev=APP.currentEvent;
   const sig=APP.settings.Signature||"UVI Luxury Catering & Decor";
@@ -1083,14 +1112,8 @@ function msgVendor(vendorId){
   } else {
     msg=`Dear ${(vendor.Agency_Name||"").split(" ")[0]},\n\nRegarding *${ev.Occasion}* — ${ev.Client_Name} on ${ev.Event_Date}.\n\n*${sig}*`;
   }
-  navigator.clipboard.writeText(msg).then(()=>{
-    const wa=vendor.WhatsApp_Group_Link||(vendor.Contact_Number?`https://wa.me/91${vendor.Contact_Number}`:"");
-    if(wa) window.open(wa,"_blank");
-    else alert("Message copied! Open WhatsApp manually.");
-  }).catch(()=>{
-    const wa=vendor.WhatsApp_Group_Link||(vendor.Contact_Number?`https://wa.me/91${vendor.Contact_Number}`:"");
-    if(wa) window.open(wa,"_blank");
-  });
+  const wa=vendor.WhatsApp_Group_Link||(vendor.Contact_Number?`https://wa.me/91${vendor.Contact_Number}`:"");
+  showWAMsg(msg, wa, `To: ${vendor.Agency_Name}`);
 }
 
 // ── VENDORS ───────────────────────────────────────────────────
@@ -1227,17 +1250,12 @@ async function saveAssignVendor(){
     document.getElementById("assignMsg").innerHTML=`<div class="success-box"><div class="title">✓ Vendor Assigned</div><div class="sub">Opening WhatsApp to send quote request...</div></div>`;
     
     // Copy message and open WhatsApp
-    navigator.clipboard.writeText(msg).then(()=>{
-      setTimeout(()=>{
-        const wa=vendor?.WhatsApp_Group_Link||
-          (vendor?.Contact_Number?`https://wa.me/91${vendor.Contact_Number}`:"");
-        if(wa) window.open(wa,"_blank");
-        else alert("Message copied! Open WhatsApp manually and paste.");
-      },600);
-    });
-
+    const wa=vendor?.WhatsApp_Group_Link||(vendor?.Contact_Number?`https://wa.me/91${vendor.Contact_Number}`:"");
     APP.currentEventVendors=await apiGet("getEventVendors","&event_id="+APP.currentEvent.Event_ID);
-    setTimeout(()=>renderEventDetail(),1500);
+    setTimeout(()=>{
+      renderEventDetail();
+      showWAMsg(msg, wa, `Quote Request → ${vendor?.Agency_Name}`);
+    },600);
   }
 }
 
@@ -1253,6 +1271,50 @@ function goStep(prefix,step,btn){
 function openModal(id){document.getElementById(id).classList.add("open");}
 function closeModal(id){document.getElementById(id).classList.remove("open");}
 function copyText(elId){const text=document.getElementById(elId)?.textContent||"";navigator.clipboard.writeText(text).then(()=>alert("Copied! Open WhatsApp and paste."));}
+
+// ── WA MESSAGE MODAL ──────────────────────────────────────────
+function showWAMsg(msg, waLink, recipientLabel) {
+  APP._waMsg  = msg;
+  APP._waLink = waLink;
+  document.getElementById("waMsgText").textContent      = msg;
+  document.getElementById("waMsgRecipient").textContent = recipientLabel || "";
+  document.getElementById("copyWABtn").textContent      = "📋 Copy Message";
+  openModal("modal-waMsg");
+}
+
+function copyWAMsg() {
+  const msg = APP._waMsg;
+  // Try clipboard API first
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(msg)
+      .then(() => { document.getElementById("copyWABtn").textContent = "✓ Copied!"; })
+      .catch(() => fallbackCopy(msg));
+  } else {
+    fallbackCopy(msg);
+  }
+}
+
+function fallbackCopy(text) {
+  // Create temp textarea and copy
+  const ta = document.createElement("textarea");
+  ta.value = text;
+  ta.style.position = "fixed";
+  ta.style.opacity  = "0";
+  document.body.appendChild(ta);
+  ta.focus(); ta.select();
+  try {
+    document.execCommand("copy");
+    document.getElementById("copyWABtn").textContent = "✓ Copied!";
+  } catch(e) {
+    alert("Could not auto-copy. Please long-press the green box above and select all text to copy.");
+  }
+  document.body.removeChild(ta);
+}
+
+function openWALink() {
+  if (APP._waLink) window.open(APP._waLink, "_blank");
+  else alert("No WhatsApp link found for this vendor. Please open WhatsApp manually.");
+}
 
 // ── VENDOR COST EDIT ─────────────────────────────────────────
 function toggleVendorEdit(vi) {
