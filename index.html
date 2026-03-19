@@ -964,7 +964,10 @@ function aiShowStep(n){
 }
 
 function renderCategoryButtons(){
-  const cats=["Chaat","Sweets","Desserts","Mains","Breads","Farsan","Beverages","Live Counter","Welcome Drink","Other"];
+  // Build from ITEM_VENDORS sheet categories + always include "Other"
+  const fromSheet=[...new Set(APP.itemVendors.map(function(iv){ return iv.Category; }).filter(Boolean))];
+  if(!fromSheet.includes("Other")) fromSheet.push("Other");
+  const cats=fromSheet;
   const el=document.getElementById("aiCatBtns");
   el.innerHTML="";
   // Count items added per category
