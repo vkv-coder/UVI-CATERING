@@ -348,6 +348,23 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);max-width:48
       <div class="form-group"><label class="form-label">Date</label><input class="form-input" id="nf-date" type="date"></div>
       <div class="form-group"><label class="form-label">Pax</label><input class="form-input" id="nf-pax" type="number" placeholder="100"></div>
     </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Time of Day</label>
+        <select class="form-select" id="nf-timeofday">
+          <option value="">— Select —</option>
+          <option>Morning</option><option>Afternoon</option>
+          <option>Evening</option><option>Night</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Meal Type</label>
+        <select class="form-select" id="nf-mealtype">
+          <option value="">— Select —</option>
+          <option>Breakfast</option><option>Lunch</option><option>High Tea</option>
+          <option>Snacks</option><option>Dinner</option><option>Refreshment</option>
+          <option>Full Day</option>
+        </select>
+      </div>
+    </div>
     <div class="form-group"><label class="form-label">Venue</label><input class="form-input" id="nf-venue" placeholder="e.g. Rajpath Club"></div>
     <div class="form-group"><label class="form-label">Notes</label><input class="form-input" id="nf-notes" placeholder="Any special requirements"></div>
     <button class="btn btn-gold" id="saveFunctionBtn" onclick="saveNewFunction()">Add Function</button>
@@ -358,48 +375,40 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);max-width:48
 <!-- Add Items Modal -->
 <div class="modal-overlay" id="modal-addItems">
   <div class="modal">
-    <div class="modal-header"><div class="modal-title">Add Items & Get Quotes</div><button class="modal-close" onclick="closeModal('modal-addItems')">×</button></div>
-    <div class="step-tabs">
-      <button class="step-tab active" onclick="goStep('ai',1,this)">1. Item</button>
-      <button class="step-tab" onclick="goStep('ai',2,this)">2. Qty</button>
-      <button class="step-tab" onclick="goStep('ai',3,this)">3. Vendors</button>
-      <button class="step-tab" onclick="goStep('ai',4,this)">4. Send</button>
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Add Items & Quotes</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px" id="aiModalSubtitle"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal('modal-addItems')">×</button>
     </div>
 
-    <!-- Step 1 — Pick Item -->
-    <div id="ai-step-1">
-      <div class="form-group">
-        <label class="form-label">Search or select item</label>
-        <input class="form-input" id="aiItemSearch" placeholder="Type to search..." oninput="filterItems()">
-      </div>
-      <div id="aiItemChips" style="margin-bottom:14px"></div>
-      <div class="gold-line"></div>
-      <div class="form-group" style="margin-top:12px">
-        <label class="form-label">Or type new item</label>
-        <div style="display:flex;gap:8px">
-          <input class="form-input" id="aiNewItem" placeholder="Item name">
-          <select class="form-select" style="width:120px" id="aiNewCat">
+    <!-- ADD ITEM FORM -->
+    <div id="aiAddForm">
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <div class="form-group" style="flex:1;margin-bottom:0">
+          <label class="form-label">Category</label>
+          <select class="form-select" id="aiCat" onchange="onCatChange()">
+            <option value="">— Select —</option>
             <option>Chaat</option><option>Sweets</option><option>Desserts</option>
             <option>Mains</option><option>Breads</option><option>Farsan</option>
-            <option>Beverages</option><option>Live Counter</option><option>Welcome Drink</option><option>Other</option>
+            <option>Beverages</option><option>Live Counter</option>
+            <option>Welcome Drink</option><option>Other</option>
+          </select>
+        </div>
+        <div class="form-group" style="flex:1;margin-bottom:0">
+          <label class="form-label">Item</label>
+          <select class="form-select" id="aiItemSel" onchange="onItemChange()">
+            <option value="">— Select —</option>
           </select>
         </div>
       </div>
-      <button class="btn btn-gold" onclick="aiStep1Next()">Next →</button>
-    </div>
-
-    <!-- Step 2 — Qty & Unit -->
-    <div id="ai-step-2" style="display:none">
-      <div class="card" style="margin-bottom:16px">
-        <div style="font-size:16px;font-weight:700;color:var(--text)" id="aiSelectedItemName">—</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:3px" id="aiSelectedItemCat">—</div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Quantity</label>
-          <input class="form-input" id="aiQty" type="number" placeholder="e.g. 300">
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <div class="form-group" style="flex:1;margin-bottom:0">
+          <label class="form-label">Qty</label>
+          <input class="form-input" id="aiQty" type="number" placeholder="e.g. 150">
         </div>
-        <div class="form-group">
+        <div class="form-group" style="flex:1;margin-bottom:0">
           <label class="form-label">Unit</label>
           <select class="form-select" id="aiUnit">
             <option>pax</option><option>pcs</option><option>kg</option>
@@ -408,37 +417,35 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);max-width:48
           </select>
         </div>
       </div>
-      <div class="btn-row">
-        <button class="btn btn-outline" onclick="goStep('ai',1,null)">← Back</button>
-        <button class="btn btn-gold" onclick="aiStep2Next()">Next →</button>
+      <!-- Vendor multi-select -->
+      <div class="form-group" style="margin-bottom:8px">
+        <label class="form-label">Vendors <span style="color:var(--muted);font-weight:400">(tap to select multiple)</span></label>
+        <div id="aiVendorChips" style="min-height:36px"></div>
       </div>
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <select class="form-select" id="aiExtraVendor" style="flex:1">
+          <option value="">+ Add other vendor</option>
+        </select>
+        <button onclick="addExtraVendor()" class="btn btn-outline btn-sm" style="width:auto;padding:9px 14px">Add</button>
+      </div>
+      <button class="btn btn-gold" onclick="addItemToList()">+ Add to List</button>
     </div>
 
-    <!-- Step 3 — Select Vendors -->
-    <div id="ai-step-3" style="display:none">
-      <div style="font-size:13px;color:var(--muted);margin-bottom:12px" id="aiVendorContext"></div>
-      <div class="section-label">Vendors who supply this item:</div>
-      <div id="aiVendorChips" style="margin-bottom:14px"></div>
-      <div class="section-label" style="margin-top:12px">Or add any vendor:</div>
-      <select class="form-select" id="aiExtraVendor" style="margin-bottom:14px">
-        <option value="">— Select vendor —</option>
-      </select>
-      <button onclick="addExtraVendor()" class="btn btn-outline btn-sm" style="margin-bottom:14px">+ Add This Vendor</button>
-      <div class="section-label">Selected vendors:</div>
-      <div id="aiSelectedVendors" style="margin-bottom:14px"></div>
-      <div class="btn-row">
-        <button class="btn btn-outline" onclick="goStep('ai',2,null)">← Back</button>
-        <button class="btn btn-gold" onclick="aiStep3Next()">Next →</button>
-      </div>
-    </div>
+    <!-- ITEMS LIST -->
+    <div id="aiItemsList" style="margin-top:16px"></div>
 
-    <!-- Step 4 — Send Quote Requests -->
-    <div id="ai-step-4" style="display:none">
-      <div id="aiQuoteMsgs"></div>
-      <div id="aiSaveMsg" style="margin-top:10px"></div>
-      <button class="btn btn-gold" style="margin-top:14px" onclick="saveAndAddMore()">✓ Save & Add Another Item</button>
-      <button class="btn btn-outline" style="margin-top:8px" onclick="saveAndDone()">✓ Done</button>
+    <!-- SEND BUTTONS -->
+    <div id="aiSendSection" style="display:none;margin-top:16px">
+      <div class="gold-line"></div>
+      <div class="section-label" style="margin-bottom:10px">Send Quote Requests</div>
+      <button class="btn btn-gold" onclick="sendFunctionQuotes()" style="margin-bottom:8px">
+        📤 Send for This Function
+      </button>
+      <button class="btn btn-outline" onclick="sendClientQuotes()">
+        📤 Send for All Functions (Client)
+      </button>
     </div>
+    <div id="aiQuoteMsgs" style="margin-top:10px"></div>
   </div>
 </div>
 
@@ -532,7 +539,6 @@ const STAGE_COLORS = ["","#3B5BDB","#D4500A","#B7900A","#862E62","#553C9A","#C9A
 const STAGE_LABELS = ["","Menu Quote","Vendor Costs","Price Quote","Tasting","Advance & Confirm","Final Orders"];
 const DAYS   = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-const UNITS  = ["pax","pcs","kg","ltr","portion","plate","box","dozen"];
 
 let APP = {
   vendors:[], clients:[], allEvents:[], tasks:[], settings:{}, itemVendors:[],
@@ -540,7 +546,7 @@ let APP = {
   currentEventItems:[], currentEventVendors:[],
   currentUser:"",
   // Add items flow
-  ai:{item:null, qty:"", unit:"pax", selectedVendors:[], savedItems:[]},
+  ai:{pendingItems:[], selectedVendors:[], currentItemVendors:[]},
   _waMsg:"", _waLink:"",
   menuFileName:"", menuAttached:false
 };
@@ -599,16 +605,11 @@ function switchScreen(name, btn){
 }
 
 function onFabClick(){
-  // Determine context
   const fnDetail = document.getElementById("functionDetail");
   const clientDetail = document.getElementById("clientDetail");
-  if(fnDetail && fnDetail.style.display!=="none" && APP.currentEvent){
-    openAddItems();
-  } else if(clientDetail && clientDetail.style.display!=="none" && APP.currentClient){
-    openModal("modal-newFunction");
-  } else {
-    openModal("modal-newClient");
-  }
+  if(fnDetail && fnDetail.style.display!=="none" && APP.currentEvent) openAddItems();
+  else if(clientDetail && clientDetail.style.display!=="none" && APP.currentClient) openModal("modal-newFunction");
+  else openModal("modal-newClient");
 }
 
 function showClientList(){
@@ -617,14 +618,12 @@ function showClientList(){
   document.getElementById("functionDetail").style.display="none";
   document.getElementById("fab").style.display="flex";
 }
-
 function showClientDetail(){
   document.getElementById("clientList").style.display="none";
   document.getElementById("clientDetail").style.display="block";
   document.getElementById("functionDetail").style.display="none";
   document.getElementById("fab").style.display="flex";
 }
-
 function showFunctionDetail(){
   document.getElementById("clientList").style.display="none";
   document.getElementById("clientDetail").style.display="none";
@@ -638,7 +637,6 @@ function setTodayHeader(){
   document.getElementById("todayDay").textContent=DAYS[now.getDay()].toUpperCase();
   document.getElementById("todayDate").textContent=`${now.getDate()} ${MONTHS[now.getMonth()]} ${now.getFullYear()}`;
 }
-
 function renderToday(){
   const tasks=APP.tasks||[];
   const overdue=tasks.filter(t=>t.urgency==="overdue");
@@ -660,7 +658,6 @@ function renderToday(){
   if(!tasks.length)   html=`<div class="empty-state"><div class="icon">✅</div><p>No tasks yet. Add a client to get started.</p></div>`;
   document.getElementById("taskList").innerHTML=html;
 }
-
 function renderTaskSection(label,color,tasks){
   return `<div class="task-section">
     <div class="task-section-head"><div class="task-section-bar" style="background:${color}"></div><div class="task-section-title" style="color:${color}">${label} (${tasks.length})</div></div>
@@ -678,7 +675,6 @@ function renderTaskSection(label,color,tasks){
     </div>`).join("")}
   </div>`;
 }
-
 async function doneTask(rowId,btn){
   btn.textContent="✓";btn.style.color="var(--green)";
   await apiWrite("completeTask",{Row_ID:rowId});
@@ -703,7 +699,8 @@ function renderClients(){
         <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
           ${fns.map(f=>{
             const color=STAGE_COLORS[parseInt(f.Stage)||1];
-            return `<span class="tag" style="background:${color}18;color:${color};border:1px solid ${color}30">${f.Function} · ${f.Date}</span>`;
+            const tod=f.Time_of_Day?` · ${f.Time_of_Day}`:"";
+            return `<span class="tag" style="background:${color}18;color:${color};border:1px solid ${color}30">${f.Function} · ${f.Date}${tod}</span>`;
           }).join("")}
           ${!fns.length?`<span style="font-size:12px;color:var(--muted)">No functions yet</span>`:""}
         </div>
@@ -738,12 +735,14 @@ function renderClientDetail(fns){
       <div class="section-label" style="margin-bottom:0">Functions</div>
       <button class="btn btn-gold btn-sm" style="width:auto;padding:8px 14px" onclick="openModal('modal-newFunction')">+ Add Function</button>
     </div>
-    ${fns.length?fns.map(f=>renderFunctionCard(f)).join(""):`<div class="empty-state"><div class="icon">📅</div><p>No functions yet. Tap + Add Function.</p></div>`}`;
+    ${fns.length?fns.map(f=>renderFunctionCard(f)).join(""):`<div class="empty-state"><div class="icon">📅</div><p>No functions yet.</p></div>`}`;
 }
 
 function renderFunctionCard(f){
   const stage=parseInt(f.Stage)||1;
   const color=STAGE_COLORS[stage]||STAGE_COLORS[1];
+  const tod=f.Time_of_Day?` · ${f.Time_of_Day}`:"";
+  const meal=f.Meal_Type?` · ${f.Meal_Type}`:"";
   return `<div class="fn-card" onclick="openFunction('${f.Event_ID}')">
     <div class="fn-card-left" style="background:${color}"></div>
     <div class="fn-card-inner">
@@ -751,7 +750,7 @@ function renderFunctionCard(f){
         <div class="fn-name">${f.Function}</div>
         <span class="tag" style="background:${color}18;color:${color};border:1px solid ${color}30">Stage ${stage}</span>
       </div>
-      <div class="fn-sub">📅 ${f.Date||"Date TBD"} · 👥 ${f.Pax||0} pax ${f.Venue?"· 📍 "+f.Venue:""}</div>
+      <div class="fn-sub">📅 ${f.Date||"Date TBD"}${tod}${meal} · 👥 ${f.Pax||0} pax${f.Venue?" · 📍 "+f.Venue:""}</div>
     </div>
   </div>`;
 }
@@ -772,39 +771,38 @@ function renderFunctionDetailScreen(){
   const color=STAGE_COLORS[stage]||STAGE_COLORS[1];
   const items=APP.currentEventItems;
   const vendors=APP.currentEventVendors;
+  const tod=ev.Time_of_Day?` · ${ev.Time_of_Day}`:"";
+  const meal=ev.Meal_Type?` · ${ev.Meal_Type}`:"";
 
-  // Group vendors by item
+  // Group vendors by item row
   const vendorsByItem={};
   vendors.forEach(v=>{
-    if(!vendorsByItem[v.Item_Row_ID]) vendorsByItem[v.Item_Row_ID]=[];
+    if(!vendorsByItem[v.Item_Row_ID])vendorsByItem[v.Item_Row_ID]=[];
     vendorsByItem[v.Item_Row_ID].push(v);
   });
 
   const itemsHtml=items.length?items.map(item=>{
-    const itemVendors=vendorsByItem[item.Row_ID]||[];
-    return `<div class="item-row" style="flex-direction:column;align-items:stretch">
+    const iv=vendorsByItem[item.Row_ID]||[];
+    return `<div class="item-row" style="flex-direction:column;align-items:stretch;margin-bottom:10px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
         <div>
           <div class="item-row-name">${item.Item_Name}</div>
           <div class="item-row-sub">${item.Qty} ${item.Unit} · ${item.Category}</div>
         </div>
-        <button onclick="deleteItemRow('${item.Row_ID}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px">×</button>
+        <button onclick="deleteItemRow('${item.Row_ID}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;padding:4px">×</button>
       </div>
-      ${itemVendors.length?`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">
-        ${itemVendors.map(v=>{
+      ${iv.length?`<div style="display:flex;gap:6px;flex-wrap:wrap">
+        ${iv.map(v=>{
           const sc=v.Status==="confirmed"?"var(--green)":v.Status==="quote_pending"?"var(--orange)":"var(--muted)";
-          return `<div onclick="openVendorQuote('${v.Row_ID}')" style="background:var(--card-alt);border:1px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer">
+          return `<div onclick="openVendorQuote('${v.Row_ID}')" style="background:var(--card-alt);border:1px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer;min-width:80px">
             <div style="font-size:12px;font-weight:600;color:var(--text)">${v.Agency_Name}</div>
-            <div style="font-size:11px;color:${sc}">${v.Quoted_Cost||"Quote pending"}</div>
+            <div style="font-size:11px;color:${sc};margin-top:2px">${v.Quoted_Cost||"Pending"}</div>
           </div>`;
         }).join("")}
-      </div>`:
-      `<div style="font-size:12px;color:var(--muted)">No vendors assigned yet</div>`}
+      </div>`:`<div style="font-size:12px;color:var(--muted)">No vendors assigned</div>`}
     </div>`;
-  }).join(""):
-  `<div class="empty-state" style="padding:20px"><div class="icon">🍽️</div><p>No items yet. Tap + to add items and get quotes.</p></div>`;
+  }).join(""):`<div class="empty-state" style="padding:20px"><div class="icon">🍽️</div><p>No items yet. Tap + to add items.</p></div>`;
 
-  // Stage actions
   let actions="";
   if(stage===1) actions+=`<button class="btn btn-gold" onclick="openSendMenu()" style="margin-bottom:8px">📎 Send Menu Quote to Client</button>`;
   if(stage===3) actions+=`<button class="btn btn-gold" onclick="sendPriceQuote()" style="margin-bottom:8px">💰 Send Price Quote to Client</button>`;
@@ -823,18 +821,19 @@ function renderFunctionDetailScreen(){
     </div>
     <div class="card" style="margin-bottom:14px">
       <div style="font-family:var(--serif);font-size:20px;color:var(--text)">${ev.Function}</div>
-      <div style="font-size:13px;color:var(--muted);margin-top:3px">${c?c.Client_Name:""} · ${ev.Date||"Date TBD"} · ${ev.Pax||0} pax ${ev.Venue?"· "+ev.Venue:""}</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:3px">${c?c.Client_Name:""} · 📅 ${ev.Date||"TBD"}${tod}${meal}</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:2px">👥 ${ev.Pax||0} pax${ev.Venue?" · 📍 "+ev.Venue:""}</div>
       <div style="margin-top:10px">
-        <span class="tag" style="background:${color}18;color:${color};border:1px solid ${color}30;font-size:12px">
-          Stage ${stage}: ${STAGE_LABELS[stage]}
-        </span>
+        <span class="tag" style="background:${color}18;color:${color};border:1px solid ${color}30;font-size:12px">Stage ${stage}: ${STAGE_LABELS[stage]}</span>
       </div>
     </div>
     ${actions?`<div style="margin-bottom:14px">${actions}</div>`:""}
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-      <div class="section-label" style="margin-bottom:0">Items & Quote Status</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div class="section-label" style="margin-bottom:0">Items & Quotes (${items.length})</div>
+      <button class="btn btn-gold btn-sm" style="width:auto;padding:8px 14px" onclick="openAddItems()">+ Add Items</button>
     </div>
-    ${itemsHtml}`;
+    <div id="fnItemsList">${itemsHtml}</div>
+    ${items.length?`<button class="btn btn-outline" style="margin-top:8px" onclick="openSendQuotes()">📤 Send Quote Requests</button>`:""}`;
 }
 
 async function goBackToClient(){
@@ -852,230 +851,312 @@ async function deleteItemRow(rowId){
   renderFunctionDetailScreen();
 }
 
-// ── VENDOR QUOTE POPUP ────────────────────────────────────────
+// ── VENDOR QUOTE ──────────────────────────────────────────────
 function openVendorQuote(rowId){
-  const v=APP.currentEventVendors.find(x=>x.Row_ID===rowId);
-  if(!v)return;
+  const v=APP.currentEventVendors.find(x=>x.Row_ID===rowId);if(!v)return;
   const vendor=APP.vendors.find(x=>x.Vendor_ID===v.Vendor_ID);
   const ev=APP.currentEvent;
   const sig=APP.settings.Signature||"UVI Luxury Catering & Decor";
-  const msg=`Dear ${(v.Agency_Name||"").split(" ")[0]},\n\nWe are planning an *${ev.Function}* on *${ev.Date}* (${ev.Pax} pax).\n\nKindly share your best quote for:\n• ${v.Item_Name}\n\nPlease revert at the earliest.\n\n*${sig}*`;
+  const tod=ev.Time_of_Day?` (${ev.Time_of_Day})`:"";
+  const msg=`Dear ${(v.Agency_Name||"").split(" ")[0]},
+
+We are planning an *${ev.Function}${tod}* on *${ev.Date}* (${ev.Pax} pax).
+
+Kindly share your best quote for:
+• ${v.Item_Name}
+
+Please revert at the earliest.
+
+*${sig}*`;
   const wa=vendor?.WhatsApp_Group_Link||(vendor?.Contact_Number?`https://wa.me/91${vendor.Contact_Number}`:"");
-  showWAMsg(msg, wa, `Quote Request → ${v.Agency_Name}`);
+  showWAMsg(msg,wa,`Quote Request → ${v.Agency_Name}`);
 }
 
 // ── ADD ITEMS FLOW ────────────────────────────────────────────
 function openAddItems(){
-  APP.ai={item:null,qty:"",unit:"pax",selectedVendors:[],savedItems:[]};
-  document.getElementById("aiItemSearch").value="";
-  renderItemChips("");
-  populateExtraVendorDropdown();
-  goStep("ai",1,null);
+  APP.ai={pendingItems:[], selectedVendors:[], currentItemVendors:[]};
+  const ev=APP.currentEvent;
+  const tod=ev.Time_of_Day?` · ${ev.Time_of_Day}`:"";
+  const meal=ev.Meal_Type?` · ${ev.Meal_Type}`:"";
+  document.getElementById("aiModalSubtitle").textContent=`${ev.Function} · ${ev.Date}${tod}${meal} · ${ev.Pax} pax`;
+  // Reset form
+  document.getElementById("aiCat").value="";
+  document.getElementById("aiItemSel").innerHTML=`<option value="">— Select —</option>`;
+  document.getElementById("aiQty").value="";
+  document.getElementById("aiUnit").value="pax";
+  document.getElementById("aiVendorChips").innerHTML="";
+  document.getElementById("aiItemsList").innerHTML="";
+  document.getElementById("aiSendSection").style.display="none";
+  document.getElementById("aiQuoteMsgs").innerHTML="";
+  // Populate extra vendor dropdown
+  document.getElementById("aiExtraVendor").innerHTML=
+    `<option value="">+ Add other vendor</option>`+
+    APP.vendors.map(v=>`<option value="${v.Vendor_ID}|${v.Agency_Name}">${v.Agency_Name}</option>`).join("");
   openModal("modal-addItems");
 }
 
-function filterItems(){
-  const q=document.getElementById("aiItemSearch").value.toLowerCase();
-  renderItemChips(q);
-}
-
-function renderItemChips(query){
-  const items=APP.itemVendors.filter(i=>!query||i.Item_Name.toLowerCase().includes(query));
-  // Group by category
-  const cats={};
-  items.forEach(i=>{
-    if(!cats[i.Category])cats[i.Category]=[];
-    cats[i.Category].push(i);
-  });
-  let html="";
-  Object.entries(cats).forEach(([cat,citems])=>{
-    html+=`<div style="font-size:10px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin:8px 0 4px">${cat}</div>`;
-    html+=citems.map(i=>`<span class="chip ${APP.ai.item?.Item_Name===i.Item_Name?"selected":""}" onclick="selectItem('${i.Item_Name}','${i.Category}')">${i.Item_Name}</span>`).join("");
-  });
-  if(!html) html=`<div style="font-size:13px;color:var(--muted);padding:10px 0">No items found. Type below to add new.</div>`;
-  document.getElementById("aiItemChips").innerHTML=html;
-}
-
-function selectItem(name,cat){
-  APP.ai.item={Item_Name:name,Category:cat};
-  renderItemChips(document.getElementById("aiItemSearch").value.toLowerCase());
-}
-
-function aiStep1Next(){
-  // Check if item selected from chips or typed
-  const typed=document.getElementById("aiNewItem").value.trim();
-  if(!APP.ai.item&&!typed){alert("Please select or type an item.");return;}
-  if(typed){
-    APP.ai.item={Item_Name:typed,Category:document.getElementById("aiNewCat").value};
-  }
-  document.getElementById("aiSelectedItemName").textContent=APP.ai.item.Item_Name;
-  document.getElementById("aiSelectedItemCat").textContent=APP.ai.item.Category;
-  goStep("ai",2,null);
-}
-
-function aiStep2Next(){
-  const qty=document.getElementById("aiQty").value.trim();
-  if(!qty){alert("Please enter quantity.");return;}
-  APP.ai.qty=qty;
-  APP.ai.unit=document.getElementById("aiUnit").value;
-  // Load vendors for this item
+function onCatChange(){
+  const cat=document.getElementById("aiCat").value;
+  const items=APP.itemVendors.filter(i=>!cat||i.Category===cat);
+  const sel=document.getElementById("aiItemSel");
+  sel.innerHTML=`<option value="">— Select item —</option>`+
+    items.map(i=>`<option value="${i.Item_Name}">${i.Item_Name}</option>`).join("");
+  // Add "Other" option
+  sel.innerHTML+=`<option value="__other__">Other (type below)</option>`;
+  document.getElementById("aiVendorChips").innerHTML="";
   APP.ai.selectedVendors=[];
-  const itemData=APP.itemVendors.find(i=>i.Item_Name===APP.ai.item.Item_Name);
-  APP.ai.itemVendorList=itemData?itemData.Vendors:[];
-  document.getElementById("aiVendorContext").textContent=`${APP.ai.item.Item_Name} — ${APP.ai.qty} ${APP.ai.unit}`;
-  renderAiVendorChips();
-  goStep("ai",3,null);
 }
 
-function renderAiVendorChips(){
-  const list=APP.ai.itemVendorList||[];
+function onItemChange(){
+  const itemName=document.getElementById("aiItemSel").value;
+  if(!itemName||itemName==="__other__"){
+    document.getElementById("aiVendorChips").innerHTML="";
+    return;
+  }
+  // Load vendors for this item
+  const itemData=APP.itemVendors.find(i=>i.Item_Name===itemName);
+  APP.ai.currentItemVendors=itemData?itemData.Vendors:[];
+  APP.ai.selectedVendors=[];
+  renderVendorChips();
+}
+
+function renderVendorChips(){
+  const list=APP.ai.currentItemVendors;
   if(!list.length){
-    document.getElementById("aiVendorChips").innerHTML=`<div style="font-size:13px;color:var(--muted)">No standard vendors on file for this item. Select from dropdown below.</div>`;
+    document.getElementById("aiVendorChips").innerHTML=`<div style="font-size:12px;color:var(--muted)">No standard vendors. Use dropdown below.</div>`;
     return;
   }
   document.getElementById("aiVendorChips").innerHTML=list.map(name=>{
     const sel=APP.ai.selectedVendors.some(v=>v.name===name);
-    return `<span class="chip ${sel?"selected":""}" onclick="toggleAiVendor('${name.replace(/'/g,"\\'")}')">
-      ${sel?"✓ ":""}${name}
-    </span>`;
+    return `<span class="chip ${sel?"selected":""}" onclick="toggleVendorChip('${name.replace(/'/g,"\'")}')">${sel?"✓ ":""}${name}</span>`;
   }).join("");
 }
 
-function toggleAiVendor(name){
+function toggleVendorChip(name){
   const idx=APP.ai.selectedVendors.findIndex(v=>v.name===name);
   if(idx>=0) APP.ai.selectedVendors.splice(idx,1);
   else {
     const vendor=APP.vendors.find(v=>v.Agency_Name===name);
-    APP.ai.selectedVendors.push({name, vendor_id:vendor?.Vendor_ID||"", vendor});
+    APP.ai.selectedVendors.push({name,vendor_id:vendor?.Vendor_ID||"",vendor});
   }
-  renderAiVendorChips();
-  renderAiSelectedVendors();
-}
-
-function populateExtraVendorDropdown(){
-  const el=document.getElementById("aiExtraVendor");
-  el.innerHTML=`<option value="">— Select vendor —</option>`+
-    APP.vendors.map(v=>`<option value="${v.Vendor_ID}">${v.Agency_Name}</option>`).join("");
+  renderVendorChips();
 }
 
 function addExtraVendor(){
-  const sel=document.getElementById("aiExtraVendor");
-  const vendorId=sel.value;
-  if(!vendorId)return;
-  const vendor=APP.vendors.find(v=>v.Vendor_ID===vendorId);
-  if(!vendor)return;
-  if(!APP.ai.selectedVendors.some(v=>v.vendor_id===vendorId)){
-    APP.ai.selectedVendors.push({name:vendor.Agency_Name,vendor_id:vendorId,vendor});
-    renderAiVendorChips();
-    renderAiSelectedVendors();
+  const val=document.getElementById("aiExtraVendor").value;
+  if(!val)return;
+  const [vendor_id,name]=val.split("|");
+  if(!APP.ai.selectedVendors.some(v=>v.vendor_id===vendor_id)){
+    const vendor=APP.vendors.find(v=>v.Vendor_ID===vendor_id);
+    APP.ai.selectedVendors.push({name,vendor_id,vendor});
+    // Add to chips list if not there
+    if(!APP.ai.currentItemVendors.includes(name)) APP.ai.currentItemVendors.push(name);
+    renderVendorChips();
   }
-  sel.value="";
+  document.getElementById("aiExtraVendor").value="";
 }
 
-function renderAiSelectedVendors(){
-  const el=document.getElementById("aiSelectedVendors");
-  if(!APP.ai.selectedVendors.length){
-    el.innerHTML=`<div style="font-size:13px;color:var(--muted)">None selected yet</div>`;
+function addItemToList(){
+  let itemName=document.getElementById("aiItemSel").value;
+  let itemCat=document.getElementById("aiCat").value||"Other";
+  // Handle "other"
+  if(itemName==="__other__"){
+    itemName=prompt("Enter item name:");
+    if(!itemName)return;
+  }
+  if(!itemName){alert("Please select an item.");return;}
+  const qty=document.getElementById("aiQty").value.trim();
+  if(!qty){alert("Please enter quantity.");return;}
+  if(!APP.ai.selectedVendors.length){alert("Please select at least one vendor.");return;}
+  const unit=document.getElementById("aiUnit").value;
+
+  APP.ai.pendingItems.push({
+    itemName, itemCat, qty, unit,
+    vendors:[...APP.ai.selectedVendors]
+  });
+
+  renderPendingItems();
+
+  // Reset form for next item
+  document.getElementById("aiCat").value="";
+  document.getElementById("aiItemSel").innerHTML=`<option value="">— Select —</option><option value="__other__">Other (type below)</option>`;
+  document.getElementById("aiQty").value="";
+  document.getElementById("aiVendorChips").innerHTML="";
+  APP.ai.selectedVendors=[];
+  APP.ai.currentItemVendors=[];
+
+  if(APP.ai.pendingItems.length>0){
+    document.getElementById("aiSendSection").style.display="block";
+  }
+}
+
+function renderPendingItems(){
+  const items=APP.ai.pendingItems;
+  if(!items.length){
+    document.getElementById("aiItemsList").innerHTML="";
     return;
   }
-  el.innerHTML=APP.ai.selectedVendors.map((v,i)=>`
-    <div class="sel-item">
-      <div><div class="sel-item-name">${v.name}</div></div>
-      <button class="remove-btn" onclick="removeAiVendor(${i})">×</button>
+  document.getElementById("aiItemsList").innerHTML=`
+    <div class="section-label" style="margin-bottom:8px">Items to save (${items.length}):</div>`+
+    items.map((item,i)=>`
+    <div class="sel-item" style="flex-direction:column;align-items:stretch">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div class="sel-item-name">${item.itemName}</div>
+          <div class="sel-item-sub">${item.qty} ${item.unit} · ${item.vendors.map(v=>v.name).join(", ")}</div>
+        </div>
+        <button class="remove-btn" onclick="removePendingItem(${i})">×</button>
+      </div>
     </div>`).join("");
 }
 
-function removeAiVendor(i){
-  APP.ai.selectedVendors.splice(i,1);
-  renderAiVendorChips();
-  renderAiSelectedVendors();
+function removePendingItem(i){
+  APP.ai.pendingItems.splice(i,1);
+  renderPendingItems();
+  if(!APP.ai.pendingItems.length) document.getElementById("aiSendSection").style.display="none";
 }
 
-function aiStep3Next(){
-  if(!APP.ai.selectedVendors.length){alert("Please select at least one vendor.");return;}
-  buildQuoteMsgs();
-  goStep("ai",4,null);
+// ── SEND QUOTES ───────────────────────────────────────────────
+async function sendFunctionQuotes(){
+  await saveAllPendingItems();
+  buildAndShowQuoteMsgs([APP.currentEvent]);
 }
 
-function buildQuoteMsgs(){
+async function sendClientQuotes(){
+  await saveAllPendingItems();
+  const clientFns=APP.allEvents.filter(e=>e.Client_ID===APP.currentClient.Client_ID);
+  buildAndShowQuoteMsgs(clientFns);
+}
+
+async function saveAllPendingItems(){
   const ev=APP.currentEvent;
+  for(const item of APP.ai.pendingItems){
+    const itemRes=await apiWrite("addEventItem",{
+      Event_ID:ev.Event_ID, Item_Name:item.itemName,
+      Category:item.itemCat, Qty:item.qty, Unit:item.unit
+    });
+    if(itemRes.success){
+      for(const v of item.vendors){
+        await apiWrite("addEventVendor",{
+          Event_ID:ev.Event_ID, Item_Row_ID:itemRes.Row_ID,
+          Vendor_ID:v.vendor_id, Agency_Name:v.name, Item_Name:item.itemName
+        });
+      }
+    }
+  }
+  APP.ai.pendingItems=[];
+  // Refresh
+  APP.currentEventItems=await apiGet("getEventItems","&event_id="+ev.Event_ID);
+  APP.currentEventVendors=await apiGet("getEventVendors","&event_id="+ev.Event_ID);
+}
+
+async function buildAndShowQuoteMsgs(functions){
   const sig=APP.settings.Signature||"UVI Luxury Catering & Decor";
-  const item=APP.ai.item;
-  const qty=APP.ai.qty;
-  const unit=APP.ai.unit;
-  let html="";
-  APP.ai.selectedVendors.forEach((v,i)=>{
-    const msg=`Dear ${v.name.split(" ")[0]},\n\nWe are planning an *${ev.Function}* on *${ev.Date}* (${ev.Pax} pax).\n\nKindly share your best quote for:\n• ${item.Item_Name} — ${qty} ${unit}\n\nPlease revert at the earliest.\n\n*${sig}*`;
-    APP.ai.selectedVendors[i].msg=msg;
-    const wa=v.vendor?.WhatsApp_Group_Link||(v.vendor?.Contact_Number?`https://wa.me/91${v.vendor.Contact_Number}`:"");
-    APP.ai.selectedVendors[i].wa=wa;
-    html+=`<div class="card" style="margin-bottom:10px">
+  // Load all items and vendors for each function
+  const vendorMap={}; // vendor_id → {vendor, items:[{fn, itemName, qty, unit}]}
+
+  for(const fn of functions){
+    const items=await apiGet("getEventItems","&event_id="+fn.Event_ID);
+    const vendors=await apiGet("getEventVendors","&event_id="+fn.Event_ID);
+    const itemMap={};
+    items.forEach(i=>itemMap[i.Row_ID]=i);
+    vendors.forEach(v=>{
+      if(!vendorMap[v.Agency_Name]) vendorMap[v.Agency_Name]={vendor:APP.vendors.find(x=>x.Vendor_ID===v.Vendor_ID),items:[]};
+      const item=itemMap[v.Item_Row_ID];
+      if(item) vendorMap[v.Agency_Name].items.push({
+        fn:fn.Function, date:fn.Date, tod:fn.Time_of_Day||"", meal:fn.Meal_Type||"",
+        pax:fn.Pax, itemName:item.Item_Name, qty:item.Qty, unit:item.Unit
+      });
+    });
+  }
+
+  // Build one message per vendor
+  let html="<div class='section-label' style='margin-bottom:10px'>Quote Requests — one per vendor:</div>";
+  const vendorEntries=Object.entries(vendorMap);
+  if(!vendorEntries.length){
+    document.getElementById("aiQuoteMsgs").innerHTML=`<div class="error-box"><div class="title">No vendor assignments found.</div></div>`;
+    return;
+  }
+
+  vendorEntries.forEach(([agencyName,{vendor,items}],idx)=>{
+    // Group items by function
+    const fnGroups={};
+    items.forEach(i=>{
+      const key=`${i.fn}|${i.date}|${i.tod}|${i.pax}`;
+      if(!fnGroups[key])fnGroups[key]={fn:i.fn,date:i.date,tod:i.tod,pax:i.pax,items:[]};
+      fnGroups[key].items.push(`• ${i.itemName} — ${i.qty} ${i.unit}`);
+    });
+
+    let msgBody=`Dear ${agencyName.split(" ")[0]},
+
+We request your best quote for the following:
+`;
+    Object.values(fnGroups).forEach(g=>{
+      const tod=g.tod?` (${g.tod})`:"";
+      msgBody+=`
+*${g.fn}${tod} — ${g.date} — ${g.pax} pax*
+${g.items.join("
+")}
+`;
+    });
+    msgBody+=`
+Kindly revert at the earliest.
+
+*${sig}*`;
+
+    const wa=vendor?.WhatsApp_Group_Link||(vendor?.Contact_Number?`https://wa.me/91${vendor.Contact_Number}`:"");
+
+    html+=`<div class="card" style="margin-bottom:12px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <strong style="font-size:14px">${v.name}</strong>
-        <span id="qsent_${i}" style="font-size:11px;color:var(--muted)"></span>
+        <strong style="font-size:14px">${agencyName}</strong>
+        <span style="font-size:11px;color:var(--muted)">${items.length} item(s)</span>
       </div>
-      <div class="wa-preview">${msg}</div>
+      <div class="wa-preview" id="qmsg_${idx}">${msgBody}</div>
       <div style="display:flex;gap:8px">
-        <button class="btn btn-gold btn-sm" style="flex:2" onclick="sendQuoteMsg(${i})">📋 Copy + WhatsApp</button>
-        <button id="qmark_${i}" onclick="markQuoteSent(${i})" style="flex:1;padding:9px;border-radius:10px;cursor:pointer;font-family:var(--sans);font-size:12px;border:1.5px solid var(--border);background:var(--card-alt);color:var(--muted)">Mark Sent</button>
+        <button class="btn btn-gold btn-sm" style="flex:2" onclick="showQuoteWA(${idx},'${agencyName.replace(/'/g,"\'")}','${(wa||'').replace(/'/g,"\'")}')">📋 Copy + WhatsApp</button>
+        <button id="qmark_${idx}" onclick="markQSent(${idx})" style="flex:1;padding:9px;border-radius:10px;cursor:pointer;font-family:var(--sans);font-size:12px;border:1.5px solid var(--border);background:var(--card-alt);color:var(--muted)">Mark Sent</button>
       </div>
     </div>`;
+    // Store for copy
+    window[`_qmsg_${idx}`]=msgBody;
+    window[`_qwa_${idx}`]=wa;
   });
+
   document.getElementById("aiQuoteMsgs").innerHTML=html;
+  // Scroll to messages
+  document.getElementById("aiQuoteMsgs").scrollIntoView({behavior:"smooth"});
 }
 
-function sendQuoteMsg(i){
-  const v=APP.ai.selectedVendors[i];
-  showWAMsg(v.msg,v.wa,`Quote Request → ${v.name}`);
+function showQuoteWA(idx,name,wa){
+  const msg=window[`_qmsg_${idx}`]||"";
+  showWAMsg(msg,wa,`Quote Request → ${name}`);
 }
 
-function markQuoteSent(i){
-  const btn=document.getElementById(`qmark_${i}`);
-  const tag=document.getElementById(`qsent_${i}`);
+function markQSent(idx){
+  const btn=document.getElementById(`qmark_${idx}`);
   btn.textContent="✓ Sent";btn.style.background="#E8F5E9";btn.style.color="var(--green)";btn.style.borderColor="var(--green)";
-  tag.textContent="✓ Sent";tag.style.color="var(--green)";
 }
 
-async function saveAndAddMore(){
-  await saveCurrentItem();
-  APP.ai={item:null,qty:"",unit:"pax",selectedVendors:[],savedItems:APP.ai.savedItems};
-  document.getElementById("aiItemSearch").value="";
-  document.getElementById("aiNewItem").value="";
-  renderItemChips("");
-  goStep("ai",1,null);
-}
-
-async function saveAndDone(){
-  await saveCurrentItem();
-  await refreshFunctionData();
-  closeModal("modal-addItems");
-}
-
-async function saveCurrentItem(){
+// Also expose openSendQuotes from function detail
+function openSendQuotes(){
+  APP.ai={pendingItems:[],selectedVendors:[],currentItemVendors:[]};
   const ev=APP.currentEvent;
-  const item=APP.ai.item;
-  if(!item)return;
-  // Save item to EVENT_ITEMS
-  const itemRes=await apiWrite("addEventItem",{
-    Event_ID:ev.Event_ID, Item_Name:item.Item_Name,
-    Category:item.Category, Qty:APP.ai.qty, Unit:APP.ai.unit
-  });
-  if(itemRes.success){
-    // Save each vendor to EVENT_VENDORS
-    for(const v of APP.ai.selectedVendors){
-      await apiWrite("addEventVendor",{
-        Event_ID:ev.Event_ID, Item_Row_ID:itemRes.Row_ID,
-        Vendor_ID:v.vendor_id, Agency_Name:v.name, Item_Name:item.Item_Name
-      });
-    }
-    document.getElementById("aiSaveMsg").innerHTML=`<div class="success-box"><div class="title">✓ ${item.Item_Name} saved with ${APP.ai.selectedVendors.length} vendor(s)</div></div>`;
-  }
-}
-
-async function refreshFunctionData(){
-  APP.currentEventItems=await apiGet("getEventItems","&event_id="+APP.currentEvent.Event_ID);
-  APP.currentEventVendors=await apiGet("getEventVendors","&event_id="+APP.currentEvent.Event_ID);
-  renderFunctionDetailScreen();
+  const tod=ev.Time_of_Day?` · ${ev.Time_of_Day}`:"";
+  const meal=ev.Meal_Type?` · ${ev.Meal_Type}`:"";
+  document.getElementById("aiModalSubtitle").textContent=`${ev.Function} · ${ev.Date}${tod}${meal} · ${ev.Pax} pax`;
+  document.getElementById("aiItemsList").innerHTML="";
+  document.getElementById("aiQuoteMsgs").innerHTML="";
+  document.getElementById("aiSendSection").style.display="block";
+  document.getElementById("aiCat").value="";
+  document.getElementById("aiItemSel").innerHTML=`<option value="">— Select —</option><option value="__other__">Other (type below)</option>`;
+  document.getElementById("aiQty").value="";
+  document.getElementById("aiVendorChips").innerHTML="";
+  document.getElementById("aiExtraVendor").innerHTML=
+    `<option value="">+ Add other vendor</option>`+
+    APP.vendors.map(v=>`<option value="${v.Vendor_ID}|${v.Agency_Name}">${v.Agency_Name}</option>`).join("");
+  openModal("modal-addItems");
+  // Build messages for existing items immediately
+  buildAndShowQuoteMsgs([APP.currentEvent]);
 }
 
 // ── NEW CLIENT ────────────────────────────────────────────────
@@ -1093,8 +1174,7 @@ async function saveNewClient(){
   });
   if(res.success){
     document.getElementById("newClientMsg").innerHTML=`<div class="success-box"><div class="title">✓ Client Added</div></div>`;
-    await loadClients(); await loadAllEvents();
-    renderClients();
+    await loadClients();await loadAllEvents();renderClients();
     setTimeout(()=>{closeModal("modal-newClient");document.getElementById("newClientMsg").innerHTML="";},1200);
   }
   btn.textContent="Create Client";btn.disabled=false;
@@ -1112,13 +1192,14 @@ async function saveNewFunction(){
     Date:document.getElementById("nf-date").value,
     Pax:document.getElementById("nf-pax").value||0,
     Venue:document.getElementById("nf-venue").value,
+    Time_of_Day:document.getElementById("nf-timeofday").value,
+    Meal_Type:document.getElementById("nf-mealtype").value,
     Notes:document.getElementById("nf-notes").value,
     Stage:1
   });
   if(res.success){
     document.getElementById("newFunctionMsg").innerHTML=`<div class="success-box"><div class="title">✓ Function Added</div><div class="sub">Tasks auto-generated.</div></div>`;
-    await loadAllEvents(); await loadTasks();
-    renderToday();
+    await loadAllEvents();await loadTasks();renderToday();
     const fns=APP.allEvents.filter(e=>e.Client_ID===APP.currentClient.Client_ID);
     renderClientDetail(fns);
     setTimeout(()=>{closeModal("modal-newFunction");document.getElementById("newFunctionMsg").innerHTML="";},1200);
@@ -1130,11 +1211,12 @@ async function saveNewFunction(){
 function editFunction(){
   document.getElementById("fnDropdown").classList.remove("open");
   const ev=APP.currentEvent;
-  // Pre-fill and open modal
   document.getElementById("nf-function").value=ev.Function||"Haldi";
   document.getElementById("nf-date").value=ev.Date||"";
   document.getElementById("nf-pax").value=ev.Pax||"";
   document.getElementById("nf-venue").value=ev.Venue||"";
+  document.getElementById("nf-timeofday").value=ev.Time_of_Day||"";
+  document.getElementById("nf-mealtype").value=ev.Meal_Type||"";
   document.getElementById("nf-notes").value=ev.Notes||"";
   const btn=document.getElementById("saveFunctionBtn");
   btn.textContent="Save Changes";
@@ -1151,6 +1233,8 @@ async function saveEditFunction(){
     Date:document.getElementById("nf-date").value,
     Pax:document.getElementById("nf-pax").value,
     Venue:document.getElementById("nf-venue").value,
+    Time_of_Day:document.getElementById("nf-timeofday").value,
+    Meal_Type:document.getElementById("nf-mealtype").value,
     Notes:document.getElementById("nf-notes").value
   });
   await loadAllEvents();
@@ -1174,7 +1258,7 @@ function updateFunctionStage(){
 
 async function cancelFunction(){
   document.getElementById("fnDropdown").classList.remove("open");
-  if(!confirm(`Cancel ${APP.currentEvent.Function} for ${APP.currentClient?.Client_Name}? Record will be kept.`))return;
+  if(!confirm(`Cancel ${APP.currentEvent.Function}? Record will be kept.`))return;
   await apiWrite("updateEvent",{Event_ID:APP.currentEvent.Event_ID,Stage:0});
   await loadAllEvents();
   goBackToClient();
@@ -1187,29 +1271,37 @@ function openSendMenu(){
   document.getElementById("menuAttachText").textContent="Tap to attach menu PDF";
   goStep("menu",1,null);updateMenuPreview();openModal("modal-sendMenu");
 }
-
 function menuAttachClick(){
   APP.menuAttached=true;
   APP.menuFileName=`${APP.currentClient?.Client_Name.replace(/ /g,"_")}_${APP.currentEvent?.Function}_Menu.pdf`;
   document.getElementById("menuAttachIcon").textContent="📎";
   document.getElementById("menuAttachText").textContent=APP.menuFileName;
 }
-
 function updateMenuPreview(){
   const ev=APP.currentEvent;const c=APP.currentClient;if(!ev)return;
   const note=document.getElementById("menuNote")?.value||"";
   const meal=document.getElementById("menuMeal")?.value||"";
   const ver=document.getElementById("menuVersion")?.value||"V1";
   const sig=APP.settings.Signature||"UVI Luxury Catering & Decor";
-  APP._menuMsg=`Dear ${(c?.Client_Name||"").split(" ")[0]},\n\nPlease find attached the menu proposal for your *${ev.Function}*.\n\n📅 Date: ${ev.Date}\n👥 Guests: ${ev.Pax} pax\n🍽️ Meal: ${meal} (${ver})\n\n${note}\n\nWarm regards,\n*${sig}*`;
+  const tod=ev.Time_of_Day?` (${ev.Time_of_Day})`:"";
+  APP._menuMsg=`Dear ${(c?.Client_Name||"").split(" ")[0]},
+
+Please find attached the menu proposal for your *${ev.Function}${tod}*.
+
+📅 Date: ${ev.Date}
+👥 Guests: ${ev.Pax} pax
+🍽️ Meal: ${meal} (${ver})
+
+${note}
+
+Warm regards,
+*${sig}*`;
   const el=document.getElementById("menuWAPreview");if(el)el.textContent=APP._menuMsg;
 }
-
 function copyMenuMsg(){
   fallbackCopyStr(APP._menuMsg||"");
   document.getElementById("copyMenuBtn").textContent="✓ Copied!";
 }
-
 async function markMenuSent(){
   const res=await apiWrite("addMenuSent",{
     Event_ID:APP.currentEvent.Event_ID,
@@ -1231,7 +1323,19 @@ async function markMenuSent(){
 function sendPriceQuote(){
   const ev=APP.currentEvent;const c=APP.currentClient;
   const sig=APP.settings.Signature||"UVI Luxury Catering & Decor";
-  const msg=`Dear ${(c?.Client_Name||"").split(" ")[0]},\n\nPlease find our *Final Price Quote* for your ${ev.Function}.\n\n📅 Date: ${ev.Date}\n👥 Guests: ${ev.Pax} pax\n\nThis includes full coordination, setup & our quality guarantee. Valid for 48 hours.\n\nKindly confirm to proceed.\n\n*${sig}*`;
+  const tod=ev.Time_of_Day?` (${ev.Time_of_Day})`:"";
+  const msg=`Dear ${(c?.Client_Name||"").split(" ")[0]},
+
+Please find our *Final Price Quote* for your ${ev.Function}${tod}.
+
+📅 Date: ${ev.Date}
+👥 Guests: ${ev.Pax} pax
+
+This includes full coordination, setup & our quality guarantee. Valid for 48 hours.
+
+Kindly confirm to proceed.
+
+*${sig}*`;
   showWAMsg(msg,"",`Price Quote → ${c?.Client_Name}`);
 }
 
@@ -1259,16 +1363,13 @@ function renderVendors(){
     </div>
   </div>`).join("");
 }
-
 function setVendorFilter(f){vendorFilter=f;renderVendors();}
-
 function openVendorWA(vendorId){
   const v=APP.vendors.find(x=>x.Vendor_ID===vendorId);if(!v)return;
   const wa=v.WhatsApp_Group_Link||(v.Contact_Number?`https://wa.me/91${v.Contact_Number}`:"");
   if(wa)window.open(wa,"_blank");
   else alert("No WhatsApp contact found.");
 }
-
 async function saveNewVendor(){
   const name=document.getElementById("av-name").value.trim();if(!name){alert("Agency name required");return;}
   const res=await apiWrite("addVendor",{
@@ -1293,23 +1394,12 @@ function showWAMsg(msg,waLink,recipientLabel){
   document.getElementById("copyWABtn").textContent="📋 Copy Message";
   openModal("modal-waMsg");
 }
-
-function copyWAMsg(){
-  fallbackCopyStr(APP._waMsg);
-  document.getElementById("copyWABtn").textContent="✓ Copied!";
-}
-
-function openWALink(){
-  if(APP._waLink)window.open(APP._waLink,"_blank");
-  else alert("No WhatsApp link. Open WhatsApp manually.");
-}
-
+function copyWAMsg(){fallbackCopyStr(APP._waMsg);document.getElementById("copyWABtn").textContent="✓ Copied!";}
+function openWALink(){if(APP._waLink)window.open(APP._waLink,"_blank");else alert("No WhatsApp link. Open manually.");}
 function fallbackCopyStr(text){
-  if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(text).catch(()=>execCopy(text));
-  } else execCopy(text);
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).catch(()=>execCopy(text));}
+  else execCopy(text);
 }
-
 function execCopy(text){
   const ta=document.createElement("textarea");ta.value=text;ta.style.position="fixed";ta.style.opacity="0";
   document.body.appendChild(ta);ta.focus();ta.select();
@@ -1336,6 +1426,6 @@ function toggleDropdown(btn){
 // ── MODALS ────────────────────────────────────────────────────
 function openModal(id){document.getElementById(id).classList.add("open");}
 function closeModal(id){document.getElementById(id).classList.remove("open");}
-</script>
+
 </body>
 </html>
