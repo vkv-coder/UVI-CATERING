@@ -408,7 +408,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);max-width:48
     <div class="modal-header">
       <div>
         <div class="modal-title">Add Items & Quotes</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:2px" id="aiModalSubtitle"></div>
+        <div style="font-size:13px;color:var(--gold);font-weight:600;margin-top:3px" id="aiModalSubtitle"></div>
       </div>
       <button class="modal-close" onclick="closeModal('modal-addItems')">×</button>
     </div>
@@ -489,7 +489,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);max-width:48
       <div id="aiAllItemsSummary" style="margin-bottom:14px"></div>
       <div class="gold-line"></div>
       <div class="section-label" style="margin:10px 0">Send Quote Requests</div>
-      <button class="btn btn-gold" onclick="sendFunctionQuotes()" style="margin-bottom:8px">
+      <button class="btn btn-gold" onclick="sendFunctionQuotes()" style="margin-bottom:8px" id="btnSendThisFn">
         📤 Send for This Function
       </button>
       <button class="btn btn-outline" onclick="sendClientQuotes()" style="margin-bottom:8px">
@@ -946,7 +946,7 @@ function openAddItems(){
   const ev=APP.currentEvent;
   const tod=ev.Time_of_Day?` · ${ev.Time_of_Day}`:"";
   const meal=ev.Meal_Type?` · ${ev.Meal_Type}`:"";
-  document.getElementById("aiModalSubtitle").textContent=`${ev.Function} · ${ev.Date}${tod}${meal} · ${ev.Pax} pax`;
+  document.getElementById("aiModalSubtitle").innerHTML=`<span style="font-size:15px;font-weight:700">${ev.Function}</span> &nbsp;·&nbsp; ${ev.Date}${tod}${meal} &nbsp;·&nbsp; ${ev.Pax} pax`;
   // Populate extra vendor dropdown
   document.getElementById("aiExtraVendor").innerHTML=
     `<option value="">+ Add other vendor</option>`+
@@ -1155,6 +1155,9 @@ function removePendingItem(i){
 }
 
 function aiShowSendSection(){
+  // Update send button label with function name
+  const fnBtn=document.getElementById("btnSendThisFn");
+  if(fnBtn && APP.currentEvent) fnBtn.textContent="📤 Send for "+APP.currentEvent.Function+" only";
   // Show summary of all items
   const el=document.getElementById("aiAllItemsSummary");
   const byCat={};
@@ -1177,14 +1180,18 @@ function aiShowSendSection(){
 
 // -- SEND QUOTES -----------------------------------------------
 async function sendFunctionQuotes(){
+  showToast("Saving & building messages...", 10000);
   await saveAllPendingItems();
-  buildAndShowQuoteMsgs([APP.currentEvent]);
+  aiShowStep(3);
+  await buildAndShowQuoteMsgs([APP.currentEvent]);
 }
 
 async function sendClientQuotes(){
+  showToast("Saving & building messages...", 10000);
   await saveAllPendingItems();
   const clientFns=APP.allEvents.filter(function(e){ return e.Client_ID===APP.currentClient.Client_ID; });
-  buildAndShowQuoteMsgs(clientFns);
+  aiShowStep(3);
+  await buildAndShowQuoteMsgs(clientFns);
 }
 
 async function saveAllPendingItems(){
@@ -1212,6 +1219,8 @@ async function saveAllPendingItems(){
 
 
 async function buildAndShowQuoteMsgs(functions){
+  const el=document.getElementById("aiQuoteMsgs");
+  el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted)">Building messages...</div>';
   const sig=APP.settings.Signature||"UVI Luxury Catering & Decor";
   const vendorMap={};
   for(const fn of functions){
@@ -1220,15 +1229,16 @@ async function buildAndShowQuoteMsgs(functions){
     const itemMap={};
     items.forEach(i=>itemMap[i.Row_ID]=i);
     vendors.forEach(v=>{
-      if(!vendorMap[v.Agency_Name]) vendorMap[v.Agency_Name]={vendor:APP.vendors.find(x=>x.Vendor_ID===v.Vendor_ID),items:[]};
       const item=itemMap[v.Item_Row_ID];
-      if(item) vendorMap[v.Agency_Name].items.push({fn:fn.Function,date:fn.Date,tod:fn.Time_of_Day||"",pax:fn.Pax,itemName:item.Item_Name,qty:item.Qty,unit:item.Unit});
+      if(!item) return; // skip orphaned vendor rows — THIS is the fix for 0 item vendors
+      if(!vendorMap[v.Agency_Name]) vendorMap[v.Agency_Name]={vendor:APP.vendors.find(x=>x.Vendor_ID===v.Vendor_ID),items:[]};
+      vendorMap[v.Agency_Name].items.push({fn:fn.Function,date:fn.Date,tod:fn.Time_of_Day||"",pax:fn.Pax,itemName:item.Item_Name,qty:item.Qty,unit:item.Unit});
     });
   }
-  document.getElementById("aiQuoteMsgs").innerHTML="";
+  el.innerHTML="";
   const vendorEntries=Object.entries(vendorMap);
   if(!vendorEntries.length){
-    document.getElementById("aiQuoteMsgs").innerHTML='<div class="error-box"><div class="title">No vendor assignments found. Add items first.</div></div>';
+    el.innerHTML='<div class="error-box"><div class="title">No vendor assignments found. Add items first.</div></div>';
     return;
   }
   vendorEntries.forEach(([agencyName,{vendor,items}],idx)=>{
@@ -1295,23 +1305,17 @@ function markQSent(idx){
 
 // Also expose openSendQuotes from function detail
 function openSendQuotes(){
-  APP.ai={pendingItems:[],selectedVendors:[],currentItemVendors:[]};
+  APP.ai={pendingItems:[],selectedVendors:[],currentItemVendors:[],activeCat:""};
   const ev=APP.currentEvent;
   const tod=ev.Time_of_Day?` · ${ev.Time_of_Day}`:"";
   const meal=ev.Meal_Type?` · ${ev.Meal_Type}`:"";
-  document.getElementById("aiModalSubtitle").textContent=`${ev.Function} · ${ev.Date}${tod}${meal} · ${ev.Pax} pax`;
-  document.getElementById("aiItemsList").innerHTML="";
-  document.getElementById("aiQuoteMsgs").innerHTML="";
-  document.getElementById("aiSendSection").style.display="block";
-  document.getElementById("aiCat").value="";
-  document.getElementById("aiItemSel").innerHTML=`<option value="">— Select —</option><option value="__other__">Other (type below)</option>`;
-  document.getElementById("aiQty").value="";
-  document.getElementById("aiVendorChips").innerHTML="";
+  document.getElementById("aiModalSubtitle").innerHTML=`<span style="font-size:15px;font-weight:700">${ev.Function}</span> &nbsp;·&nbsp; ${ev.Date}${tod}${meal} &nbsp;·&nbsp; ${ev.Pax} pax`;
   document.getElementById("aiExtraVendor").innerHTML=
     `<option value="">+ Add other vendor</option>`+
     APP.vendors.map(v=>`<option value="${v.Vendor_ID}|${v.Agency_Name}">${v.Agency_Name}</option>`).join("");
+  document.getElementById("aiQuoteMsgs").innerHTML="";
+  aiShowStep(3);
   openModal("modal-addItems");
-  // Build messages for existing items immediately
   buildAndShowQuoteMsgs([APP.currentEvent]);
 }
 
