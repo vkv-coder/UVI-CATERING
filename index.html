@@ -15,7 +15,7 @@
   --text:#1A1510; --text-soft:#3D3020; --muted:#8A7A65;
   --border:#E0D5C5; --faint:#EDE4D8;
   --red:#C0392B; --green:#2E7D52; --blue:#2C5282;
-  --orange:#C05621; --purple:#553C9A; --pink:#9B2C5E;
+  --orange:#C05621; --purple:#553C9A;
   --serif:'Playfair Display',Georgia,serif;
   --sans:'DM Sans',system-ui,sans-serif;
 }
@@ -83,24 +83,58 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);max-width:48
 .btn-outline{background:transparent;border:1.5px solid var(--gold-border);color:var(--gold-dark)}
 .btn-danger{background:transparent;border:1.5px solid rgba(192,57,43,0.3);color:var(--red)}
 .btn-sm{padding:9px 16px;font-size:13px}
+.btn-row{display:flex;gap:8px}
+.btn-row .btn{flex:1}
 
-/* PIPELINE */
-.pipeline{display:flex;align-items:flex-start;width:100%;margin:14px 0}
-.pip-item{flex:1;display:flex;align-items:center}
-.pip-dot-wrap{display:flex;flex-direction:column;align-items:center;gap:2px}
-.pip-dot{width:8px;height:8px;border-radius:50%;background:var(--faint);flex-shrink:0;transition:all 0.3s}
-.pip-dot.done{background:var(--sc,var(--gold))}
-.pip-dot.current{width:12px;height:12px;border:2.5px solid var(--sc,var(--gold));background:transparent;box-shadow:0 0 7px var(--sc,var(--gold))}
-.pip-label{font-size:8px;color:var(--sc,var(--gold));text-align:center;line-height:1.2;font-weight:700;white-space:pre-line}
-.pip-line{flex:1;height:1.5px;background:var(--faint)}
-.pip-line.done{background:rgba(201,168,76,0.4)}
+/* STAGE PILLS */
+.stage-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;border:1.5px solid transparent}
 
-/* STAGE LEGEND */
-.stage-legend{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:18px;box-shadow:0 1px 6px rgba(0,0,0,0.04)}
-.stage-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px 14px;margin-top:10px}
-.stage-item{display:flex;align-items:center;gap:8px}
-.stage-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.stage-item span{font-size:13px;color:var(--text-soft)}
+/* FORMS */
+.form-group{margin-bottom:14px}
+.form-label{font-size:13px;color:var(--muted);margin-bottom:6px;display:block}
+.form-input{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-family:var(--sans);font-size:14px;outline:none;transition:border-color 0.2s}
+.form-input:focus{border-color:var(--gold)}
+.form-select{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-family:var(--sans);font-size:14px;outline:none}
+.form-textarea{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-family:Georgia,serif;font-size:13px;outline:none;resize:none;line-height:1.7}
+.form-row{display:flex;gap:10px}
+.form-row .form-group{flex:1}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;display:none;align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal-overlay.center{align-items:center}
+.modal{background:var(--surface);border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;animation:slideUp 0.3s ease}
+.modal-center{background:var(--surface);border-radius:20px;padding:24px;width:calc(100% - 40px);max-width:400px;margin:auto;animation:fadeIn 0.2s ease}
+@keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes fadeIn{from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:scale(1)}}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.modal-title{font-family:var(--serif);font-size:20px;color:var(--text)}
+.modal-close{background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer}
+
+/* STEP TABS */
+.step-tabs{display:flex;gap:6px;margin-bottom:20px}
+.step-tab{flex:1;padding:10px 6px;border-radius:10px;border:none;cursor:pointer;font-size:12px;font-family:var(--sans);transition:all 0.2s;background:var(--card-alt);color:var(--muted);border-bottom:2.5px solid transparent}
+.step-tab.active{background:var(--surface);color:var(--gold-dark);font-weight:700;border-bottom-color:var(--gold);box-shadow:0 1px 5px rgba(0,0,0,0.07)}
+
+/* CHIP */
+.chip{display:inline-block;padding:7px 14px;border-radius:20px;font-size:13px;cursor:pointer;border:1.5px solid var(--border);background:var(--card-alt);color:var(--text-soft);margin:3px;transition:all 0.2s;font-family:var(--sans)}
+.chip.selected{background:var(--gold-glow);border-color:var(--gold);color:var(--gold-dark);font-weight:700}
+
+/* SELECTED ITEM */
+.sel-item{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;background:var(--card-alt);border-radius:10px;margin-bottom:7px;border:1px solid var(--border)}
+.sel-item-name{font-size:14px;color:var(--text);font-weight:600}
+.sel-item-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.remove-btn{background:none;border:none;color:var(--red);cursor:pointer;font-size:18px;padding:0 4px}
+
+/* SUCCESS / ERROR */
+.success-box{background:#E8F5E9;border:1px solid #A5D6A7;border-radius:12px;padding:14px 18px;text-align:center;margin-top:14px}
+.success-box .title{font-size:15px;color:var(--green);font-weight:700}
+.success-box .sub{font-size:12px;color:#388E3C;margin-top:4px}
+.error-box{background:rgba(192,57,43,0.08);border:1px solid rgba(192,57,43,0.25);border-radius:12px;padding:14px;text-align:center;margin-top:10px}
+.error-box .title{font-size:13px;color:var(--red);font-weight:600}
+
+/* WA PREVIEW */
+.wa-preview{background:#E8F5E9;border:1px solid #C8E6C9;border-radius:12px;padding:14px;font-size:13px;color:#1B5E20;line-height:1.8;font-family:var(--sans);white-space:pre-line;margin-bottom:14px;max-height:250px;overflow-y:auto}
 
 /* TODAY */
 .date-header{margin-bottom:22px}
@@ -124,123 +158,59 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);max-width:48
 .task-event{font-size:11px;color:var(--muted)}
 .task-done-btn{background:none;border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-size:10px;color:var(--muted);cursor:pointer}
 
-/* EVENTS */
-.event-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:14px;cursor:pointer;position:relative;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.06);transition:box-shadow 0.2s}
-.event-card.cancelled{opacity:0.5;border-color:var(--red)}
-.event-card:active{box-shadow:0 1px 4px rgba(0,0,0,0.08)}
-.event-left-bar{position:absolute;left:0;top:0;bottom:0;width:5px;border-radius:14px 0 0 14px}
-.event-inner{padding-left:12px}
-.event-name{font-family:var(--serif);font-size:20px;color:var(--text)}
-.event-sub{font-size:13px;color:var(--muted);margin-top:2px;margin-bottom:16px}
-.event-footer{display:flex;justify-content:space-between;align-items:center;margin-top:14px}
-.event-balance .amount{font-size:16px;color:var(--gold-dark);font-weight:700}
-.event-balance .label{font-size:10px;color:var(--muted)}
+/* CLIENT CARDS */
+.client-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.05);transition:box-shadow 0.2s;position:relative;overflow:hidden}
+.client-card:active{box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.client-card-name{font-family:var(--serif);font-size:20px;color:var(--text)}
+.client-card-sub{font-size:13px;color:var(--muted);margin-top:3px}
+.client-left-bar{position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--gold);border-radius:14px 0 0 14px}
 
-/* EVENT DETAIL HEADER */
-.detail-topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
-.back-btn{background:none;border:none;color:var(--gold-dark);font-size:14px;cursor:pointer;padding:0;font-family:var(--serif);display:flex;align-items:center;gap:5px}
-.menu-btn{background:none;border:1px solid var(--border);border-radius:8px;width:36px;height:36px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;color:var(--muted);position:relative}
-.dropdown{position:absolute;top:40px;right:0;background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.12);z-index:50;min-width:180px;overflow:hidden;display:none}
-.dropdown.open{display:block}
-.dropdown-item{padding:13px 16px;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:background 0.15s;border:none;background:none;width:100%;text-align:left;font-family:var(--sans)}
-.dropdown-item:hover{background:var(--faint)}
-.dropdown-item.danger{color:var(--red)}
+/* FUNCTION CARDS */
+.fn-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;box-shadow:0 1px 6px rgba(0,0,0,0.04);position:relative;overflow:hidden}
+.fn-card-left{position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:12px 0 0 12px}
+.fn-card-inner{padding-left:10px}
+.fn-name{font-family:var(--serif);font-size:17px;color:var(--text)}
+.fn-sub{font-size:12px;color:var(--muted);margin-top:2px}
 
-/* CANCELLED BANNER */
-.cancelled-banner{background:rgba(192,57,43,0.08);border:1px solid rgba(192,57,43,0.25);border-radius:10px;padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;gap:10px}
-.cancelled-banner .icon{font-size:20px}
-.cancelled-banner .text{font-size:14px;color:var(--red);font-weight:600}
-.cancelled-banner .sub{font-size:12px;color:var(--muted);margin-top:2px}
+/* BACK BTN */
+.back-btn{background:none;border:none;color:var(--gold-dark);font-size:14px;cursor:pointer;padding:0 0 16px;font-family:var(--serif);display:flex;align-items:center;gap:5px}
 
-/* FIN */
-.fin-row{display:flex;gap:10px;margin-top:14px}
-.fin-card{flex:1;background:var(--card-alt);border-radius:10px;padding:12px 14px}
-.fin-card .amount{font-size:17px;font-weight:700}
-.fin-card .label{font-size:11px;color:var(--muted);margin-top:3px}
-.action-btns{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+/* TABS */
 .tabs{display:flex;background:var(--card-alt);border-radius:12px;padding:4px;margin-bottom:16px;border:1px solid var(--border)}
 .tab-btn{flex:1;padding:10px 0;border:none;cursor:pointer;border-radius:8px;font-family:var(--serif);font-size:14px;transition:all 0.2s;background:transparent;color:var(--muted);border-bottom:2px solid transparent}
 .tab-btn.active{background:var(--surface);color:var(--gold-dark);font-weight:700;box-shadow:0 1px 5px rgba(0,0,0,0.07);border-bottom:2px solid var(--gold)}
 .tab-content{display:none}
 .tab-content.active{display:block}
-.vendor-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 1px 5px rgba(0,0,0,0.04)}
-.vendor-price-row{display:flex;justify-content:space-between;margin-bottom:14px}
-.vpc .lbl{font-size:11px;color:var(--muted);margin-bottom:2px}
-.vpc .val{font-size:16px;font-weight:600}
 
-/* FORMS */
-.form-group{margin-bottom:14px}
-.form-label{font-size:13px;color:var(--muted);margin-bottom:6px;display:block}
-.form-input{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-family:var(--sans);font-size:14px;outline:none;transition:border-color 0.2s}
-.form-input:focus{border-color:var(--gold)}
-.form-select{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-family:var(--sans);font-size:14px;outline:none}
-.form-textarea{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-family:Georgia,serif;font-size:13px;outline:none;resize:none;line-height:1.7}
-.form-row{display:flex;gap:10px}
-.form-row .form-group{flex:1}
+/* DROPDOWN */
+.detail-topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.menu-btn{background:none;border:1px solid var(--border);border-radius:8px;width:36px;height:36px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;color:var(--muted);position:relative}
+.dropdown{position:absolute;top:40px;right:0;background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.12);z-index:50;min-width:190px;overflow:hidden;display:none}
+.dropdown.open{display:block}
+.dropdown-item{padding:13px 16px;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:background 0.15s;border:none;background:none;width:100%;text-align:left;font-family:var(--sans)}
+.dropdown-item:hover{background:var(--faint)}
+.dropdown-item.danger{color:var(--red)}
 
-/* WA PREVIEW */
-.wa-preview{background:#E8F5E9;border:1px solid #C8E6C9;border-radius:12px;padding:14px;font-size:13px;color:#1B5E20;line-height:1.8;font-family:var(--sans);white-space:pre-line;margin-bottom:14px}
+/* ITEM ROW */
+.item-row{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;background:var(--card-alt);border-radius:10px;margin-bottom:8px;border:1px solid var(--border)}
+.item-row-name{font-size:14px;color:var(--text);font-weight:600}
+.item-row-sub{font-size:12px;color:var(--muted);margin-top:2px}
 
-/* SUCCESS / ERROR */
-.success-box{background:#E8F5E9;border:1px solid #A5D6A7;border-radius:12px;padding:14px 18px;text-align:center;margin-top:14px}
-.success-box .title{font-size:15px;color:var(--green);font-weight:700}
-.success-box .sub{font-size:12px;color:#388E3C;margin-top:4px}
-.error-box{background:rgba(192,57,43,0.08);border:1px solid rgba(192,57,43,0.25);border-radius:12px;padding:14px 18px;text-align:center;margin-top:14px}
-.error-box .title{font-size:14px;color:var(--red);font-weight:600}
+/* VENDOR QUOTE CARD */
+.vq-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;box-shadow:0 1px 5px rgba(0,0,0,0.04)}
+.vq-name{font-family:var(--serif);font-size:15px;color:var(--text)}
+.vq-item{font-size:12px;color:var(--muted);margin-top:2px;margin-bottom:10px}
+.vq-costs{display:flex;gap:0;margin-bottom:10px}
+.vq-col{flex:1}
+.vq-col .lbl{font-size:10px;color:var(--muted);margin-bottom:2px}
+.vq-col .val{font-size:14px;font-weight:600}
 
-/* VENDORS */
+/* VENDORS SCREEN */
 .filter-row{display:flex;gap:6px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px}
 .filter-btn{padding:6px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--surface);color:var(--muted);font-size:12px;cursor:pointer;white-space:nowrap;font-family:var(--sans);transition:all 0.2s}
 .filter-btn.active{border-color:var(--gold);background:var(--gold-glow);color:var(--gold-dark);font-weight:700}
 .vendor-list-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:10px;display:flex;gap:14px;align-items:center;box-shadow:0 1px 5px rgba(0,0,0,0.04)}
 .vendor-emoji-box{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;background:rgba(201,168,76,0.12);border:1.5px solid rgba(201,168,76,0.25)}
-
-/* MODAL */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;display:none;align-items:flex-end;justify-content:center}
-.modal-overlay.open{display:flex}
-.modal{background:var(--surface);border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;animation:slideUp 0.3s ease}
-@keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
-.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
-.modal-title{font-family:var(--serif);font-size:20px;color:var(--text)}
-.modal-close{background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer}
-
-/* CONFIRM MODAL */
-.confirm-modal{background:var(--surface);border-radius:20px;padding:24px;width:calc(100% - 40px);max-width:400px;margin:auto;animation:fadeIn 0.2s ease}
-@keyframes fadeIn{from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:scale(1)}}
-.modal-overlay.center{align-items:center}
-
-/* STEP TABS */
-.step-tabs{display:flex;gap:6px;margin-bottom:20px}
-.step-tab{flex:1;padding:10px 6px;border-radius:10px;border:none;cursor:pointer;font-size:12px;font-family:var(--sans);transition:all 0.2s;background:var(--card-alt);color:var(--muted);border-bottom:2.5px solid transparent}
-.step-tab.active{background:var(--surface);color:var(--gold-dark);font-weight:700;border-bottom-color:var(--gold);box-shadow:0 1px 5px rgba(0,0,0,0.07)}
-
-/* ATTACH */
-.attach-box{border:2px dashed var(--gold-border);border-radius:12px;padding:22px;text-align:center;cursor:pointer;background:var(--bg);margin-bottom:14px;transition:all 0.2s}
-.attach-box:hover{background:var(--card-alt)}
-
-/* RADIO */
-.radio-option{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;margin-bottom:8px;cursor:pointer;border:1.5px solid var(--border);background:var(--bg);transition:all 0.2s}
-.radio-option.selected{background:var(--gold-glow);border-color:var(--gold)}
-.radio-circle{width:18px;height:18px;border-radius:50%;border:2px solid var(--muted);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.radio-option.selected .radio-circle{border-color:var(--gold)}
-.radio-dot{width:9px;height:9px;border-radius:50%;background:var(--gold);display:none}
-.radio-option.selected .radio-dot{display:block}
-.radio-label{font-size:14px;color:var(--text-soft)}
-.radio-option.selected .radio-label{color:var(--gold-dark)}
-
-/* CHIP */
-.chip{display:inline-block;padding:6px 14px;border-radius:20px;font-size:12px;cursor:pointer;border:1.5px solid var(--border);background:var(--card-alt);color:var(--text-soft);margin:3px;transition:all 0.2s;font-family:var(--sans)}
-.chip.selected{background:var(--gold-glow);border-color:var(--gold);color:var(--gold-dark);font-weight:700}
-
-/* SELECTED ITEM */
-.selected-item{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;background:var(--card-alt);border-radius:10px;margin-bottom:7px;border:1px solid var(--border)}
-.selected-item span{font-size:14px;color:var(--text)}
-.remove-btn{background:none;border:none;color:var(--red);cursor:pointer;font-size:18px}
-
-/* SENT ROW */
-.sent-row{display:flex;gap:8px;margin-top:10px}
-.mark-btn{flex:1;padding:12px;border-radius:10px;cursor:pointer;font-family:var(--sans);font-size:13px;border:1.5px solid var(--border);background:var(--card-alt);color:var(--muted);transition:all 0.2s}
-.mark-btn.done{background:#E8F5E9;border-color:var(--green);color:var(--green);font-weight:700}
 
 /* FAB */
 .fab{position:fixed;bottom:72px;right:16px;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-dark));border:none;font-size:24px;color:#fff;cursor:pointer;box-shadow:0 4px 16px rgba(201,168,76,0.4);z-index:99;display:none;align-items:center;justify-content:center}
@@ -249,19 +219,22 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);max-width:48
 .empty-state{text-align:center;padding:40px 20px}
 .empty-state .icon{font-size:40px;margin-bottom:12px}
 .empty-state p{color:var(--muted);font-size:14px}
+
+/* STAGE COLORS */
+.s1{--sc:#3B5BDB} .s2{--sc:#D4500A} .s3{--sc:#B7900A}
+.s4{--sc:#862E62} .s5{--sc:#553C9A} .s6{--sc:#C9A84C}
 </style>
 </head>
 <body>
 
-<!-- PIN SCREEN -->
+<!-- PIN -->
 <div id="pinScreen">
   <div class="pin-logo">
     <svg width="60" height="60" viewBox="0 0 60 60" style="margin-bottom:10px">
       <circle cx="30" cy="30" r="26" fill="none" stroke="#C9A84C" stroke-width="2" stroke-dasharray="130 26" stroke-dashoffset="-8"/>
       <text x="30" y="37" text-anchor="middle" fill="#A8841E" style="font-size:18px;font-family:'Playfair Display',serif;font-weight:700;letter-spacing:1px">UVI</text>
     </svg>
-    <h1>UVI</h1>
-    <p>Luxury Catering & Decor</p>
+    <h1>UVI</h1><p>Luxury Catering & Decor</p>
   </div>
   <div style="font-size:14px;color:var(--muted);margin-bottom:8px">Enter your PIN</div>
   <div class="pin-dots">
@@ -270,18 +243,10 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);max-width:48
   </div>
   <div class="pin-error" id="pinError"></div>
   <div class="pin-grid">
-    <button class="pin-key" onclick="pinPress('1')">1</button>
-    <button class="pin-key" onclick="pinPress('2')">2</button>
-    <button class="pin-key" onclick="pinPress('3')">3</button>
-    <button class="pin-key" onclick="pinPress('4')">4</button>
-    <button class="pin-key" onclick="pinPress('5')">5</button>
-    <button class="pin-key" onclick="pinPress('6')">6</button>
-    <button class="pin-key" onclick="pinPress('7')">7</button>
-    <button class="pin-key" onclick="pinPress('8')">8</button>
-    <button class="pin-key" onclick="pinPress('9')">9</button>
-    <button class="pin-key empty"></button>
-    <button class="pin-key" onclick="pinPress('0')">0</button>
-    <button class="pin-key del" onclick="pinDel()">⌫</button>
+    <button class="pin-key" onclick="pinPress('1')">1</button><button class="pin-key" onclick="pinPress('2')">2</button><button class="pin-key" onclick="pinPress('3')">3</button>
+    <button class="pin-key" onclick="pinPress('4')">4</button><button class="pin-key" onclick="pinPress('5')">5</button><button class="pin-key" onclick="pinPress('6')">6</button>
+    <button class="pin-key" onclick="pinPress('7')">7</button><button class="pin-key" onclick="pinPress('8')">8</button><button class="pin-key" onclick="pinPress('9')">9</button>
+    <button class="pin-key empty"></button><button class="pin-key" onclick="pinPress('0')">0</button><button class="pin-key del" onclick="pinDel()">⌫</button>
   </div>
 </div>
 
@@ -294,9 +259,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);max-width:48
       <circle cx="20" cy="20" r="17" fill="none" stroke="#C9A84C" stroke-width="1.4" stroke-dasharray="88 18" stroke-dashoffset="-5"/>
       <text x="20" y="25" text-anchor="middle" fill="#A8841E" style="font-size:13px;font-family:'Playfair Display',serif;font-weight:700;letter-spacing:1px">UVI</text>
     </svg>
-    <div class="header-brand-text">
-      <h1>UVI</h1><p>Luxury Catering & Decor</p>
-    </div>
+    <div class="header-brand-text"><h1>UVI</h1><p>Luxury Catering & Decor</p></div>
   </div>
   <div class="header-right">
     <div id="overdueBadge" style="display:none" class="badge-red">0 Overdue</div>
@@ -304,7 +267,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);max-width:48
   </div>
 </div>
 
-<!-- SCREENS -->
+<!-- TODAY SCREEN -->
 <div id="screen-today" class="screen active">
   <div class="date-header">
     <div class="day" id="todayDay">—</div>
@@ -319,135 +282,181 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);max-width:48
   <div id="taskList"><div class="loading"><div class="spinner"></div><p>Loading tasks...</p></div></div>
 </div>
 
-<div id="screen-events" class="screen">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-    <div><div class="page-title">Events</div><div class="page-sub" id="eventCount">Loading...</div></div>
+<!-- CLIENTS SCREEN -->
+<div id="screen-clients" class="screen">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+    <div><div class="page-title">Clients</div><div class="page-sub" id="clientCount">Loading...</div></div>
   </div>
-  <div class="stage-legend">
-    <div class="section-label">Pipeline Stages</div>
-    <div class="stage-grid">
-      <div class="stage-item"><div class="stage-dot" style="background:#3B5BDB"></div><span>1. Menu Quote</span></div>
-      <div class="stage-item"><div class="stage-dot" style="background:#D4500A"></div><span>2. Vendor Costs</span></div>
-      <div class="stage-item"><div class="stage-dot" style="background:#B7900A"></div><span>3. Price Quote</span></div>
-      <div class="stage-item"><div class="stage-dot" style="background:#862E62"></div><span>4. Tasting</span></div>
-      <div class="stage-item"><div class="stage-dot" style="background:#553C9A"></div><span>5. Advance & Confirm</span></div>
-      <div class="stage-item"><div class="stage-dot" style="background:#C9A84C"></div><span>6. Final Orders</span></div>
-    </div>
-  </div>
-  <div id="eventList"><div class="loading"><div class="spinner"></div><p>Loading events...</p></div></div>
-  <div id="eventDetail" style="display:none"></div>
+  <div id="clientList"><div class="loading"><div class="spinner"></div><p>Loading...</p></div></div>
+  <div id="clientDetail" style="display:none"></div>
+  <div id="functionDetail" style="display:none"></div>
 </div>
 
+<!-- VENDORS SCREEN -->
 <div id="screen-vendors" class="screen">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
     <div><div class="page-title">Vendors</div><div class="page-sub" id="vendorCount">Loading...</div></div>
     <button class="btn btn-gold btn-sm" style="width:auto;padding:9px 16px" onclick="openModal('modal-addVendor')">+ Add</button>
   </div>
   <div class="filter-row" id="cuisineFilters"></div>
-  <div id="vendorList"><div class="loading"><div class="spinner"></div><p>Loading vendors...</p></div></div>
+  <div id="vendorList"><div class="loading"><div class="spinner"></div><p>Loading...</p></div></div>
 </div>
 
-<button class="fab" id="fabNewEvent" onclick="openModal('modal-newEvent')">+</button>
+<!-- FAB -->
+<button class="fab" id="fab" onclick="onFabClick()">+</button>
 
-<!-- WA MESSAGE PREVIEW MODAL -->
+<!-- NAV -->
+<nav class="nav">
+  <button class="nav-btn active" onclick="switchScreen('today',this)"><span class="icon">◉</span><span class="label">Today</span><div class="underline"></div></button>
+  <button class="nav-btn" onclick="switchScreen('clients',this)"><span class="icon">◈</span><span class="label">Clients</span><div class="underline"></div></button>
+  <button class="nav-btn" onclick="switchScreen('vendors',this)"><span class="icon">◎</span><span class="label">Vendors</span><div class="underline"></div></button>
+</nav>
+</div>
+
+<!-- MODALS -->
+
+<!-- New Client -->
+<div class="modal-overlay" id="modal-newClient">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">New Client</div><button class="modal-close" onclick="closeModal('modal-newClient')">×</button></div>
+    <div class="form-group"><label class="form-label">Client / Family Name *</label><input class="form-input" id="nc-name" placeholder="e.g. Mehta Family"></div>
+    <div class="form-group"><label class="form-label">Contact Person</label><input class="form-input" id="nc-contact" placeholder="e.g. Mrs. Priya Mehta"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Phone</label><input class="form-input" id="nc-phone" type="tel" placeholder="9XXXXXXXXX"></div>
+      <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="nc-email" type="email" placeholder="Optional"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Notes</label><input class="form-input" id="nc-notes" placeholder="Any initial notes"></div>
+    <button class="btn btn-gold" id="saveClientBtn" onclick="saveNewClient()">Create Client</button>
+    <div id="newClientMsg" style="margin-top:10px"></div>
+  </div>
+</div>
+
+<!-- New Function -->
+<div class="modal-overlay" id="modal-newFunction">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">Add Function</div><button class="modal-close" onclick="closeModal('modal-newFunction')">×</button></div>
+    <div class="form-group"><label class="form-label">Function / Occasion *</label>
+      <select class="form-select" id="nf-function">
+        <option>Haldi</option><option>Mehendi</option><option>Sangeet</option>
+        <option>Wedding</option><option>Reception</option><option>Engagement</option>
+        <option>Gruh Shanti</option><option>House Warming</option><option>Inauguration</option>
+        <option>Corporate Dinner</option><option>Birthday</option><option>Anniversary</option>
+        <option>Small Party</option><option>Other</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Date</label><input class="form-input" id="nf-date" type="date"></div>
+      <div class="form-group"><label class="form-label">Pax</label><input class="form-input" id="nf-pax" type="number" placeholder="100"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Venue</label><input class="form-input" id="nf-venue" placeholder="e.g. Rajpath Club"></div>
+    <div class="form-group"><label class="form-label">Notes</label><input class="form-input" id="nf-notes" placeholder="Any special requirements"></div>
+    <button class="btn btn-gold" id="saveFunctionBtn" onclick="saveNewFunction()">Add Function</button>
+    <div id="newFunctionMsg" style="margin-top:10px"></div>
+  </div>
+</div>
+
+<!-- Add Items Modal -->
+<div class="modal-overlay" id="modal-addItems">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">Add Items & Get Quotes</div><button class="modal-close" onclick="closeModal('modal-addItems')">×</button></div>
+    <div class="step-tabs">
+      <button class="step-tab active" onclick="goStep('ai',1,this)">1. Item</button>
+      <button class="step-tab" onclick="goStep('ai',2,this)">2. Qty</button>
+      <button class="step-tab" onclick="goStep('ai',3,this)">3. Vendors</button>
+      <button class="step-tab" onclick="goStep('ai',4,this)">4. Send</button>
+    </div>
+
+    <!-- Step 1 — Pick Item -->
+    <div id="ai-step-1">
+      <div class="form-group">
+        <label class="form-label">Search or select item</label>
+        <input class="form-input" id="aiItemSearch" placeholder="Type to search..." oninput="filterItems()">
+      </div>
+      <div id="aiItemChips" style="margin-bottom:14px"></div>
+      <div class="gold-line"></div>
+      <div class="form-group" style="margin-top:12px">
+        <label class="form-label">Or type new item</label>
+        <div style="display:flex;gap:8px">
+          <input class="form-input" id="aiNewItem" placeholder="Item name">
+          <select class="form-select" style="width:120px" id="aiNewCat">
+            <option>Chaat</option><option>Sweets</option><option>Desserts</option>
+            <option>Mains</option><option>Breads</option><option>Farsan</option>
+            <option>Beverages</option><option>Live Counter</option><option>Welcome Drink</option><option>Other</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-gold" onclick="aiStep1Next()">Next →</button>
+    </div>
+
+    <!-- Step 2 — Qty & Unit -->
+    <div id="ai-step-2" style="display:none">
+      <div class="card" style="margin-bottom:16px">
+        <div style="font-size:16px;font-weight:700;color:var(--text)" id="aiSelectedItemName">—</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:3px" id="aiSelectedItemCat">—</div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Quantity</label>
+          <input class="form-input" id="aiQty" type="number" placeholder="e.g. 300">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Unit</label>
+          <select class="form-select" id="aiUnit">
+            <option>pax</option><option>pcs</option><option>kg</option>
+            <option>ltr</option><option>portion</option><option>plate</option>
+            <option>box</option><option>dozen</option>
+          </select>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-outline" onclick="goStep('ai',1,null)">← Back</button>
+        <button class="btn btn-gold" onclick="aiStep2Next()">Next →</button>
+      </div>
+    </div>
+
+    <!-- Step 3 — Select Vendors -->
+    <div id="ai-step-3" style="display:none">
+      <div style="font-size:13px;color:var(--muted);margin-bottom:12px" id="aiVendorContext"></div>
+      <div class="section-label">Vendors who supply this item:</div>
+      <div id="aiVendorChips" style="margin-bottom:14px"></div>
+      <div class="section-label" style="margin-top:12px">Or add any vendor:</div>
+      <select class="form-select" id="aiExtraVendor" style="margin-bottom:14px">
+        <option value="">— Select vendor —</option>
+      </select>
+      <button onclick="addExtraVendor()" class="btn btn-outline btn-sm" style="margin-bottom:14px">+ Add This Vendor</button>
+      <div class="section-label">Selected vendors:</div>
+      <div id="aiSelectedVendors" style="margin-bottom:14px"></div>
+      <div class="btn-row">
+        <button class="btn btn-outline" onclick="goStep('ai',2,null)">← Back</button>
+        <button class="btn btn-gold" onclick="aiStep3Next()">Next →</button>
+      </div>
+    </div>
+
+    <!-- Step 4 — Send Quote Requests -->
+    <div id="ai-step-4" style="display:none">
+      <div id="aiQuoteMsgs"></div>
+      <div id="aiSaveMsg" style="margin-top:10px"></div>
+      <button class="btn btn-gold" style="margin-top:14px" onclick="saveAndAddMore()">✓ Save & Add Another Item</button>
+      <button class="btn btn-outline" style="margin-top:8px" onclick="saveAndDone()">✓ Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- WA Message Modal -->
 <div class="modal-overlay" id="modal-waMsg">
   <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title">📋 WhatsApp Message</div>
-      <button class="modal-close" onclick="closeModal('modal-waMsg')">×</button>
-    </div>
+    <div class="modal-header"><div class="modal-title">📋 WhatsApp Message</div><button class="modal-close" onclick="closeModal('modal-waMsg')">×</button></div>
     <div style="font-size:12px;color:var(--muted);margin-bottom:10px" id="waMsgRecipient"></div>
-    <div style="background:#E8F5E9;border:1px solid #C8E6C9;border-radius:12px;padding:14px;font-size:13px;color:#1B5E20;line-height:1.8;font-family:var(--sans);white-space:pre-line;margin-bottom:16px;max-height:300px;overflow-y:auto" id="waMsgText"></div>
+    <div class="wa-preview" id="waMsgText"></div>
     <div style="background:rgba(201,168,76,0.1);border:1px solid var(--gold-border);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--gold-dark);margin-bottom:16px">
-      👆 Long press above to select all & copy<br>OR tap the button below
+      👆 Long press above to select & copy — OR tap button below
     </div>
     <button class="btn btn-gold" onclick="copyWAMsg()" id="copyWABtn" style="margin-bottom:10px">📋 Copy Message</button>
     <button class="btn btn-outline" onclick="openWALink()" id="openWABtn">💬 Open WhatsApp</button>
   </div>
 </div>
 
-<nav class="nav">
-  <button class="nav-btn active" onclick="switchScreen('today',this)"><span class="icon">◉</span><span class="label">Today</span><div class="underline"></div></button>
-  <button class="nav-btn" onclick="switchScreen('events',this)"><span class="icon">◈</span><span class="label">Events</span><div class="underline"></div></button>
-  <button class="nav-btn" onclick="switchScreen('vendors',this)"><span class="icon">◎</span><span class="label">Vendors</span><div class="underline"></div></button>
-</nav>
-</div>
-
-<!-- MODALS -->
-<div class="modal-overlay" id="modal-newEvent">
-  <div class="modal">
-    <div class="modal-header"><div class="modal-title">New Event</div><button class="modal-close" onclick="closeModal('modal-newEvent')">×</button></div>
-    <div class="form-group"><label class="form-label">Client Name *</label><input class="form-input" id="new-client" placeholder="e.g. Mehta Family"></div>
-    <div class="form-group">
-      <label class="form-label">Occasion</label>
-      <select class="form-select" id="new-occasion">
-        <option>Wedding Reception</option><option>Wedding Lunch</option><option>Sangeet</option>
-        <option>Haldi</option><option>Mehendi</option><option>Engagement</option>
-        <option>Gruh Shanti</option><option>House Warming</option><option>Inauguration</option>
-        <option>Corporate Dinner</option><option>Birthday Gala</option>
-        <option>Anniversary</option><option>Small Party</option><option>Other</option>
-      </select>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Event Date</label><input class="form-input" id="new-date" type="date"></div>
-      <div class="form-group"><label class="form-label">Guests</label><input class="form-input" id="new-pax" type="number" placeholder="100"></div>
-    </div>
-    <div class="form-group"><label class="form-label">Notes</label><input class="form-input" id="new-notes" placeholder="Any special requirements"></div>
-    <button class="btn btn-gold" onclick="saveNewEvent()" id="saveEventBtn">Create Event</button>
-    <div id="newEventMsg" style="margin-top:10px"></div>
-  </div>
-</div>
-
-<!-- EDIT EVENT MODAL -->
-<div class="modal-overlay" id="modal-editEvent">
-  <div class="modal">
-    <div class="modal-header"><div class="modal-title">Edit Event</div><button class="modal-close" onclick="closeModal('modal-editEvent')">×</button></div>
-    <div class="form-group"><label class="form-label">Occasion</label>
-      <select class="form-select" id="edit-occasion">
-        <option>Wedding Reception</option><option>Wedding Lunch</option><option>Sangeet</option>
-        <option>Haldi</option><option>Mehendi</option><option>Engagement</option>
-        <option>Gruh Shanti</option><option>House Warming</option><option>Inauguration</option>
-        <option>Corporate Dinner</option><option>Birthday Gala</option>
-        <option>Anniversary</option><option>Small Party</option><option>Other</option>
-      </select>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Event Date</label><input class="form-input" id="edit-date" type="date"></div>
-      <div class="form-group"><label class="form-label">Guests</label><input class="form-input" id="edit-pax" type="number"></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Advance Received</label><input class="form-input" id="edit-advance" placeholder="e.g. ₹50,000"></div>
-      <div class="form-group"><label class="form-label">Balance Due</label><input class="form-input" id="edit-balance" placeholder="e.g. ₹1,50,000"></div>
-    </div>
-    <div class="form-group"><label class="form-label">Stage (1–6)</label>
-      <select class="form-select" id="edit-stage">
-        <option value="1">1 — Menu Quote</option>
-        <option value="2">2 — Vendor Costs</option>
-        <option value="3">3 — Price Quote</option>
-        <option value="4">4 — Tasting</option>
-        <option value="5">5 — Advance & Confirm</option>
-        <option value="6">6 — Final Orders</option>
-      </select>
-    </div>
-    <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="edit-notes" rows="2"></textarea></div>
-    <button class="btn btn-gold" onclick="saveEditEvent()" id="saveEditBtn">Save Changes</button>
-    <div id="editEventMsg" style="margin-top:10px"></div>
-  </div>
-</div>
-
-<!-- CANCEL CONFIRM MODAL -->
-<div class="modal-overlay center" id="modal-cancelConfirm">
-  <div class="confirm-modal">
-    <div style="font-size:28px;text-align:center;margin-bottom:12px">⚠️</div>
-    <div style="font-family:var(--serif);font-size:18px;color:var(--text);text-align:center;margin-bottom:8px">Cancel Event?</div>
-    <div style="font-size:13px;color:var(--muted);text-align:center;margin-bottom:24px" id="cancelConfirmText">This will mark the event as cancelled. The record will be kept for reference.</div>
-    <div style="display:flex;flex-direction:column;gap:10px">
-      <button class="btn btn-danger" onclick="confirmCancelEvent()">Yes — Mark as Cancelled</button>
-      <button class="btn btn-outline" onclick="closeModal('modal-cancelConfirm')">No — Keep Event</button>
-    </div>
-  </div>
-</div>
-
+<!-- Send Menu Modal -->
 <div class="modal-overlay" id="modal-sendMenu">
   <div class="modal">
     <div class="modal-header"><div class="modal-title">Send Menu Quote</div><button class="modal-close" onclick="closeModal('modal-sendMenu')">×</button></div>
@@ -457,7 +466,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);max-width:48
       <button class="step-tab" onclick="goStep('menu',3,this)">3. Send</button>
     </div>
     <div id="menu-step-1">
-      <div class="attach-box" onclick="menuAttachClick()">
+      <div style="border:2px dashed var(--gold-border);border-radius:12px;padding:22px;text-align:center;cursor:pointer;background:var(--bg);margin-bottom:14px" onclick="menuAttachClick()">
         <div style="font-size:30px;margin-bottom:8px" id="menuAttachIcon">📁</div>
         <div style="font-size:14px;color:var(--muted)" id="menuAttachText">Tap to attach menu PDF</div>
         <div style="font-size:12px;color:var(--gold);margin-top:4px">From your Canva export</div>
@@ -487,7 +496,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);max-width:48
       <button class="btn btn-gold" onclick="goStep('menu',3,null)">Next →</button>
     </div>
     <div id="menu-step-3" style="display:none">
-      <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Copy the message, open WhatsApp, send with the PDF attached. Then mark as sent.</p>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Copy the message, open WhatsApp, send with PDF attached. Then mark as sent.</p>
       <button class="btn btn-gold" onclick="copyMenuMsg()" id="copyMenuBtn" style="margin-bottom:10px">📋 Copy Message</button>
       <button class="btn btn-outline" id="menuMarkSentBtn" onclick="markMenuSent()">✅ Mark as Sent — Record in App</button>
       <div id="menuSentMsg"></div>
@@ -495,66 +504,19 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);max-width:48
   </div>
 </div>
 
-<div class="modal-overlay" id="modal-tasting">
-  <div class="modal">
-    <div class="modal-header"><div class="modal-title">Tasting Setup</div><button class="modal-close" onclick="closeModal('modal-tasting')">×</button></div>
-    <div class="step-tabs">
-      <button class="step-tab active" onclick="goStep('tasting',1,this)">1. Details</button>
-      <button class="step-tab" onclick="goStep('tasting',2,this)">2. Items</button>
-      <button class="step-tab" onclick="goStep('tasting',3,this)">3. Send</button>
-    </div>
-    <div id="tasting-step-1">
-      <div class="form-group"><label class="form-label">Tasting Date</label><input class="form-input" id="tastingDate" type="date"></div>
-      <div class="form-group"><label class="form-label">Time</label><input class="form-input" id="tastingTime" placeholder="e.g. 12:00 PM"></div>
-      <div class="form-group">
-        <label class="form-label">Venue Type</label>
-        <div class="radio-option" onclick="selectVenue(this,'client')"><div class="radio-circle"><div class="radio-dot"></div></div><div class="radio-label">Client's Home / Office</div></div>
-        <div class="radio-option" onclick="selectVenue(this,'neutral')"><div class="radio-circle"><div class="radio-dot"></div></div><div class="radio-label">Neutral location (arranged by us)</div></div>
-        <div class="radio-option" onclick="selectVenue(this,'vendor')"><div class="radio-circle"><div class="radio-dot"></div></div><div class="radio-label">Vendor's Kitchen / Restaurant</div></div>
-      </div>
-      <div class="form-group"><label class="form-label">Venue / Address</label><input class="form-input" id="tastingVenue" placeholder="Enter venue details"></div>
-      <button class="btn btn-gold" onclick="goStep('tasting',2,null)">Next → Select Items</button>
-    </div>
-    <div id="tasting-step-2" style="display:none">
-      <div style="display:flex;gap:8px;margin-bottom:14px">
-        <input class="form-input" id="tastingNewItem" placeholder="Type item + Enter" onkeydown="if(event.key==='Enter')addTastingItem()">
-        <button onclick="addTastingItem()" style="background:var(--gold);border:none;border-radius:10px;padding:11px 16px;color:#fff;font-weight:700;cursor:pointer;font-size:18px">+</button>
-      </div>
-      <div class="section-label">Quick add from vendors:</div>
-      <div id="tastingQuickChips" style="margin-bottom:16px"></div>
-      <div id="tastingSelectedItems"></div>
-      <button class="btn btn-gold" onclick="goStep('tasting',3,null)">Next → Send Messages</button>
-    </div>
-    <div id="tasting-step-3" style="display:none">
-      <div class="card" style="margin-bottom:12px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-          <strong style="font-size:15px">👤 Message to Client</strong><span id="clientSentTag"></span>
-        </div>
-        <div class="wa-preview" id="tastingClientMsg"></div>
-        <div class="sent-row">
-          <button class="btn btn-gold btn-sm" style="flex:2" onclick="copyText('tastingClientMsg')">📋 Copy</button>
-          <button class="mark-btn" id="clientMarkBtn" onclick="markClientSent()">Mark Sent</button>
-        </div>
-      </div>
-      <div class="section-label">🏪 Messages to Vendors</div>
-      <div id="tastingVendorMsgs"></div>
-      <div id="tastingAllSentMsg"></div>
-    </div>
-  </div>
-</div>
-
+<!-- Add Vendor Modal -->
 <div class="modal-overlay" id="modal-addVendor">
   <div class="modal">
     <div class="modal-header"><div class="modal-title">Add Vendor</div><button class="modal-close" onclick="closeModal('modal-addVendor')">×</button></div>
     <div class="form-group"><label class="form-label">Agency Name *</label><input class="form-input" id="av-name" placeholder="e.g. Le Jardin Patisserie"></div>
-    <div class="form-group"><label class="form-label">Cuisine / Specialty *</label><input class="form-input" id="av-cuisine" placeholder="e.g. Desserts"></div>
+    <div class="form-group"><label class="form-label">Cuisine / Specialty</label><input class="form-input" id="av-cuisine" placeholder="e.g. Desserts"></div>
     <div class="form-row">
       <div class="form-group"><label class="form-label">Contact Person</label><input class="form-input" id="av-contact" placeholder="Name"></div>
       <div class="form-group"><label class="form-label">Designation</label><input class="form-input" id="av-desig" placeholder="Owner"></div>
     </div>
     <div class="form-group"><label class="form-label">Contact Number</label><input class="form-input" id="av-phone" type="tel" placeholder="9XXXXXXXXX"></div>
     <div class="form-row">
-      <div class="form-group"><label class="form-label">Contact Person 2</label><input class="form-input" id="av-contact2" placeholder="Optional"></div>
+      <div class="form-group"><label class="form-label">Contact 2</label><input class="form-input" id="av-contact2" placeholder="Optional"></div>
       <div class="form-group"><label class="form-label">Number 2</label><input class="form-input" id="av-phone2" type="tel" placeholder="Optional"></div>
     </div>
     <div class="form-group"><label class="form-label">Base City</label><input class="form-input" id="av-city" placeholder="Vadodara"></div>
@@ -570,17 +532,17 @@ const STAGE_COLORS = ["","#3B5BDB","#D4500A","#B7900A","#862E62","#553C9A","#C9A
 const STAGE_LABELS = ["","Menu Quote","Vendor Costs","Price Quote","Tasting","Advance & Confirm","Final Orders"];
 const DAYS   = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const UNITS  = ["pax","pcs","kg","ltr","portion","plate","box","dozen"];
 
 let APP = {
-  vendors:[], events:[], tasks:[], settings:{},
-  menuItems:[], vendorMenuItems:[],
-  currentEvent:null, currentEventVendors:[],
-  tastingItems:[], tastingVenueType:"client",
-  menuAttached:false, menuFileName:"",
-  clientSent:false, vendorsSent:{},
+  vendors:[], clients:[], allEvents:[], tasks:[], settings:{}, itemVendors:[],
+  currentClient:null, currentEvent:null,
+  currentEventItems:[], currentEventVendors:[],
   currentUser:"",
-  assignSelectedItems:[],
-  _waMsg:"", _waLink:""
+  // Add items flow
+  ai:{item:null, qty:"", unit:"pax", selectedVendors:[], savedItems:[]},
+  _waMsg:"", _waLink:"",
+  menuFileName:"", menuAttached:false
 };
 
 // ── API ───────────────────────────────────────────────────────
@@ -589,24 +551,19 @@ async function apiGet(action, params="") {
   return r.json();
 }
 async function apiWrite(action, data) {
-  const encoded = encodeURIComponent(JSON.stringify(data));
-  const r = await fetch(`${API}?action=${action}&d=${encoded}`);
+  const r = await fetch(`${API}?action=${action}&d=${encodeURIComponent(JSON.stringify(data))}`);
   return r.json();
 }
 
 // ── PIN ───────────────────────────────────────────────────────
-let pinValue = "";
-function pinPress(d) {
-  if (pinValue.length >= 4) return;
-  pinValue += d; updatePinDots();
-  if (pinValue.length === 4) setTimeout(checkPin, 200);
-}
-function pinDel() { pinValue = pinValue.slice(0,-1); updatePinDots(); document.getElementById("pinError").textContent=""; }
-function updatePinDots() { for(let i=0;i<4;i++) document.getElementById("pd"+i).classList.toggle("filled", i<pinValue.length); }
-async function checkPin() {
-  const res = await apiGet("checkPin","&pin="+pinValue);
-  if (res.success) {
-    APP.currentUser = res.name;
+let pinValue="";
+function pinPress(d){if(pinValue.length>=4)return;pinValue+=d;updatePinDots();if(pinValue.length===4)setTimeout(checkPin,200);}
+function pinDel(){pinValue=pinValue.slice(0,-1);updatePinDots();document.getElementById("pinError").textContent="";}
+function updatePinDots(){for(let i=0;i<4;i++)document.getElementById("pd"+i).classList.toggle("filled",i<pinValue.length);}
+async function checkPin(){
+  const res=await apiGet("checkPin","&pin="+pinValue);
+  if(res.success){
+    APP.currentUser=res.name;
     document.getElementById("pinScreen").style.display="none";
     document.getElementById("mainApp").style.display="block";
     document.getElementById("userBadge").textContent=res.name;
@@ -618,59 +575,93 @@ async function checkPin() {
 }
 
 // ── INIT ──────────────────────────────────────────────────────
-async function initApp() {
+async function initApp(){
   setTodayHeader();
-  await Promise.all([loadSettings(), loadVendors(), loadEvents(), loadTasks(), loadMenuItems()]);
+  await Promise.all([loadSettings(),loadVendors(),loadClients(),loadAllEvents(),loadTasks(),loadItemVendors()]);
   renderToday(); renderVendors();
 }
-async function loadSettings()   { APP.settings  = await apiGet("getSettings"); }
-async function loadVendors()    { APP.vendors   = await apiGet("getVendors");  }
-async function loadEvents()     { APP.events    = await apiGet("getEvents");   }
-async function loadTasks()      { APP.tasks     = await apiGet("getTasks");    }
-async function loadMenuItems()  { APP.menuItems = await apiGet("getMenuItems"); }
+async function loadSettings()    { APP.settings    = await apiGet("getSettings"); }
+async function loadVendors()     { APP.vendors     = await apiGet("getVendors"); }
+async function loadClients()     { APP.clients     = await apiGet("getClients"); }
+async function loadAllEvents()   { APP.allEvents   = await apiGet("getEvents"); }
+async function loadTasks()       { APP.tasks       = await apiGet("getTasks"); }
+async function loadItemVendors() { APP.itemVendors = await apiGet("getItemVendors"); }
 
 // ── NAV ───────────────────────────────────────────────────────
-function switchScreen(name, btn) {
+function switchScreen(name, btn){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active"));
   document.getElementById("screen-"+name).classList.add("active");
   btn.classList.add("active");
-  document.getElementById("fabNewEvent").style.display = name==="events"?"flex":"none";
-  if (name==="events") { renderEvents(); showEventList(); }
-  if (name==="vendors") renderVendors();
+  document.getElementById("fab").style.display = (name==="clients")?"flex":"none";
+  if(name==="clients"){ renderClients(); showClientList(); }
+  if(name==="vendors") renderVendors();
 }
-function showEventList() {
-  document.getElementById("eventList").style.display="block";
-  document.getElementById("eventDetail").style.display="none";
+
+function onFabClick(){
+  // Determine context
+  const fnDetail = document.getElementById("functionDetail");
+  const clientDetail = document.getElementById("clientDetail");
+  if(fnDetail && fnDetail.style.display!=="none" && APP.currentEvent){
+    openAddItems();
+  } else if(clientDetail && clientDetail.style.display!=="none" && APP.currentClient){
+    openModal("modal-newFunction");
+  } else {
+    openModal("modal-newClient");
+  }
+}
+
+function showClientList(){
+  document.getElementById("clientList").style.display="block";
+  document.getElementById("clientDetail").style.display="none";
+  document.getElementById("functionDetail").style.display="none";
+  document.getElementById("fab").style.display="flex";
+}
+
+function showClientDetail(){
+  document.getElementById("clientList").style.display="none";
+  document.getElementById("clientDetail").style.display="block";
+  document.getElementById("functionDetail").style.display="none";
+  document.getElementById("fab").style.display="flex";
+}
+
+function showFunctionDetail(){
+  document.getElementById("clientList").style.display="none";
+  document.getElementById("clientDetail").style.display="none";
+  document.getElementById("functionDetail").style.display="block";
+  document.getElementById("fab").style.display="flex";
 }
 
 // ── TODAY ─────────────────────────────────────────────────────
-function setTodayHeader() {
-  const now = new Date();
-  document.getElementById("todayDay").textContent  = DAYS[now.getDay()].toUpperCase();
-  document.getElementById("todayDate").textContent = `${now.getDate()} ${MONTHS[now.getMonth()]} ${now.getFullYear()}`;
+function setTodayHeader(){
+  const now=new Date();
+  document.getElementById("todayDay").textContent=DAYS[now.getDay()].toUpperCase();
+  document.getElementById("todayDate").textContent=`${now.getDate()} ${MONTHS[now.getMonth()]} ${now.getFullYear()}`;
 }
-function renderToday() {
-  const tasks    = APP.tasks||[];
-  const overdue  = tasks.filter(t=>t.urgency==="overdue");
-  const today    = tasks.filter(t=>t.urgency==="today");
-  const tomorrow = tasks.filter(t=>t.urgency==="tomorrow");
-  const future   = tasks.filter(t=>t.urgency==="future");
-  document.getElementById("statOverdue").textContent  = overdue.length;
-  document.getElementById("statToday").textContent    = today.length;
-  document.getElementById("statTomorrow").textContent = tomorrow.length;
-  document.getElementById("todaySummary").textContent = `${tasks.length} actions across ${APP.events.filter(e=>parseInt(e.Stage)>0).length} active events`;
+
+function renderToday(){
+  const tasks=APP.tasks||[];
+  const overdue=tasks.filter(t=>t.urgency==="overdue");
+  const today=tasks.filter(t=>t.urgency==="today");
+  const tomorrow=tasks.filter(t=>t.urgency==="tomorrow");
+  const future=tasks.filter(t=>t.urgency==="future");
+  document.getElementById("statOverdue").textContent=overdue.length;
+  document.getElementById("statToday").textContent=today.length;
+  document.getElementById("statTomorrow").textContent=tomorrow.length;
+  document.getElementById("todaySummary").textContent=`${tasks.length} actions · ${APP.clients.length} clients · ${APP.allEvents.length} functions`;
   const badge=document.getElementById("overdueBadge");
-  if (overdue.length){badge.style.display="block";badge.textContent=overdue.length+" Overdue";}else badge.style.display="none";
+  if(overdue.length){badge.style.display="block";badge.textContent=overdue.length+" Overdue";}
+  else badge.style.display="none";
   let html="";
-  if (overdue.length)  html+=renderTaskSection("OVERDUE","#C0392B",overdue);
-  if (today.length)    html+=renderTaskSection("TODAY","#A8841E",today);
-  if (tomorrow.length) html+=renderTaskSection("TOMORROW","#553C9A",tomorrow);
-  if (future.length)   html+=renderTaskSection("UPCOMING","#8A7A65",future);
-  if (!tasks.length)   html=`<div class="empty-state"><div class="icon">✅</div><p>No tasks yet. Create an event to get started.</p></div>`;
+  if(overdue.length)  html+=renderTaskSection("OVERDUE","#C0392B",overdue);
+  if(today.length)    html+=renderTaskSection("TODAY","#A8841E",today);
+  if(tomorrow.length) html+=renderTaskSection("TOMORROW","#553C9A",tomorrow);
+  if(future.length)   html+=renderTaskSection("UPCOMING","#8A7A65",future);
+  if(!tasks.length)   html=`<div class="empty-state"><div class="icon">✅</div><p>No tasks yet. Add a client to get started.</p></div>`;
   document.getElementById("taskList").innerHTML=html;
 }
-function renderTaskSection(label,color,tasks) {
+
+function renderTaskSection(label,color,tasks){
   return `<div class="task-section">
     <div class="task-section-head"><div class="task-section-bar" style="background:${color}"></div><div class="task-section-title" style="color:${color}">${label} (${tasks.length})</div></div>
     ${tasks.map(t=>`<div class="task-row">
@@ -687,314 +678,506 @@ function renderTaskSection(label,color,tasks) {
     </div>`).join("")}
   </div>`;
 }
-async function doneTask(rowId,btn) {
+
+async function doneTask(rowId,btn){
   btn.textContent="✓";btn.style.color="var(--green)";
   await apiWrite("completeTask",{Row_ID:rowId});
   await loadTasks(); renderToday();
 }
 
-// ── EVENTS ────────────────────────────────────────────────────
-function renderEvents() {
-  const events = APP.events||[];
-  const active = events.filter(e=>parseInt(e.Stage)>0);
-  document.getElementById("eventCount").textContent=`${active.length} active · ${events.length-active.length} cancelled`;
-  if (!events.length){
-    document.getElementById("eventList").innerHTML=`<div class="empty-state"><div class="icon">📋</div><p>No events yet. Tap + to create your first event.</p></div>`;
+// ── CLIENTS ───────────────────────────────────────────────────
+function renderClients(){
+  const clients=APP.clients||[];
+  document.getElementById("clientCount").textContent=`${clients.length} active clients`;
+  if(!clients.length){
+    document.getElementById("clientList").innerHTML=`<div class="empty-state"><div class="icon">👤</div><p>No clients yet. Tap + to add your first client.</p></div>`;
     return;
   }
-  document.getElementById("eventList").innerHTML=events.map(ev=>{
-    const stage=parseInt(ev.Stage)||1;
-    const cancelled=stage===0;
-    const color=cancelled?"#C0392B":(STAGE_COLORS[stage]||STAGE_COLORS[1]);
-    return `<div class="event-card ${cancelled?"cancelled":""}" onclick="openEvent('${ev.Event_ID}')">
-      <div class="event-left-bar" style="background:${color}"></div>
-      <div class="event-inner">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start">
-          <div class="event-name">${ev.Client_Name||"—"}</div>
-          <div style="font-size:12px;color:var(--muted)">${ev.Event_Date||""}</div>
-        </div>
-        <div class="event-sub">${ev.Occasion||""} · ${ev.Pax||0} guests</div>
-        ${cancelled
-          ? `<span class="tag" style="background:rgba(192,57,43,0.1);color:var(--red);border:1px solid rgba(192,57,43,0.3)">Cancelled</span>`
-          : renderPipeline(stage)}
-        <div class="event-footer">
-          ${!cancelled?`<span class="tag" style="background:${color}18;color:${color};border:1px solid ${color}30">Stage ${stage}: ${STAGE_LABELS[stage]}</span>`:`<span></span>`}
-          <div class="event-balance"><div class="amount">${ev.Balance_Due||"—"}</div><div class="label">balance due</div></div>
+  document.getElementById("clientList").innerHTML=clients.map(c=>{
+    const fns=APP.allEvents.filter(e=>e.Client_ID===c.Client_ID);
+    return `<div class="client-card" onclick="openClient('${c.Client_ID}')">
+      <div class="client-left-bar"></div>
+      <div style="padding-left:12px">
+        <div class="client-card-name">${c.Client_Name}</div>
+        <div class="client-card-sub">${c.Contact_Person||""} ${c.Phone?"· "+c.Phone:""}</div>
+        <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
+          ${fns.map(f=>{
+            const color=STAGE_COLORS[parseInt(f.Stage)||1];
+            return `<span class="tag" style="background:${color}18;color:${color};border:1px solid ${color}30">${f.Function} · ${f.Date}</span>`;
+          }).join("")}
+          ${!fns.length?`<span style="font-size:12px;color:var(--muted)">No functions yet</span>`:""}
         </div>
       </div>
     </div>`;
   }).join("");
 }
 
-function renderPipeline(current) {
-  let html=`<div class="pipeline">`;
-  for(let i=1;i<=6;i++){
-    const color=STAGE_COLORS[i];
-    const isCurrent=i===current,isDone=i<current;
-    html+=`<div class="pip-item"><div class="pip-dot-wrap">
-      <div class="pip-dot ${isCurrent?"current":isDone?"done":""}" style="--sc:${color}"></div>
-      ${isCurrent?`<div class="pip-label" style="color:${color}">${STAGE_LABELS[i].replace(" ","\n")}</div>`:""}
-    </div>${i<6?`<div class="pip-line ${isDone?"done":""}"></div>`:""}</div>`;
-  }
-  return html+`</div>`;
+async function openClient(clientId){
+  APP.currentClient=APP.clients.find(c=>c.Client_ID===clientId);
+  if(!APP.currentClient)return;
+  const fns=APP.allEvents.filter(e=>e.Client_ID===clientId);
+  renderClientDetail(fns);
+  showClientDetail();
 }
 
-async function openEvent(eventId) {
-  APP.currentEvent=APP.events.find(e=>e.Event_ID===eventId);
-  if (!APP.currentEvent) return;
+function renderClientDetail(fns){
+  const c=APP.currentClient;
+  document.getElementById("clientDetail").innerHTML=`
+    <button class="back-btn" onclick="showClientList();APP.currentClient=null">← All Clients</button>
+    <div class="card" style="margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div style="font-family:var(--serif);font-size:22px;color:var(--text)">${c.Client_Name}</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:3px">${c.Contact_Person||""}</div>
+          ${c.Phone?`<div style="font-size:13px;color:var(--muted);margin-top:2px">📞 ${c.Phone}</div>`:""}
+        </div>
+        <div style="font-size:14px;color:var(--gold-dark);font-weight:700">${fns.length} function${fns.length!==1?"s":""}</div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div class="section-label" style="margin-bottom:0">Functions</div>
+      <button class="btn btn-gold btn-sm" style="width:auto;padding:8px 14px" onclick="openModal('modal-newFunction')">+ Add Function</button>
+    </div>
+    ${fns.length?fns.map(f=>renderFunctionCard(f)).join(""):`<div class="empty-state"><div class="icon">📅</div><p>No functions yet. Tap + Add Function.</p></div>`}`;
+}
+
+function renderFunctionCard(f){
+  const stage=parseInt(f.Stage)||1;
+  const color=STAGE_COLORS[stage]||STAGE_COLORS[1];
+  return `<div class="fn-card" onclick="openFunction('${f.Event_ID}')">
+    <div class="fn-card-left" style="background:${color}"></div>
+    <div class="fn-card-inner">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div class="fn-name">${f.Function}</div>
+        <span class="tag" style="background:${color}18;color:${color};border:1px solid ${color}30">Stage ${stage}</span>
+      </div>
+      <div class="fn-sub">📅 ${f.Date||"Date TBD"} · 👥 ${f.Pax||0} pax ${f.Venue?"· 📍 "+f.Venue:""}</div>
+    </div>
+  </div>`;
+}
+
+async function openFunction(eventId){
+  APP.currentEvent=APP.allEvents.find(e=>e.Event_ID===eventId);
+  if(!APP.currentEvent)return;
+  APP.currentEventItems=await apiGet("getEventItems","&event_id="+eventId);
   APP.currentEventVendors=await apiGet("getEventVendors","&event_id="+eventId);
-  renderEventDetail();
-  document.getElementById("eventList").style.display="none";
-  document.getElementById("eventDetail").style.display="block";
+  renderFunctionDetailScreen();
+  showFunctionDetail();
 }
 
-function renderEventDetail() {
+function renderFunctionDetailScreen(){
   const ev=APP.currentEvent;
+  const c=APP.currentClient;
   const stage=parseInt(ev.Stage)||1;
-  const cancelled=stage===0;
-  const color=cancelled?"#C0392B":(STAGE_COLORS[stage]||STAGE_COLORS[1]);
+  const color=STAGE_COLORS[stage]||STAGE_COLORS[1];
+  const items=APP.currentEventItems;
+  const vendors=APP.currentEventVendors;
 
-  let actions="";
-  if (!cancelled){
-    if (stage===1) actions+=`<button class="btn btn-gold" onclick="openSendMenu()">📎  Send Menu Quote to Client</button>`;
-    if (stage===3) actions+=`<button class="btn btn-gold" onclick="openPriceQuote()">💰  Send Price Quote to Client</button>`;
-    if (stage>=2)  actions+=`<button class="btn btn-outline" style="margin-top:8px" onclick="openTasting()">🍽️  Set Up Tasting</button>`;
-  }
+  // Group vendors by item
+  const vendorsByItem={};
+  vendors.forEach(v=>{
+    if(!vendorsByItem[v.Item_Row_ID]) vendorsByItem[v.Item_Row_ID]=[];
+    vendorsByItem[v.Item_Row_ID].push(v);
+  });
 
-  const vendorCards=APP.currentEventVendors.length
-    ?APP.currentEventVendors.map((v,vi)=>{
-      const advColor=v.Advance_Paid&&v.Advance_Paid!=='—'&&v.Advance_Paid!=='pending'?'var(--green)':'var(--red)';
-      const balColor=v.Balance_Paid&&v.Balance_Paid!=='—'?'var(--green)':'var(--muted)';
-      return `<div class="vendor-card">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
-          <div style="font-family:var(--serif);font-size:16px">${v.Agency_Name||v.Vendor_ID}</div>
-          <div style="display:flex;gap:6px;align-items:center">
-            <span class="tag" style="background:#2C528218;color:#2C5282;border:1px solid #2C528230">${v.Status||"pending"}</span>
-            <button onclick="toggleVendorEdit(${vi})" style="background:none;border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-size:11px;color:var(--muted);cursor:pointer">✏️</button>
-          </div>
+  const itemsHtml=items.length?items.map(item=>{
+    const itemVendors=vendorsByItem[item.Row_ID]||[];
+    return `<div class="item-row" style="flex-direction:column;align-items:stretch">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div>
+          <div class="item-row-name">${item.Item_Name}</div>
+          <div class="item-row-sub">${item.Qty} ${item.Unit} · ${item.Category}</div>
         </div>
-        <div style="font-size:13px;color:var(--muted);margin-bottom:12px">${v.Items||"—"}</div>
-        <div class="gold-line"></div>
-        <div class="vendor-price-row">
-          <div class="vpc"><div class="lbl">Quoted Cost</div><div class="val">${v.Vendor_Cost||"—"}</div></div>
-          <div class="vpc"><div class="lbl">Advance Paid</div><div class="val" style="color:${advColor}">${v.Advance_Paid||"—"}</div></div>
-          <div class="vpc"><div class="lbl">Balance Paid</div><div class="val" style="color:${balColor}">${v.Balance_Paid||"—"}</div></div>
-        </div>
-        <div id="vedit_${vi}" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--faint)">
-          <div class="form-row">
-            <div class="form-group"><label class="form-label">Quoted Cost (₹)</label><input class="form-input" id="vc_cost_${vi}" placeholder="e.g. 45000" value="${v.Vendor_Cost||''}"></div>
-            <div class="form-group"><label class="form-label">Status</label>
-              <select class="form-select" id="vc_status_${vi}">
-                <option value="quote_pending" ${v.Status==='quote_pending'?'selected':''}>Quote Pending</option>
-                <option value="confirmed" ${v.Status==='confirmed'?'selected':''}>Confirmed</option>
-                <option value="order_placed" ${v.Status==='order_placed'?'selected':''}>Order Placed</option>
-                <option value="tasting_set" ${v.Status==='tasting_set'?'selected':''}>Tasting Set</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group"><label class="form-label">Advance Paid (₹)</label><input class="form-input" id="vc_adv_${vi}" placeholder="e.g. 10000" value="${v.Advance_Paid||''}"></div>
-            <div class="form-group"><label class="form-label">Balance Paid (₹)</label><input class="form-input" id="vc_bal_${vi}" placeholder="e.g. 35000" value="${v.Balance_Paid||''}"></div>
-          </div>
-          <div class="form-row">
-            <div class="form-group"><label class="form-label">Payment Date</label><input class="form-input" id="vc_date_${vi}" type="date" value="${v.Payment_Date||''}"></div>
-            <div class="form-group"><label class="form-label">Payment Mode</label>
-              <select class="form-select" id="vc_mode_${vi}">
-                <option value="">— Select —</option>
-                <option value="Cash" ${v.Payment_Mode==='Cash'?'selected':''}>Cash</option>
-                <option value="NEFT" ${v.Payment_Mode==='NEFT'?'selected':''}>NEFT</option>
-                <option value="UPI" ${v.Payment_Mode==='UPI'?'selected':''}>UPI</option>
-                <option value="Cheque" ${v.Payment_Mode==='Cheque'?'selected':''}>Cheque</option>
-              </select>
-            </div>
-          </div>
-          <div style="display:flex;gap:8px;margin-top:4px">
-            <button class="btn btn-gold btn-sm" style="flex:2" onclick="saveVendorCost(${vi},'${v.Row_ID}')">Save</button>
-            <button class="btn btn-outline btn-sm" style="flex:1" onclick="toggleVendorEdit(${vi})">Cancel</button>
-          </div>
-          <div id="vc_msg_${vi}" style="margin-top:8px"></div>
-        </div>
-        <button class="btn btn-outline btn-sm" style="margin-top:10px" onclick="msgVendor('${v.Vendor_ID}')">💬  Message Vendor</button>
-      </div>`;
-    }).join("")
-    :`<div class="empty-state"><div class="icon">🏪</div><p>No vendors assigned yet.</p></div>`;
-
-  document.getElementById("eventDetail").innerHTML=`
-    <div class="detail-topbar">
-      <button class="back-btn" onclick="showEventList()">← All Events</button>
-      ${!cancelled?`<div style="position:relative">
-        <button class="menu-btn" onclick="toggleDropdown(this)" id="eventMenuBtn">⋮</button>
-        <div class="dropdown" id="eventDropdown">
-          <button class="dropdown-item" onclick="openEditEvent()">✏️ Edit Event</button>
-          <button class="dropdown-item danger" onclick="openCancelConfirm()">🚫 Cancel Event</button>
-        </div>
-      </div>`:""}
-    </div>
-    ${cancelled?`<div class="cancelled-banner"><div class="icon">🚫</div><div><div class="text">Event Cancelled</div><div class="sub">This event has been cancelled. Record is kept for reference.</div></div></div>`:""}
-    <div class="card" style="margin-bottom:14px">
-      <div style="font-family:var(--serif);font-size:22px;color:var(--text)">${ev.Client_Name}</div>
-      <div style="font-size:13px;color:var(--muted);margin-bottom:16px">${ev.Occasion} · ${ev.Event_Date} · ${ev.Pax} pax</div>
-      ${!cancelled?renderPipeline(stage):""}
-      <div class="fin-row">
-        <div class="fin-card"><div class="amount" style="color:var(--green)">${ev.Advance_Recd||"—"}</div><div class="label">Advance Received</div></div>
-        <div class="fin-card"><div class="amount" style="color:var(--orange)">${ev.Balance_Due||"—"}</div><div class="label">Balance Due</div></div>
+        <button onclick="deleteItemRow('${item.Row_ID}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px">×</button>
       </div>
-    </div>
-    ${actions?`<div class="action-btns">${actions}</div>`:""}
-    <div class="tabs">
-      <button class="tab-btn active" onclick="switchTab('client',this)">👤  Client</button>
-      <button class="tab-btn" onclick="switchTab('vendors',this)">🏪  Vendors</button>
-    </div>
-    <div id="tab-client" class="tab-content active">
-      <div class="card" style="margin-bottom:12px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-          <div class="section-label" style="margin-bottom:0">Client Payment</div>
-          <button onclick="toggleClientPayEdit()" id="clientPayEditBtn" style="background:none;border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-size:11px;color:var(--muted);cursor:pointer">✏️ Edit</button>
-        </div>
-        <div id="clientPayView">
-          <div style="display:flex;justify-content:space-between;margin-bottom:10px">
-            <div class="vpc"><div class="lbl">Total Package</div><div class="val" style="color:var(--text)" id="cpv_total">${ev.Total_Package||"—"}</div></div>
-            <div class="vpc"><div class="lbl">Advance Recd</div><div class="val" style="color:var(--green)" id="cpv_adv">${ev.Advance_Recd||"—"}</div></div>
-            <div class="vpc"><div class="lbl">Balance Due</div><div class="val" style="color:var(--orange)" id="cpv_bal">${ev.Balance_Due||"—"}</div></div>
-          </div>
-          <div style="font-size:12px;color:var(--muted)">${ev.Payment_Mode?'Mode: '+ev.Payment_Mode:''} ${ev.Payment_Date?'· Date: '+ev.Payment_Date:''}</div>
-        </div>
-        <div id="clientPayEdit" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--faint)">
-          <div class="form-row">
-            <div class="form-group"><label class="form-label">Total Package (₹)</label><input class="form-input" id="cp_total" placeholder="e.g. 200000" value="${ev.Total_Package||''}"></div>
-            <div class="form-group"><label class="form-label">Advance Received (₹)</label><input class="form-input" id="cp_adv" placeholder="e.g. 50000" value="${ev.Advance_Recd!=='—'?ev.Advance_Recd||'':''}"></div>
-          </div>
-          <div class="form-row">
-            <div class="form-group"><label class="form-label">Balance Due (₹)</label><input class="form-input" id="cp_bal" placeholder="e.g. 150000" value="${ev.Balance_Due!=='—'?ev.Balance_Due||'':''}"></div>
-            <div class="form-group"><label class="form-label">Payment Mode</label>
-              <select class="form-select" id="cp_mode">
-                <option value="">— Select —</option>
-                <option value="Cash" ${ev.Payment_Mode==='Cash'?'selected':''}>Cash</option>
-                <option value="NEFT" ${ev.Payment_Mode==='NEFT'?'selected':''}>NEFT</option>
-                <option value="UPI" ${ev.Payment_Mode==='UPI'?'selected':''}>UPI</option>
-                <option value="Cheque" ${ev.Payment_Mode==='Cheque'?'selected':''}>Cheque</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-group"><label class="form-label">Payment Date</label><input class="form-input" id="cp_date" type="date" value="${ev.Payment_Date||''}"></div>
-          <div style="display:flex;gap:8px">
-            <button class="btn btn-gold btn-sm" style="flex:2" onclick="saveClientPayment()">Save</button>
-            <button class="btn btn-outline btn-sm" style="flex:1" onclick="toggleClientPayEdit()">Cancel</button>
-          </div>
-          <div id="cp_msg" style="margin-top:8px"></div>
-        </div>
-      </div>
-      <div class="card"><div class="section-label">Menus Sent</div><div style="font-size:13px;color:var(--muted);padding:10px 0">No menus recorded yet.</div></div>
-    </div>
-    <div id="tab-vendors" class="tab-content">
-      ${vendorCards}
-      ${!cancelled?`<button class="btn btn-outline" onclick="showAssignVendor()" style="margin-top:4px">+ Assign Vendor to Event</button>`:""}
+      ${itemVendors.length?`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">
+        ${itemVendors.map(v=>{
+          const sc=v.Status==="confirmed"?"var(--green)":v.Status==="quote_pending"?"var(--orange)":"var(--muted)";
+          return `<div onclick="openVendorQuote('${v.Row_ID}')" style="background:var(--card-alt);border:1px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer">
+            <div style="font-size:12px;font-weight:600;color:var(--text)">${v.Agency_Name}</div>
+            <div style="font-size:11px;color:${sc}">${v.Quoted_Cost||"Quote pending"}</div>
+          </div>`;
+        }).join("")}
+      </div>`:
+      `<div style="font-size:12px;color:var(--muted)">No vendors assigned yet</div>`}
     </div>`;
+  }).join(""):
+  `<div class="empty-state" style="padding:20px"><div class="icon">🍽️</div><p>No items yet. Tap + to add items and get quotes.</p></div>`;
+
+  // Stage actions
+  let actions="";
+  if(stage===1) actions+=`<button class="btn btn-gold" onclick="openSendMenu()" style="margin-bottom:8px">📎 Send Menu Quote to Client</button>`;
+  if(stage===3) actions+=`<button class="btn btn-gold" onclick="sendPriceQuote()" style="margin-bottom:8px">💰 Send Price Quote to Client</button>`;
+
+  document.getElementById("functionDetail").innerHTML=`
+    <div class="detail-topbar">
+      <button class="back-btn" onclick="goBackToClient()">← ${c?c.Client_Name:"Client"}</button>
+      <div style="position:relative">
+        <button class="menu-btn" onclick="toggleDropdown(this)">⋮</button>
+        <div class="dropdown" id="fnDropdown">
+          <button class="dropdown-item" onclick="editFunction()">✏️ Edit Function</button>
+          <button class="dropdown-item" onclick="updateFunctionStage()">📊 Update Stage</button>
+          <button class="dropdown-item danger" onclick="cancelFunction()">🚫 Cancel Function</button>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:14px">
+      <div style="font-family:var(--serif);font-size:20px;color:var(--text)">${ev.Function}</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:3px">${c?c.Client_Name:""} · ${ev.Date||"Date TBD"} · ${ev.Pax||0} pax ${ev.Venue?"· "+ev.Venue:""}</div>
+      <div style="margin-top:10px">
+        <span class="tag" style="background:${color}18;color:${color};border:1px solid ${color}30;font-size:12px">
+          Stage ${stage}: ${STAGE_LABELS[stage]}
+        </span>
+      </div>
+    </div>
+    ${actions?`<div style="margin-bottom:14px">${actions}</div>`:""}
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div class="section-label" style="margin-bottom:0">Items & Quote Status</div>
+    </div>
+    ${itemsHtml}`;
 }
 
-function toggleDropdown(btn) {
-  const dd=document.getElementById("eventDropdown");
-  dd.classList.toggle("open");
-  document.addEventListener("click", function closeDD(e){
-    if (!btn.contains(e.target)){dd.classList.remove("open");document.removeEventListener("click",closeDD);}
-  });
+async function goBackToClient(){
+  if(!APP.currentClient)return showClientList();
+  const fns=APP.allEvents.filter(e=>e.Client_ID===APP.currentClient.Client_ID);
+  renderClientDetail(fns);
+  showClientDetail();
 }
 
-function switchTab(name,btn) {
-  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
-  document.querySelectorAll(".tab-content").forEach(c=>c.classList.remove("active"));
-  btn.classList.add("active");
-  document.getElementById("tab-"+name).classList.add("active");
+async function deleteItemRow(rowId){
+  if(!confirm("Remove this item?"))return;
+  await apiWrite("deleteEventItem",{Row_ID:rowId});
+  APP.currentEventItems=await apiGet("getEventItems","&event_id="+APP.currentEvent.Event_ID);
+  APP.currentEventVendors=await apiGet("getEventVendors","&event_id="+APP.currentEvent.Event_ID);
+  renderFunctionDetailScreen();
 }
 
-// ── EDIT EVENT ────────────────────────────────────────────────
-function openEditEvent() {
-  document.getElementById("eventDropdown").classList.remove("open");
+// ── VENDOR QUOTE POPUP ────────────────────────────────────────
+function openVendorQuote(rowId){
+  const v=APP.currentEventVendors.find(x=>x.Row_ID===rowId);
+  if(!v)return;
+  const vendor=APP.vendors.find(x=>x.Vendor_ID===v.Vendor_ID);
   const ev=APP.currentEvent;
-  document.getElementById("edit-occasion").value=ev.Occasion||"Wedding Reception";
-  document.getElementById("edit-date").value=ev.Event_Date||"";
-  document.getElementById("edit-pax").value=ev.Pax||"";
-  document.getElementById("edit-advance").value=ev.Advance_Recd||"";
-  document.getElementById("edit-balance").value=ev.Balance_Due||"";
-  document.getElementById("edit-stage").value=ev.Stage||1;
-  document.getElementById("edit-notes").value=ev.Notes||"";
-  document.getElementById("editEventMsg").innerHTML="";
-  openModal("modal-editEvent");
+  const sig=APP.settings.Signature||"UVI Luxury Catering & Decor";
+  const msg=`Dear ${(v.Agency_Name||"").split(" ")[0]},\n\nWe are planning an *${ev.Function}* on *${ev.Date}* (${ev.Pax} pax).\n\nKindly share your best quote for:\n• ${v.Item_Name}\n\nPlease revert at the earliest.\n\n*${sig}*`;
+  const wa=vendor?.WhatsApp_Group_Link||(vendor?.Contact_Number?`https://wa.me/91${vendor.Contact_Number}`:"");
+  showWAMsg(msg, wa, `Quote Request → ${v.Agency_Name}`);
 }
 
-async function saveEditEvent() {
-  const btn=document.getElementById("saveEditBtn");
-  btn.textContent="Saving..."; btn.disabled=true;
-  const res=await apiWrite("updateEvent",{
-    Event_ID:   APP.currentEvent.Event_ID,
-    Occasion:   document.getElementById("edit-occasion").value,
-    Event_Date: document.getElementById("edit-date").value,
-    Pax:        document.getElementById("edit-pax").value,
-    Advance_Recd: document.getElementById("edit-advance").value,
-    Balance_Due:  document.getElementById("edit-balance").value,
-    Stage:      document.getElementById("edit-stage").value,
-    Notes:      document.getElementById("edit-notes").value
+// ── ADD ITEMS FLOW ────────────────────────────────────────────
+function openAddItems(){
+  APP.ai={item:null,qty:"",unit:"pax",selectedVendors:[],savedItems:[]};
+  document.getElementById("aiItemSearch").value="";
+  renderItemChips("");
+  populateExtraVendorDropdown();
+  goStep("ai",1,null);
+  openModal("modal-addItems");
+}
+
+function filterItems(){
+  const q=document.getElementById("aiItemSearch").value.toLowerCase();
+  renderItemChips(q);
+}
+
+function renderItemChips(query){
+  const items=APP.itemVendors.filter(i=>!query||i.Item_Name.toLowerCase().includes(query));
+  // Group by category
+  const cats={};
+  items.forEach(i=>{
+    if(!cats[i.Category])cats[i.Category]=[];
+    cats[i.Category].push(i);
   });
-  if (res.success){
-    document.getElementById("editEventMsg").innerHTML=`<div class="success-box"><div class="title">✓ Event Updated</div></div>`;
-    await loadEvents();
-    APP.currentEvent=APP.events.find(e=>e.Event_ID===APP.currentEvent.Event_ID);
-    renderEventDetail();
-    setTimeout(()=>closeModal("modal-editEvent"),1200);
-  } else {
-    document.getElementById("editEventMsg").innerHTML=`<div class="error-box"><div class="title">Error: ${res.error||"Unknown"}</div></div>`;
-  }
-  btn.textContent="Save Changes"; btn.disabled=false;
-}
-
-// ── CANCEL EVENT ──────────────────────────────────────────────
-function openCancelConfirm() {
-  document.getElementById("eventDropdown").classList.remove("open");
-  document.getElementById("cancelConfirmText").textContent=`Cancel "${APP.currentEvent.Client_Name} — ${APP.currentEvent.Occasion}"? The record will be kept for reference.`;
-  openModal("modal-cancelConfirm");
-}
-
-async function confirmCancelEvent() {
-  const res=await apiWrite("updateEvent",{
-    Event_ID: APP.currentEvent.Event_ID,
-    Stage: 0
+  let html="";
+  Object.entries(cats).forEach(([cat,citems])=>{
+    html+=`<div style="font-size:10px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin:8px 0 4px">${cat}</div>`;
+    html+=citems.map(i=>`<span class="chip ${APP.ai.item?.Item_Name===i.Item_Name?"selected":""}" onclick="selectItem('${i.Item_Name}','${i.Category}')">${i.Item_Name}</span>`).join("");
   });
-  if (res.success){
-    closeModal("modal-cancelConfirm");
-    await loadEvents();
-    APP.currentEvent=APP.events.find(e=>e.Event_ID===APP.currentEvent.Event_ID);
-    renderEventDetail();
-    renderEvents();
-  }
+  if(!html) html=`<div style="font-size:13px;color:var(--muted);padding:10px 0">No items found. Type below to add new.</div>`;
+  document.getElementById("aiItemChips").innerHTML=html;
 }
 
-// ── NEW EVENT ─────────────────────────────────────────────────
-async function saveNewEvent() {
-  const client=document.getElementById("new-client").value.trim();
-  if (!client){alert("Client name is required");return;}
-  const btn=document.getElementById("saveEventBtn");
-  btn.textContent="Saving..."; btn.disabled=true;
-  try {
-    const res=await apiWrite("addEvent",{
-      Client_Name:client,
-      Occasion:document.getElementById("new-occasion").value,
-      Event_Date:document.getElementById("new-date").value,
-      Pax:document.getElementById("new-pax").value||0,
-      Notes:document.getElementById("new-notes").value,
-      Stage:1
-    });
-    if (res.success){
-      document.getElementById("newEventMsg").innerHTML=`<div class="success-box"><div class="title">✓ Event Created</div><div class="sub">ID: ${res.Event_ID} · Tasks auto-generated.</div></div>`;
-      await loadEvents(); await loadTasks();
-      renderEvents(); renderToday();
-      setTimeout(()=>{closeModal("modal-newEvent");document.getElementById("newEventMsg").innerHTML="";},1500);
-    } else {
-      document.getElementById("newEventMsg").innerHTML=`<div class="error-box"><div class="title">Error: ${res.error||"Unknown"}</div></div>`;
+function selectItem(name,cat){
+  APP.ai.item={Item_Name:name,Category:cat};
+  renderItemChips(document.getElementById("aiItemSearch").value.toLowerCase());
+}
+
+function aiStep1Next(){
+  // Check if item selected from chips or typed
+  const typed=document.getElementById("aiNewItem").value.trim();
+  if(!APP.ai.item&&!typed){alert("Please select or type an item.");return;}
+  if(typed){
+    APP.ai.item={Item_Name:typed,Category:document.getElementById("aiNewCat").value};
+  }
+  document.getElementById("aiSelectedItemName").textContent=APP.ai.item.Item_Name;
+  document.getElementById("aiSelectedItemCat").textContent=APP.ai.item.Category;
+  goStep("ai",2,null);
+}
+
+function aiStep2Next(){
+  const qty=document.getElementById("aiQty").value.trim();
+  if(!qty){alert("Please enter quantity.");return;}
+  APP.ai.qty=qty;
+  APP.ai.unit=document.getElementById("aiUnit").value;
+  // Load vendors for this item
+  APP.ai.selectedVendors=[];
+  const itemData=APP.itemVendors.find(i=>i.Item_Name===APP.ai.item.Item_Name);
+  APP.ai.itemVendorList=itemData?itemData.Vendors:[];
+  document.getElementById("aiVendorContext").textContent=`${APP.ai.item.Item_Name} — ${APP.ai.qty} ${APP.ai.unit}`;
+  renderAiVendorChips();
+  goStep("ai",3,null);
+}
+
+function renderAiVendorChips(){
+  const list=APP.ai.itemVendorList||[];
+  if(!list.length){
+    document.getElementById("aiVendorChips").innerHTML=`<div style="font-size:13px;color:var(--muted)">No standard vendors on file for this item. Select from dropdown below.</div>`;
+    return;
+  }
+  document.getElementById("aiVendorChips").innerHTML=list.map(name=>{
+    const sel=APP.ai.selectedVendors.some(v=>v.name===name);
+    return `<span class="chip ${sel?"selected":""}" onclick="toggleAiVendor('${name.replace(/'/g,"\\'")}')">
+      ${sel?"✓ ":""}${name}
+    </span>`;
+  }).join("");
+}
+
+function toggleAiVendor(name){
+  const idx=APP.ai.selectedVendors.findIndex(v=>v.name===name);
+  if(idx>=0) APP.ai.selectedVendors.splice(idx,1);
+  else {
+    const vendor=APP.vendors.find(v=>v.Agency_Name===name);
+    APP.ai.selectedVendors.push({name, vendor_id:vendor?.Vendor_ID||"", vendor});
+  }
+  renderAiVendorChips();
+  renderAiSelectedVendors();
+}
+
+function populateExtraVendorDropdown(){
+  const el=document.getElementById("aiExtraVendor");
+  el.innerHTML=`<option value="">— Select vendor —</option>`+
+    APP.vendors.map(v=>`<option value="${v.Vendor_ID}">${v.Agency_Name}</option>`).join("");
+}
+
+function addExtraVendor(){
+  const sel=document.getElementById("aiExtraVendor");
+  const vendorId=sel.value;
+  if(!vendorId)return;
+  const vendor=APP.vendors.find(v=>v.Vendor_ID===vendorId);
+  if(!vendor)return;
+  if(!APP.ai.selectedVendors.some(v=>v.vendor_id===vendorId)){
+    APP.ai.selectedVendors.push({name:vendor.Agency_Name,vendor_id:vendorId,vendor});
+    renderAiVendorChips();
+    renderAiSelectedVendors();
+  }
+  sel.value="";
+}
+
+function renderAiSelectedVendors(){
+  const el=document.getElementById("aiSelectedVendors");
+  if(!APP.ai.selectedVendors.length){
+    el.innerHTML=`<div style="font-size:13px;color:var(--muted)">None selected yet</div>`;
+    return;
+  }
+  el.innerHTML=APP.ai.selectedVendors.map((v,i)=>`
+    <div class="sel-item">
+      <div><div class="sel-item-name">${v.name}</div></div>
+      <button class="remove-btn" onclick="removeAiVendor(${i})">×</button>
+    </div>`).join("");
+}
+
+function removeAiVendor(i){
+  APP.ai.selectedVendors.splice(i,1);
+  renderAiVendorChips();
+  renderAiSelectedVendors();
+}
+
+function aiStep3Next(){
+  if(!APP.ai.selectedVendors.length){alert("Please select at least one vendor.");return;}
+  buildQuoteMsgs();
+  goStep("ai",4,null);
+}
+
+function buildQuoteMsgs(){
+  const ev=APP.currentEvent;
+  const sig=APP.settings.Signature||"UVI Luxury Catering & Decor";
+  const item=APP.ai.item;
+  const qty=APP.ai.qty;
+  const unit=APP.ai.unit;
+  let html="";
+  APP.ai.selectedVendors.forEach((v,i)=>{
+    const msg=`Dear ${v.name.split(" ")[0]},\n\nWe are planning an *${ev.Function}* on *${ev.Date}* (${ev.Pax} pax).\n\nKindly share your best quote for:\n• ${item.Item_Name} — ${qty} ${unit}\n\nPlease revert at the earliest.\n\n*${sig}*`;
+    APP.ai.selectedVendors[i].msg=msg;
+    const wa=v.vendor?.WhatsApp_Group_Link||(v.vendor?.Contact_Number?`https://wa.me/91${v.vendor.Contact_Number}`:"");
+    APP.ai.selectedVendors[i].wa=wa;
+    html+=`<div class="card" style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <strong style="font-size:14px">${v.name}</strong>
+        <span id="qsent_${i}" style="font-size:11px;color:var(--muted)"></span>
+      </div>
+      <div class="wa-preview">${msg}</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-gold btn-sm" style="flex:2" onclick="sendQuoteMsg(${i})">📋 Copy + WhatsApp</button>
+        <button id="qmark_${i}" onclick="markQuoteSent(${i})" style="flex:1;padding:9px;border-radius:10px;cursor:pointer;font-family:var(--sans);font-size:12px;border:1.5px solid var(--border);background:var(--card-alt);color:var(--muted)">Mark Sent</button>
+      </div>
+    </div>`;
+  });
+  document.getElementById("aiQuoteMsgs").innerHTML=html;
+}
+
+function sendQuoteMsg(i){
+  const v=APP.ai.selectedVendors[i];
+  showWAMsg(v.msg,v.wa,`Quote Request → ${v.name}`);
+}
+
+function markQuoteSent(i){
+  const btn=document.getElementById(`qmark_${i}`);
+  const tag=document.getElementById(`qsent_${i}`);
+  btn.textContent="✓ Sent";btn.style.background="#E8F5E9";btn.style.color="var(--green)";btn.style.borderColor="var(--green)";
+  tag.textContent="✓ Sent";tag.style.color="var(--green)";
+}
+
+async function saveAndAddMore(){
+  await saveCurrentItem();
+  APP.ai={item:null,qty:"",unit:"pax",selectedVendors:[],savedItems:APP.ai.savedItems};
+  document.getElementById("aiItemSearch").value="";
+  document.getElementById("aiNewItem").value="";
+  renderItemChips("");
+  goStep("ai",1,null);
+}
+
+async function saveAndDone(){
+  await saveCurrentItem();
+  await refreshFunctionData();
+  closeModal("modal-addItems");
+}
+
+async function saveCurrentItem(){
+  const ev=APP.currentEvent;
+  const item=APP.ai.item;
+  if(!item)return;
+  // Save item to EVENT_ITEMS
+  const itemRes=await apiWrite("addEventItem",{
+    Event_ID:ev.Event_ID, Item_Name:item.Item_Name,
+    Category:item.Category, Qty:APP.ai.qty, Unit:APP.ai.unit
+  });
+  if(itemRes.success){
+    // Save each vendor to EVENT_VENDORS
+    for(const v of APP.ai.selectedVendors){
+      await apiWrite("addEventVendor",{
+        Event_ID:ev.Event_ID, Item_Row_ID:itemRes.Row_ID,
+        Vendor_ID:v.vendor_id, Agency_Name:v.name, Item_Name:item.Item_Name
+      });
     }
-  } catch(e){
-    document.getElementById("newEventMsg").innerHTML=`<div class="error-box"><div class="title">Connection error. Check internet.</div></div>`;
+    document.getElementById("aiSaveMsg").innerHTML=`<div class="success-box"><div class="title">✓ ${item.Item_Name} saved with ${APP.ai.selectedVendors.length} vendor(s)</div></div>`;
   }
-  btn.textContent="Create Event"; btn.disabled=false;
+}
+
+async function refreshFunctionData(){
+  APP.currentEventItems=await apiGet("getEventItems","&event_id="+APP.currentEvent.Event_ID);
+  APP.currentEventVendors=await apiGet("getEventVendors","&event_id="+APP.currentEvent.Event_ID);
+  renderFunctionDetailScreen();
+}
+
+// ── NEW CLIENT ────────────────────────────────────────────────
+async function saveNewClient(){
+  const name=document.getElementById("nc-name").value.trim();
+  if(!name){alert("Client name is required");return;}
+  const btn=document.getElementById("saveClientBtn");
+  btn.textContent="Saving...";btn.disabled=true;
+  const res=await apiWrite("addClient",{
+    Client_Name:name,
+    Contact_Person:document.getElementById("nc-contact").value,
+    Phone:document.getElementById("nc-phone").value,
+    Email:document.getElementById("nc-email").value,
+    Notes:document.getElementById("nc-notes").value
+  });
+  if(res.success){
+    document.getElementById("newClientMsg").innerHTML=`<div class="success-box"><div class="title">✓ Client Added</div></div>`;
+    await loadClients(); await loadAllEvents();
+    renderClients();
+    setTimeout(()=>{closeModal("modal-newClient");document.getElementById("newClientMsg").innerHTML="";},1200);
+  }
+  btn.textContent="Create Client";btn.disabled=false;
+}
+
+// ── NEW FUNCTION ──────────────────────────────────────────────
+async function saveNewFunction(){
+  if(!APP.currentClient){alert("No client selected");return;}
+  const btn=document.getElementById("saveFunctionBtn");
+  btn.textContent="Saving...";btn.disabled=true;
+  const res=await apiWrite("addEvent",{
+    Client_ID:APP.currentClient.Client_ID,
+    Client_Name:APP.currentClient.Client_Name,
+    Function:document.getElementById("nf-function").value,
+    Date:document.getElementById("nf-date").value,
+    Pax:document.getElementById("nf-pax").value||0,
+    Venue:document.getElementById("nf-venue").value,
+    Notes:document.getElementById("nf-notes").value,
+    Stage:1
+  });
+  if(res.success){
+    document.getElementById("newFunctionMsg").innerHTML=`<div class="success-box"><div class="title">✓ Function Added</div><div class="sub">Tasks auto-generated.</div></div>`;
+    await loadAllEvents(); await loadTasks();
+    renderToday();
+    const fns=APP.allEvents.filter(e=>e.Client_ID===APP.currentClient.Client_ID);
+    renderClientDetail(fns);
+    setTimeout(()=>{closeModal("modal-newFunction");document.getElementById("newFunctionMsg").innerHTML="";},1200);
+  }
+  btn.textContent="Add Function";btn.disabled=false;
+}
+
+// ── EDIT/CANCEL FUNCTION ──────────────────────────────────────
+function editFunction(){
+  document.getElementById("fnDropdown").classList.remove("open");
+  const ev=APP.currentEvent;
+  // Pre-fill and open modal
+  document.getElementById("nf-function").value=ev.Function||"Haldi";
+  document.getElementById("nf-date").value=ev.Date||"";
+  document.getElementById("nf-pax").value=ev.Pax||"";
+  document.getElementById("nf-venue").value=ev.Venue||"";
+  document.getElementById("nf-notes").value=ev.Notes||"";
+  const btn=document.getElementById("saveFunctionBtn");
+  btn.textContent="Save Changes";
+  btn.onclick=saveEditFunction;
+  openModal("modal-newFunction");
+}
+
+async function saveEditFunction(){
+  const btn=document.getElementById("saveFunctionBtn");
+  btn.textContent="Saving...";btn.disabled=true;
+  await apiWrite("updateEvent",{
+    Event_ID:APP.currentEvent.Event_ID,
+    Function:document.getElementById("nf-function").value,
+    Date:document.getElementById("nf-date").value,
+    Pax:document.getElementById("nf-pax").value,
+    Venue:document.getElementById("nf-venue").value,
+    Notes:document.getElementById("nf-notes").value
+  });
+  await loadAllEvents();
+  APP.currentEvent=APP.allEvents.find(e=>e.Event_ID===APP.currentEvent.Event_ID);
+  renderFunctionDetailScreen();
+  closeModal("modal-newFunction");
+  btn.textContent="Add Function";btn.onclick=saveNewFunction;btn.disabled=false;
+}
+
+function updateFunctionStage(){
+  document.getElementById("fnDropdown").classList.remove("open");
+  const stage=prompt(`Current stage: ${APP.currentEvent.Stage}\nEnter new stage (1-6):\n1=Menu Quote, 2=Vendor Costs, 3=Price Quote, 4=Tasting, 5=Advance, 6=Final Orders`);
+  if(stage&&parseInt(stage)>=1&&parseInt(stage)<=6){
+    apiWrite("updateEvent",{Event_ID:APP.currentEvent.Event_ID,Stage:parseInt(stage)}).then(async()=>{
+      await loadAllEvents();
+      APP.currentEvent=APP.allEvents.find(e=>e.Event_ID===APP.currentEvent.Event_ID);
+      renderFunctionDetailScreen();
+    });
+  }
+}
+
+async function cancelFunction(){
+  document.getElementById("fnDropdown").classList.remove("open");
+  if(!confirm(`Cancel ${APP.currentEvent.Function} for ${APP.currentClient?.Client_Name}? Record will be kept.`))return;
+  await apiWrite("updateEvent",{Event_ID:APP.currentEvent.Event_ID,Stage:0});
+  await loadAllEvents();
+  goBackToClient();
 }
 
 // ── SEND MENU ─────────────────────────────────────────────────
@@ -1004,116 +1187,52 @@ function openSendMenu(){
   document.getElementById("menuAttachText").textContent="Tap to attach menu PDF";
   goStep("menu",1,null);updateMenuPreview();openModal("modal-sendMenu");
 }
+
 function menuAttachClick(){
   APP.menuAttached=true;
-  APP.menuFileName=`${APP.currentEvent.Client_Name.replace(/ /g,"_")}_Menu_${document.getElementById("menuVersion").value}.pdf`;
+  APP.menuFileName=`${APP.currentClient?.Client_Name.replace(/ /g,"_")}_${APP.currentEvent?.Function}_Menu.pdf`;
   document.getElementById("menuAttachIcon").textContent="📎";
   document.getElementById("menuAttachText").textContent=APP.menuFileName;
 }
+
 function updateMenuPreview(){
-  const ev=APP.currentEvent;if(!ev)return;
+  const ev=APP.currentEvent;const c=APP.currentClient;if(!ev)return;
   const note=document.getElementById("menuNote")?.value||"";
   const meal=document.getElementById("menuMeal")?.value||"";
   const ver=document.getElementById("menuVersion")?.value||"V1";
   const sig=APP.settings.Signature||"UVI Luxury Catering & Decor";
-  APP._menuMsg=`Dear ${(ev.Client_Name||"").split(" ")[0]},\n\nPlease find attached the menu proposal for your *${ev.Occasion}*.\n\n📅 Date: ${ev.Event_Date}\n👥 Guests: ${ev.Pax} pax\n🍽️ Meal: ${meal} (${ver})\n\n${note}\n\nWarm regards,\n*${sig}*`;
+  APP._menuMsg=`Dear ${(c?.Client_Name||"").split(" ")[0]},\n\nPlease find attached the menu proposal for your *${ev.Function}*.\n\n📅 Date: ${ev.Date}\n👥 Guests: ${ev.Pax} pax\n🍽️ Meal: ${meal} (${ver})\n\n${note}\n\nWarm regards,\n*${sig}*`;
   const el=document.getElementById("menuWAPreview");if(el)el.textContent=APP._menuMsg;
 }
+
 function copyMenuMsg(){
-  if(APP._menuMsg){
-    if(navigator.clipboard&&navigator.clipboard.writeText){
-      navigator.clipboard.writeText(APP._menuMsg).then(()=>document.getElementById("copyMenuBtn").textContent="✓ Copied!").catch(()=>fallbackCopyStr(APP._menuMsg));
-    } else { fallbackCopyStr(APP._menuMsg); }
-  }
-}
-function fallbackCopyStr(text){
-  const ta=document.createElement("textarea");ta.value=text;ta.style.position="fixed";ta.style.opacity="0";
-  document.body.appendChild(ta);ta.focus();ta.select();
-  try{document.execCommand("copy");alert("Copied!");}catch(e){alert("Please long-press the message and copy manually.");}
-  document.body.removeChild(ta);
-}
-async function markMenuSent(){
-  const ev=APP.currentEvent;
-  const res=await apiWrite("addMenuSent",{Event_ID:ev.Event_ID,Meal_Function:document.getElementById("menuMeal").value,Version:document.getElementById("menuVersion").value,File_Name:APP.menuFileName||"Menu.pdf",Drive_Link:""});
-  if(res.success){
-    document.getElementById("menuSentMsg").innerHTML=`<div class="success-box"><div class="title">✓ Menu Quote Recorded</div><div class="sub">Follow-up reminder set for 2 days.</div></div>`;
-    document.getElementById("menuMarkSentBtn").textContent="✓ Recorded";
-    document.getElementById("menuMarkSentBtn").style.background="#E8F5E9";
-    document.getElementById("menuMarkSentBtn").style.color="var(--green)";
-    await apiWrite("updateEvent",{Event_ID:ev.Event_ID,Stage:2});
-    await loadEvents();
-  }
+  fallbackCopyStr(APP._menuMsg||"");
+  document.getElementById("copyMenuBtn").textContent="✓ Copied!";
 }
 
-// ── TASTING ───────────────────────────────────────────────────
-function openTasting(){
-  APP.tastingItems=[];APP.tastingVenueType="client";
-  document.querySelectorAll(".radio-option").forEach(r=>r.classList.remove("selected"));
-  renderTastingChips();renderTastingSelected();goStep("tasting",1,null);openModal("modal-tasting");
+async function markMenuSent(){
+  const res=await apiWrite("addMenuSent",{
+    Event_ID:APP.currentEvent.Event_ID,
+    Meal_Function:document.getElementById("menuMeal").value,
+    Version:document.getElementById("menuVersion").value,
+    File_Name:APP.menuFileName||"Menu.pdf"
+  });
+  if(res.success){
+    document.getElementById("menuSentMsg").innerHTML=`<div class="success-box"><div class="title">✓ Recorded</div><div class="sub">Follow-up reminder set for 2 days.</div></div>`;
+    document.getElementById("menuMarkSentBtn").textContent="✓ Recorded";
+    await apiWrite("updateEvent",{Event_ID:APP.currentEvent.Event_ID,Stage:2});
+    await loadAllEvents();
+    APP.currentEvent=APP.allEvents.find(e=>e.Event_ID===APP.currentEvent.Event_ID);
+    renderFunctionDetailScreen();
+  }
 }
-function selectVenue(el,type){document.querySelectorAll(".radio-option").forEach(r=>r.classList.remove("selected"));el.classList.add("selected");APP.tastingVenueType=type;}
-function renderTastingChips(){
-  const chips=[...new Set(APP.currentEventVendors.flatMap(v=>(v.Items||"").split("+").map(i=>i.trim())).filter(Boolean))];
-  document.getElementById("tastingQuickChips").innerHTML=chips.map(item=>`<span class="chip ${APP.tastingItems.includes(item)?"selected":""}" onclick="toggleTastingChip(this,'${item}')">${APP.tastingItems.includes(item)?"✓ ":""}${item}</span>`).join("");
-}
-function toggleTastingChip(el,item){if(APP.tastingItems.includes(item))APP.tastingItems=APP.tastingItems.filter(i=>i!==item);else APP.tastingItems.push(item);renderTastingChips();renderTastingSelected();}
-function addTastingItem(){const val=document.getElementById("tastingNewItem").value.trim();if(val&&!APP.tastingItems.includes(val)){APP.tastingItems.push(val);renderTastingSelected();renderTastingChips();}document.getElementById("tastingNewItem").value="";}
-function renderTastingSelected(){document.getElementById("tastingSelectedItems").innerHTML=APP.tastingItems.length?`<div class="section-label">Selected (${APP.tastingItems.length}):</div>`+APP.tastingItems.map((item,i)=>`<div class="selected-item"><span>🍽️ ${item}</span><button class="remove-btn" onclick="removeTastingItem(${i})">×</button></div>`).join(""):"";}
-function removeTastingItem(i){APP.tastingItems.splice(i,1);renderTastingSelected();renderTastingChips();}
-function buildTastingMsgs(){
-  const ev=APP.currentEvent;
-  const date=document.getElementById("tastingDate").value;
-  const time=document.getElementById("tastingTime").value;
-  const venue=document.getElementById("tastingVenue").value;
-  const sig=APP.settings.Signature||"UVI Luxury Catering & Decor";
-  const itemList=APP.tastingItems.map(i=>`• ${i}`).join("\n");
-  APP._tastingClientMsg=`Dear ${(ev.Client_Name||"").split(" ")[0]},\n\nWe are pleased to confirm your *Tasting Session*:\n\n📅 Date: ${date}\n⏰ Time: ${time}\n📍 Venue: ${venue}\n\n🍽️ Items:\n${itemList}\n\nLooking forward to hosting you.\n\n*${sig}*`;
-  document.getElementById("tastingClientMsg").textContent=APP._tastingClientMsg;
-  document.getElementById("tastingVendorMsgs").innerHTML=APP.currentEventVendors.map((v,i)=>{
-    const msg=`Dear ${(v.Agency_Name||"Vendor").split(" ")[0]},\n\nKindly prepare *tasting portions* of:\n${itemList}\n\nPickup: *${date}* at *${time}*\nEvent: ${ev.Occasion} — ${ev.Client_Name}\n\nPlease confirm.\n\n*${sig}*`;
-    APP[`_tvm_${i}`]=msg;
-    return `<div class="card" style="margin-bottom:10px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <strong style="font-size:14px">${v.Agency_Name}</strong><span id="vendorSentTag_${i}"></span>
-      </div>
-      <div class="wa-preview" id="tvm_${i}">${msg}</div>
-      <div class="sent-row">
-        <button class="btn btn-gold btn-sm" style="flex:2" onclick="copyVendorMsg(${i})">📋 Copy</button>
-        <button class="mark-btn" id="vendorMarkBtn_${i}" onclick="markVendorSent(${i})">Mark Sent</button>
-      </div>
-    </div>`;
-  }).join("");
-  APP.clientSent=false;APP.vendorsSent={};
-}
-function markClientSent(){APP.clientSent=true;document.getElementById("clientMarkBtn").className="mark-btn done";document.getElementById("clientMarkBtn").textContent="✓ Done";document.getElementById("clientSentTag").innerHTML=`<span class="tag" style="background:#2E7D5218;color:#2E7D52;border:1px solid #2E7D5230">✓ Sent</span>`;checkAllSent();}
-function markVendorSent(i){APP.vendorsSent[i]=true;document.getElementById(`vendorMarkBtn_${i}`).className="mark-btn done";document.getElementById(`vendorMarkBtn_${i}`).textContent="✓ Done";document.getElementById(`vendorSentTag_${i}`).innerHTML=`<span class="tag" style="background:#2E7D5218;color:#2E7D52;border:1px solid #2E7D5230">✓ Sent</span>`;checkAllSent();}
-function checkAllSent(){if(APP.clientSent&&Object.keys(APP.vendorsSent).length>=APP.currentEventVendors.length){document.getElementById("tastingAllSentMsg").innerHTML=`<div class="success-box"><div class="title">✓ Tasting Fully Coordinated</div><div class="sub">All messages sent. Reminder set for tasting day.</div></div>`;apiWrite("addTasting",{Event_ID:APP.currentEvent.Event_ID,Tasting_Date:document.getElementById("tastingDate").value,Time:document.getElementById("tastingTime").value,Venue_Type:APP.tastingVenueType,Venue:document.getElementById("tastingVenue").value,Items:APP.tastingItems.join(", "),Client_Msg_Sent:"Y",Vendors_Msg_Sent:"Y"});apiWrite("updateEvent",{Event_ID:APP.currentEvent.Event_ID,Stage:4});}}
-function copyVendorMsg(i){navigator.clipboard.writeText(APP[`_tvm_${i}`]||"").then(()=>alert("Copied! Paste on WhatsApp."));}
 
 // ── PRICE QUOTE ───────────────────────────────────────────────
-function openPriceQuote(){
-  const ev=APP.currentEvent;const vendors=APP.currentEventVendors;
-  const total=vendors.reduce((s,v)=>s+(parseInt((v.Your_Price||"0").replace(/[₹,]/g,""))||0),0);
+function sendPriceQuote(){
+  const ev=APP.currentEvent;const c=APP.currentClient;
   const sig=APP.settings.Signature||"UVI Luxury Catering & Decor";
-  const msg=`Dear ${(ev.Client_Name||"").split(" ")[0]},\n\nPlease find our *Final Price Quote* for your ${ev.Occasion}.\n\n📅 Date: ${ev.Event_Date}\n👥 Guests: ${ev.Pax} pax\n💰 Total Package: ₹${total.toLocaleString()}\n\nThis includes full coordination, setup & our quality guarantee. Valid for 48 hours.\n\nKindly confirm to proceed.\n\n*${sig}*`;
-  navigator.clipboard.writeText(msg).then(()=>alert("Price quote copied! Paste on WhatsApp to client."));
-}
-
-// ── VENDOR MSG ────────────────────────────────────────────────
-function msgVendor(vendorId){
-  const vendor=APP.vendors.find(v=>v.Vendor_ID===vendorId);if(!vendor)return;
-  const evVendor=APP.currentEventVendors.find(v=>v.Vendor_ID===vendorId);
-  const ev=APP.currentEvent;
-  const sig=APP.settings.Signature||"UVI Luxury Catering & Decor";
-  let msg="";
-  if(evVendor&&evVendor.Items&&evVendor.Items!=="—"){
-    const itemList=evVendor.Items.split("+").map(i=>`• ${i.trim()}`).join("\n");
-    msg=`Dear ${(vendor.Agency_Name||"").split(" ")[0]},\n\nWe are planning *${ev.Occasion}* for *${ev.Client_Name}* on *${ev.Event_Date}* (${ev.Pax} pax).\n\nKindly share your best quote for:\n${itemList}\n\nPlease revert at the earliest.\n\n*${sig}*`;
-  } else {
-    msg=`Dear ${(vendor.Agency_Name||"").split(" ")[0]},\n\nRegarding *${ev.Occasion}* — ${ev.Client_Name} on ${ev.Event_Date}.\n\n*${sig}*`;
-  }
-  const wa=vendor.WhatsApp_Group_Link||(vendor.Contact_Number?`https://wa.me/91${vendor.Contact_Number}`:"");
-  showWAMsg(msg, wa, `To: ${vendor.Agency_Name}`);
+  const msg=`Dear ${(c?.Client_Name||"").split(" ")[0]},\n\nPlease find our *Final Price Quote* for your ${ev.Function}.\n\n📅 Date: ${ev.Date}\n👥 Guests: ${ev.Pax} pax\n\nThis includes full coordination, setup & our quality guarantee. Valid for 48 hours.\n\nKindly confirm to proceed.\n\n*${sig}*`;
+  showWAMsg(msg,"",`Price Quote → ${c?.Client_Name}`);
 }
 
 // ── VENDORS ───────────────────────────────────────────────────
@@ -1122,254 +1241,101 @@ function renderVendors(){
   const vendors=APP.vendors||[];
   const cuisines=[...new Set(vendors.map(v=>v.Cuisine).filter(Boolean))];
   document.getElementById("vendorCount").textContent=`${vendors.length} partners`;
-  document.getElementById("cuisineFilters").innerHTML=["All",...cuisines.slice(0,7)].map(c=>`<button class="filter-btn ${vendorFilter===c?"active":""}" onclick="setVendorFilter('${c}')">${c}</button>`).join("");
-  const emojiMap={Sweets:"🍰",Dessert:"🎂",Chaat:"🥘",Italian:"🍝","Indian Food":"🍛",Crockery:"🍽️","Welcome Drink":"🥤",Multi:"⭐","Coffee Bar":"☕",Mediterranean:"🫒",Snacks:"🥨",Farsan:"🧆","Gujarati Live Counter":"🍱"};
+  document.getElementById("cuisineFilters").innerHTML=["All",...cuisines.slice(0,7)].map(c=>
+    `<button class="filter-btn ${vendorFilter===c?"active":""}" onclick="setVendorFilter('${c}')">${c}</button>`
+  ).join("");
+  const emojiMap={Sweets:"🍰",Dessert:"🎂",Chaat:"🥘",Italian:"🍝","Indian Food":"🍛",Crockery:"🍽️","Welcome Drink":"🥤",Multi:"⭐","Coffee Bar":"☕",Mediterranean:"🫒",Snacks:"🥨",Farsan:"🧆","Gujarati Live Counter":"🍱",Soup:"🥣",Meal:"🍱"};
   const shown=vendorFilter==="All"?vendors:vendors.filter(v=>v.Cuisine===vendorFilter);
   document.getElementById("vendorList").innerHTML=shown.map(v=>`<div class="vendor-list-card">
     <div class="vendor-emoji-box">${emojiMap[v.Cuisine]||"🏪"}</div>
-    <div style="flex:1"><div style="font-size:15px;color:var(--text)">${v.Agency_Name}</div><div style="font-size:12px;color:var(--muted);margin-top:2px">${v.Cuisine||""} · ${v.Base_City||""}</div></div>
+    <div style="flex:1">
+      <div style="font-size:15px;color:var(--text);font-weight:600">${v.Agency_Name}</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px">${v.Cuisine||""} · ${v.Base_City||""}</div>
+    </div>
     <div style="text-align:right">
       <div style="font-size:11px;color:var(--gold)">★★★★★</div>
       <div style="font-size:11px;color:var(--muted);margin-top:2px">${v.Contact_Person||""}</div>
-      ${v.Contact_Number?`<button onclick="window.open('https://wa.me/91${v.Contact_Number}','_blank')" style="margin-top:5px;background:none;border:1px solid #25D36640;color:#25D366;border-radius:6px;padding:3px 8px;font-size:10px;cursor:pointer">WhatsApp</button>`:""}
+      ${v.Contact_Number?`<button onclick="openVendorWA('${v.Vendor_ID}')" style="margin-top:5px;background:none;border:1px solid #25D36640;color:#25D366;border-radius:6px;padding:3px 8px;font-size:10px;cursor:pointer">WhatsApp</button>`:""}
     </div>
   </div>`).join("");
 }
+
 function setVendorFilter(f){vendorFilter=f;renderVendors();}
+
+function openVendorWA(vendorId){
+  const v=APP.vendors.find(x=>x.Vendor_ID===vendorId);if(!v)return;
+  const wa=v.WhatsApp_Group_Link||(v.Contact_Number?`https://wa.me/91${v.Contact_Number}`:"");
+  if(wa)window.open(wa,"_blank");
+  else alert("No WhatsApp contact found.");
+}
+
 async function saveNewVendor(){
-  const name=document.getElementById("av-name").value.trim();if(!name){alert("Agency name is required");return;}
-  const res=await apiWrite("addVendor",{Agency_Name:name,Cuisine:document.getElementById("av-cuisine").value,Contact_Person:document.getElementById("av-contact").value,Designation:document.getElementById("av-desig").value,Contact_Number:document.getElementById("av-phone").value,Contact_Person_2:document.getElementById("av-contact2").value,Contact_Number_2:document.getElementById("av-phone2").value,Base_City:document.getElementById("av-city").value,WhatsApp_Group_Link:document.getElementById("av-walink").value,Active:"Y"});
-  if(res.success){document.getElementById("addVendorMsg").innerHTML=`<div class="success-box"><div class="title">✓ Vendor Added</div></div>`;await loadVendors();renderVendors();setTimeout(()=>closeModal("modal-addVendor"),1200);}
-}
-
-// ── ASSIGN VENDOR ─────────────────────────────────────────────
-async function showAssignVendor(){
-  const existing=document.getElementById("assignVendorForm");if(existing)existing.remove();
-  const div=document.createElement("div");div.className="card";div.id="assignVendorForm";
-  div.innerHTML=`<div class="section-label" style="margin-bottom:12px">Assign Vendor</div>
-    <div class="form-group"><label class="form-label">Select Vendor</label>
-      <select class="form-select" id="assignVendorSelect" onchange="loadVendorItems()">${APP.vendors.map(v=>`<option value="${v.Vendor_ID}">${v.Agency_Name}</option>`).join("")}</select>
-    </div>
-    <div id="vendorItemsSection">
-      <div class="section-label" style="margin-bottom:8px">Vendor's Standard Items</div>
-      <div id="vendorItemChips" style="margin-bottom:12px"><div style="font-size:12px;color:var(--muted)">Loading...</div></div>
-      <div class="section-label" style="margin-bottom:8px">Selected Items</div>
-      <div id="assignSelectedList" style="margin-bottom:10px"></div>
-      <div style="display:flex;gap:8px;margin-bottom:12px">
-        <input class="form-input" id="assignNewItem" placeholder="Type item manually + Enter" onkeydown="if(event.key==='Enter')addAssignItem()">
-        <button onclick="addAssignItem()" style="background:var(--gold);border:none;border-radius:10px;padding:9px 14px;color:#fff;font-weight:700;cursor:pointer;font-size:16px">+</button>
-      </div>
-    </div>
-    <div style="display:flex;gap:8px">
-      <button class="btn btn-gold btn-sm" style="flex:2" onclick="saveAssignVendor()">Assign & Request Quote</button>
-      <button class="btn btn-outline btn-sm" style="flex:1" onclick="document.getElementById('assignVendorForm').remove()">Cancel</button>
-    </div>
-    <div id="assignMsg" style="margin-top:8px"></div>`;
-  document.getElementById("tab-vendors").appendChild(div);
-  APP.assignSelectedItems=[];
-  loadVendorItems();
-}
-
-async function loadVendorItems(){
-  const vendorId=document.getElementById("assignVendorSelect")?.value;
-  if(!vendorId)return;
-  const items=await apiGet("getVendorMenu","&vendor_id="+vendorId);
-  APP.vendorMenuItems=items;
-  renderVendorItemChips();
-}
-
-function renderVendorItemChips(){
-  const chips=APP.vendorMenuItems;
-  const el=document.getElementById("vendorItemChips");
-  if(!el)return;
-  if(!chips.length){
-    el.innerHTML=`<div style="font-size:12px;color:var(--muted)">No standard items on file. Type items manually below.</div>`;
-    return;
-  }
-  el.innerHTML=chips.map(item=>
-    `<span class="chip ${APP.assignSelectedItems.includes(item.Item_Name)?"selected":""}"
-      onclick="toggleAssignItem('${item.Item_Name.replace(/'/g,"\'")}')">
-      ${APP.assignSelectedItems.includes(item.Item_Name)?"✓ ":""}${item.Item_Name}
-    </span>`
-  ).join("");
-}
-
-function toggleAssignItem(name){
-  if(APP.assignSelectedItems.includes(name))
-    APP.assignSelectedItems=APP.assignSelectedItems.filter(i=>i!==name);
-  else APP.assignSelectedItems.push(name);
-  renderVendorItemChips();
-  renderAssignSelected();
-}
-
-function addAssignItem(){
-  const val=document.getElementById("assignNewItem")?.value.trim();
-  if(val&&!APP.assignSelectedItems.includes(val)){
-    APP.assignSelectedItems.push(val);
-    renderVendorItemChips();
-    renderAssignSelected();
-  }
-  if(document.getElementById("assignNewItem")) document.getElementById("assignNewItem").value="";
-}
-
-function renderAssignSelected(){
-  const el=document.getElementById("assignSelectedList");
-  if(!el)return;
-  el.innerHTML=APP.assignSelectedItems.map((item,i)=>
-    `<div class="selected-item"><span>• ${item}</span>
-      <button class="remove-btn" onclick="removeAssignItem(${i})">×</button>
-    </div>`
-  ).join("");
-}
-
-function removeAssignItem(i){
-  APP.assignSelectedItems.splice(i,1);
-  renderVendorItemChips();
-  renderAssignSelected();
-}
-
-async function saveAssignVendor(){
-  if(!APP.assignSelectedItems.length){alert("Please select or add at least one item.");return;}
-  const vendorId=document.getElementById("assignVendorSelect").value;
-  const vendor=APP.vendors.find(v=>v.Vendor_ID===vendorId);
-  const itemsStr=APP.assignSelectedItems.join(" + ");
-  const res=await apiWrite("addEventVendor",{
-    Event_ID:APP.currentEvent.Event_ID,
-    Vendor_ID:vendorId,
-    Agency_Name:vendor?.Agency_Name||"",
-    Items:itemsStr,
-    Status:"quote_pending"
+  const name=document.getElementById("av-name").value.trim();if(!name){alert("Agency name required");return;}
+  const res=await apiWrite("addVendor",{
+    Agency_Name:name,Cuisine:document.getElementById("av-cuisine").value,
+    Contact_Person:document.getElementById("av-contact").value,Designation:document.getElementById("av-desig").value,
+    Contact_Number:document.getElementById("av-phone").value,Contact_Person_2:document.getElementById("av-contact2").value,
+    Contact_Number_2:document.getElementById("av-phone2").value,Base_City:document.getElementById("av-city").value,
+    WhatsApp_Group_Link:document.getElementById("av-walink").value
   });
   if(res.success){
-    // Build and open WhatsApp quote request
-    const ev=APP.currentEvent;
-    const sig=APP.settings.Signature||"UVI Luxury Catering & Decor";
-    const itemList=APP.assignSelectedItems.map(i=>`• ${i}`).join("\n");
-    const msg=`Dear ${(vendor?.Agency_Name||"").split(" ")[0]},\n\nWe are planning *${ev.Occasion}* for *${ev.Client_Name}* on *${ev.Event_Date}* (${ev.Pax} pax).\n\nKindly share your best quote for:\n${itemList}\n\nPlease revert at the earliest.\n\n*${sig}*`;
-    
-    document.getElementById("assignMsg").innerHTML=`<div class="success-box"><div class="title">✓ Vendor Assigned</div><div class="sub">Opening WhatsApp to send quote request...</div></div>`;
-    
-    // Copy message and open WhatsApp
-    const wa=vendor?.WhatsApp_Group_Link||(vendor?.Contact_Number?`https://wa.me/91${vendor.Contact_Number}`:"");
-    APP.currentEventVendors=await apiGet("getEventVendors","&event_id="+APP.currentEvent.Event_ID);
-    setTimeout(()=>{
-      renderEventDetail();
-      showWAMsg(msg, wa, `Quote Request → ${vendor?.Agency_Name}`);
-    },600);
+    document.getElementById("addVendorMsg").innerHTML=`<div class="success-box"><div class="title">✓ Vendor Added</div></div>`;
+    await loadVendors();renderVendors();
+    setTimeout(()=>closeModal("modal-addVendor"),1200);
   }
+}
+
+// ── WA MESSAGE ────────────────────────────────────────────────
+function showWAMsg(msg,waLink,recipientLabel){
+  APP._waMsg=msg;APP._waLink=waLink;
+  document.getElementById("waMsgText").textContent=msg;
+  document.getElementById("waMsgRecipient").textContent=recipientLabel||"";
+  document.getElementById("copyWABtn").textContent="📋 Copy Message";
+  openModal("modal-waMsg");
+}
+
+function copyWAMsg(){
+  fallbackCopyStr(APP._waMsg);
+  document.getElementById("copyWABtn").textContent="✓ Copied!";
+}
+
+function openWALink(){
+  if(APP._waLink)window.open(APP._waLink,"_blank");
+  else alert("No WhatsApp link. Open WhatsApp manually.");
+}
+
+function fallbackCopyStr(text){
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).catch(()=>execCopy(text));
+  } else execCopy(text);
+}
+
+function execCopy(text){
+  const ta=document.createElement("textarea");ta.value=text;ta.style.position="fixed";ta.style.opacity="0";
+  document.body.appendChild(ta);ta.focus();ta.select();
+  try{document.execCommand("copy");}catch(e){}
+  document.body.removeChild(ta);
 }
 
 // ── STEP NAV ──────────────────────────────────────────────────
 function goStep(prefix,step,btn){
-  [1,2,3].forEach(i=>{const el=document.getElementById(`${prefix}-step-${i}`);if(el)el.style.display=i===step?"block":"none";});
+  [1,2,3,4].forEach(i=>{const el=document.getElementById(`${prefix}-step-${i}`);if(el)el.style.display=i===step?"block":"none";});
   if(btn){document.querySelectorAll(".step-tab").forEach(b=>b.classList.remove("active"));btn.classList.add("active");}
   if(prefix==="menu"&&step===2)updateMenuPreview();
-  if(prefix==="tasting"&&step===3)buildTastingMsgs();
+}
+
+// ── DROPDOWN ──────────────────────────────────────────────────
+function toggleDropdown(btn){
+  const dd=document.getElementById("fnDropdown");
+  dd.classList.toggle("open");
+  document.addEventListener("click",function closeDD(e){
+    if(!btn.contains(e.target)){dd.classList.remove("open");document.removeEventListener("click",closeDD);}
+  });
 }
 
 // ── MODALS ────────────────────────────────────────────────────
 function openModal(id){document.getElementById(id).classList.add("open");}
 function closeModal(id){document.getElementById(id).classList.remove("open");}
-function copyText(elId){const text=document.getElementById(elId)?.textContent||"";navigator.clipboard.writeText(text).then(()=>alert("Copied! Open WhatsApp and paste."));}
-
-// ── WA MESSAGE MODAL ──────────────────────────────────────────
-function showWAMsg(msg, waLink, recipientLabel) {
-  APP._waMsg  = msg;
-  APP._waLink = waLink;
-  document.getElementById("waMsgText").textContent      = msg;
-  document.getElementById("waMsgRecipient").textContent = recipientLabel || "";
-  document.getElementById("copyWABtn").textContent      = "📋 Copy Message";
-  openModal("modal-waMsg");
-}
-
-function copyWAMsg() {
-  const msg = APP._waMsg;
-  // Try clipboard API first
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(msg)
-      .then(() => { document.getElementById("copyWABtn").textContent = "✓ Copied!"; })
-      .catch(() => fallbackCopy(msg));
-  } else {
-    fallbackCopy(msg);
-  }
-}
-
-function fallbackCopy(text) {
-  // Create temp textarea and copy
-  const ta = document.createElement("textarea");
-  ta.value = text;
-  ta.style.position = "fixed";
-  ta.style.opacity  = "0";
-  document.body.appendChild(ta);
-  ta.focus(); ta.select();
-  try {
-    document.execCommand("copy");
-    document.getElementById("copyWABtn").textContent = "✓ Copied!";
-  } catch(e) {
-    alert("Could not auto-copy. Please long-press the green box above and select all text to copy.");
-  }
-  document.body.removeChild(ta);
-}
-
-function openWALink() {
-  if (APP._waLink) window.open(APP._waLink, "_blank");
-  else alert("No WhatsApp link found for this vendor. Please open WhatsApp manually.");
-}
-
-// ── VENDOR COST EDIT ─────────────────────────────────────────
-function toggleVendorEdit(vi) {
-  const el=document.getElementById(`vedit_${vi}`);
-  el.style.display=el.style.display==='none'?'block':'none';
-}
-
-async function saveVendorCost(vi, rowId) {
-  const data={
-    Row_ID:     rowId,
-    Vendor_Cost:document.getElementById(`vc_cost_${vi}`).value,
-    Status:     document.getElementById(`vc_status_${vi}`).value,
-    Advance_Paid:document.getElementById(`vc_adv_${vi}`).value,
-    Balance_Paid:document.getElementById(`vc_bal_${vi}`).value,
-    Payment_Date:document.getElementById(`vc_date_${vi}`).value,
-    Payment_Mode:document.getElementById(`vc_mode_${vi}`).value,
-  };
-  const res=await apiWrite("updateEventVendor",data);
-  const msgEl=document.getElementById(`vc_msg_${vi}`);
-  if(res.success){
-    msgEl.innerHTML=`<div class="success-box"><div class="title">✓ Saved</div></div>`;
-    APP.currentEventVendors=await apiGet("getEventVendors","&event_id="+APP.currentEvent.Event_ID);
-    setTimeout(()=>{renderEventDetail();switchTab('vendors',document.querySelector('.tab-btn:nth-child(2)'));},800);
-  } else {
-    msgEl.innerHTML=`<div class="error-box"><div class="title">Error saving</div></div>`;
-  }
-}
-
-// ── CLIENT PAYMENT ────────────────────────────────────────────
-function toggleClientPayEdit() {
-  const edit=document.getElementById('clientPayEdit');
-  const btn=document.getElementById('clientPayEditBtn');
-  const isOpen=edit.style.display!=='none';
-  edit.style.display=isOpen?'none':'block';
-  btn.textContent=isOpen?'✏️ Edit':'✕ Close';
-}
-
-async function saveClientPayment() {
-  const res=await apiWrite("updateEvent",{
-    Event_ID:    APP.currentEvent.Event_ID,
-    Total_Package:document.getElementById('cp_total').value,
-    Advance_Recd: document.getElementById('cp_adv').value,
-    Balance_Due:  document.getElementById('cp_bal').value,
-    Payment_Mode: document.getElementById('cp_mode').value,
-    Payment_Date: document.getElementById('cp_date').value,
-  });
-  if(res.success){
-    document.getElementById('cp_msg').innerHTML=`<div class="success-box"><div class="title">✓ Payment Updated</div></div>`;
-    await loadEvents();
-    APP.currentEvent=APP.events.find(e=>e.Event_ID===APP.currentEvent.Event_ID);
-    setTimeout(()=>{renderEventDetail();},800);
-  } else {
-    document.getElementById('cp_msg').innerHTML=`<div class="error-box"><div class="title">Error saving</div></div>`;
-  }
-}
 </script>
 </body>
 </html>
