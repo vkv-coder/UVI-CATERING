@@ -1,3 +1,11 @@
+
+.pin-enter-btn {
+  display:block; width:100%; margin-top:14px; padding:14px;
+  background:var(--gold); color:#fff; border:none; border-radius:12px;
+  font-family:'DM Sans',sans-serif; font-size:16px; font-weight:600;
+  cursor:pointer; letter-spacing:1px;
+}
+.pin-enter-btn:active { background:var(--gold-dark); }
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -223,9 +231,30 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);max-width:48
 /* STAGE COLORS */
 .s1{--sc:#3B5BDB} .s2{--sc:#D4500A} .s3{--sc:#B7900A}
 .s4{--sc:#862E62} .s5{--sc:#553C9A} .s6{--sc:#C9A84C}
+
+/* Category pills */
+.cat-pill {
+  padding:10px 16px; border-radius:20px; border:1.5px solid var(--gold-border);
+  background:#fff; color:var(--text); font-family:'DM Sans',sans-serif;
+  font-size:13px; cursor:pointer; transition:all .2s;
+}
+.cat-pill:active { transform:scale(.96); }
+.cat-pill-done {
+  background:var(--gold-glow); border-color:var(--gold); color:var(--gold);
+  font-weight:600;
+}
+/* Toast notification */
+#appToast {
+  position:fixed; bottom:80px; left:50%; transform:translateX(-50%);
+  background:rgba(30,30,30,.92); color:#fff; padding:10px 20px;
+  border-radius:20px; font-size:13px; font-family:'DM Sans',sans-serif;
+  z-index:9999; display:none; white-space:nowrap;
+}
 </style>
 </head>
 <body>
+<div id="appToast"></div>
+
 
 <!-- PIN -->
 <div id="pinScreen">
@@ -248,6 +277,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);max-width:48
     <button class="pin-key" onclick="pinPress('7')">7</button><button class="pin-key" onclick="pinPress('8')">8</button><button class="pin-key" onclick="pinPress('9')">9</button>
     <button class="pin-key empty"></button><button class="pin-key" onclick="pinPress('0')">0</button><button class="pin-key del" onclick="pinDel()">⌫</button>
   </div>
+  <button class="pin-enter-btn" onclick="checkPin()">Enter ↵</button>
 </div>
 
 <!-- MAIN APP -->
@@ -383,68 +413,93 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);max-width:48
       <button class="modal-close" onclick="closeModal('modal-addItems')">×</button>
     </div>
 
-    <!-- ADD ITEM FORM -->
-    <div id="aiAddForm">
-      <div style="display:flex;gap:8px;margin-bottom:12px">
-        <div class="form-group" style="flex:1;margin-bottom:0">
-          <label class="form-label">Category</label>
-          <select class="form-select" id="aiCat" onchange="onCatChange()">
-            <option value="">— Select —</option>
-            <option>Chaat</option><option>Sweets</option><option>Desserts</option>
-            <option>Mains</option><option>Breads</option><option>Farsan</option>
-            <option>Beverages</option><option>Live Counter</option>
-            <option>Welcome Drink</option><option>Other</option>
-          </select>
-        </div>
-        <div class="form-group" style="flex:1;margin-bottom:0">
-          <label class="form-label">Item</label>
-          <select class="form-select" id="aiItemSel" onchange="onItemChange()">
-            <option value="">— Select —</option>
-          </select>
-        </div>
-      </div>
-      <div style="display:flex;gap:8px;margin-bottom:12px">
-        <div class="form-group" style="flex:1;margin-bottom:0">
-          <label class="form-label">Qty</label>
-          <input class="form-input" id="aiQty" type="number" placeholder="e.g. 150">
-        </div>
-        <div class="form-group" style="flex:1;margin-bottom:0">
-          <label class="form-label">Unit</label>
-          <select class="form-select" id="aiUnit">
-            <option>pax</option><option>pcs</option><option>kg</option>
-            <option>ltr</option><option>portion</option><option>plate</option>
-            <option>box</option><option>dozen</option>
-          </select>
-        </div>
-      </div>
-      <!-- Vendor multi-select -->
-      <div class="form-group" style="margin-bottom:8px">
-        <label class="form-label">Vendors <span style="color:var(--muted);font-weight:400">(tap to select multiple)</span></label>
-        <div id="aiVendorChips" style="min-height:36px"></div>
-      </div>
-      <div style="display:flex;gap:8px;margin-bottom:14px">
-        <select class="form-select" id="aiExtraVendor" style="flex:1">
-          <option value="">+ Add other vendor</option>
-        </select>
-        <button onclick="addExtraVendor()" class="btn btn-outline btn-sm" style="width:auto;padding:9px 14px">Add</button>
-      </div>
-      <button class="btn btn-gold" onclick="addItemToList()">+ Add to List</button>
+    <!-- STEP 1: PICK CATEGORY -->
+    <div id="aiStep1">
+      <div class="section-label" style="margin-bottom:10px">Select Category</div>
+      <div id="aiCatBtns" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px"></div>
     </div>
 
-    <!-- ITEMS LIST -->
-    <div id="aiItemsList" style="margin-top:16px"></div>
+    <!-- STEP 2: ADD ITEMS IN CATEGORY -->
+    <div id="aiStep2" style="display:none">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <button class="btn btn-outline btn-sm" style="width:auto;padding:8px 12px" onclick="aiBackToCategories()">← Back</button>
+        <div>
+          <div style="font-weight:600;color:var(--gold)" id="aiActiveCatLabel"></div>
+          <div style="font-size:11px;color:var(--muted)" id="aiCatItemCount"></div>
+        </div>
+      </div>
 
-    <!-- SEND BUTTONS -->
-    <div id="aiSendSection" style="display:none;margin-top:16px">
+      <!-- Item picker row -->
+      <div style="background:var(--cream);border-radius:12px;padding:14px;margin-bottom:12px">
+        <div style="display:flex;gap:8px;margin-bottom:10px">
+          <div class="form-group" style="flex:2;margin-bottom:0">
+            <label class="form-label">Item</label>
+            <select class="form-select" id="aiItemSel" onchange="onItemChange()">
+              <option value="">— Select item —</option>
+            </select>
+          </div>
+          <div class="form-group" style="flex:1;margin-bottom:0">
+            <label class="form-label">Qty</label>
+            <input class="form-input" id="aiQty" type="number" placeholder="e.g. 150">
+          </div>
+          <div class="form-group" style="flex:1;margin-bottom:0">
+            <label class="form-label">Unit</label>
+            <select class="form-select" id="aiUnit">
+              <option>pax</option><option>pcs</option><option>kg</option>
+              <option>ltr</option><option>portion</option><option>plate</option>
+              <option>box</option><option>dozen</option>
+            </select>
+          </div>
+        </div>
+        <!-- Custom item name (shown when "Other" selected) -->
+        <div id="aiOtherNameRow" style="display:none;margin-bottom:10px">
+          <label class="form-label">Item Name</label>
+          <input class="form-input" id="aiOtherName" type="text" placeholder="Type item name...">
+        </div>
+        <!-- Vendors -->
+        <div class="form-group" style="margin-bottom:8px">
+          <label class="form-label">Vendors <span style="color:var(--muted);font-weight:400">(tap to select)</span></label>
+          <div id="aiVendorChips" style="min-height:36px"></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+          <select class="form-select" id="aiExtraVendor" style="flex:1">
+            <option value="">+ Add other vendor</option>
+          </select>
+          <button onclick="addExtraVendor()" class="btn btn-outline btn-sm" style="width:auto;padding:9px 14px">Add</button>
+        </div>
+        <button class="btn btn-gold" onclick="addItemToList()">+ Add to List</button>
+      </div>
+
+      <!-- Items added in this category -->
+      <div id="aiItemsList"></div>
+
+      <!-- Done with category -->
+      <div id="aiCatDoneRow" style="display:none;margin-top:12px">
+        <div class="gold-line"></div>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button class="btn btn-outline" style="flex:1" onclick="aiBackToCategories()">+ Add Another Category</button>
+          <button class="btn btn-gold" style="flex:1" onclick="aiShowSendSection()">Done → Send Quotes</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3: SEND -->
+    <div id="aiStep3" style="display:none">
+      <div class="section-label" style="margin-bottom:4px">All Items</div>
+      <div id="aiAllItemsSummary" style="margin-bottom:14px"></div>
       <div class="gold-line"></div>
-      <div class="section-label" style="margin-bottom:10px">Send Quote Requests</div>
+      <div class="section-label" style="margin:10px 0">Send Quote Requests</div>
       <button class="btn btn-gold" onclick="sendFunctionQuotes()" style="margin-bottom:8px">
         📤 Send for This Function
       </button>
-      <button class="btn btn-outline" onclick="sendClientQuotes()">
+      <button class="btn btn-outline" onclick="sendClientQuotes()" style="margin-bottom:8px">
         📤 Send for All Functions (Client)
       </button>
+      <button class="btn btn-outline btn-sm" onclick="aiBackToCategories()" style="margin-top:4px">
+        ← Add More Items
+      </button>
     </div>
+
     <div id="aiQuoteMsgs" style="margin-top:10px"></div>
   </div>
 </div>
@@ -874,102 +929,163 @@ Please revert at the earliest.
 
 // -- ADD ITEMS FLOW --------------------------------------------
 function openAddItems(){
-  APP.ai={pendingItems:[], selectedVendors:[], currentItemVendors:[]};
+  APP.ai={pendingItems:[], selectedVendors:[], currentItemVendors:[], activeCat:""};
   const ev=APP.currentEvent;
   const tod=ev.Time_of_Day?` · ${ev.Time_of_Day}`:"";
   const meal=ev.Meal_Type?` · ${ev.Meal_Type}`:"";
   document.getElementById("aiModalSubtitle").textContent=`${ev.Function} · ${ev.Date}${tod}${meal} · ${ev.Pax} pax`;
-  // Reset form
-  document.getElementById("aiCat").value="";
-  document.getElementById("aiItemSel").innerHTML=`<option value="">— Select —</option>`;
-  document.getElementById("aiQty").value="";
-  document.getElementById("aiUnit").value="pax";
-  document.getElementById("aiVendorChips").innerHTML="";
-  document.getElementById("aiItemsList").innerHTML="";
-  document.getElementById("aiSendSection").style.display="none";
-  document.getElementById("aiQuoteMsgs").innerHTML="";
   // Populate extra vendor dropdown
   document.getElementById("aiExtraVendor").innerHTML=
     `<option value="">+ Add other vendor</option>`+
     APP.vendors.map(v=>`<option value="${v.Vendor_ID}|${v.Agency_Name}">${v.Agency_Name}</option>`).join("");
+  aiShowStep(1);
+  renderCategoryButtons();
+  document.getElementById("aiQuoteMsgs").innerHTML="";
   openModal("modal-addItems");
 }
 
-function onCatChange(){
-  const cat=document.getElementById("aiCat").value;
-  const items=APP.itemVendors.filter(i=>!cat||i.Category===cat);
+function aiShowStep(n){
+  document.getElementById("aiStep1").style.display=n===1?"block":"none";
+  document.getElementById("aiStep2").style.display=n===2?"block":"none";
+  document.getElementById("aiStep3").style.display=n===3?"block":"none";
+}
+
+function renderCategoryButtons(){
+  const cats=["Chaat","Sweets","Desserts","Mains","Breads","Farsan","Beverages","Live Counter","Welcome Drink","Other"];
+  const el=document.getElementById("aiCatBtns");
+  el.innerHTML="";
+  // Count items added per category
+  const catCounts={};
+  APP.ai.pendingItems.forEach(function(it){ catCounts[it.itemCat]=(catCounts[it.itemCat]||0)+1; });
+  cats.forEach(function(cat){
+    const btn=document.createElement("button");
+    const count=catCounts[cat]||0;
+    btn.className="cat-pill"+(count?" cat-pill-done":"");
+    btn.textContent=cat+(count?" ("+count+")":"");
+    btn.onclick=function(){ openCategory(cat); };
+    el.appendChild(btn);
+  });
+  // Show send button if items exist
+  const hasPending=APP.ai.pendingItems.length>0;
+  let sendBtn=document.getElementById("aiStep1SendBtn");
+  if(!sendBtn){
+    sendBtn=document.createElement("div");
+    sendBtn.id="aiStep1SendBtn";
+    sendBtn.style.cssText="margin-top:14px";
+    document.getElementById("aiStep1").appendChild(sendBtn);
+  }
+  if(hasPending){
+    sendBtn.innerHTML=`<div class="gold-line" style="margin-bottom:12px"></div>
+      <div style="color:var(--muted);font-size:12px;margin-bottom:8px">${APP.ai.pendingItems.length} item(s) ready to send</div>
+      <button class="btn btn-gold" onclick="aiShowSendSection()" style="margin-bottom:8px">Done → Send Quotes</button>`;
+  } else {
+    sendBtn.innerHTML="";
+  }
+}
+
+function openCategory(cat){
+  APP.ai.activeCat=cat;
+  APP.ai.selectedVendors=[];
+  APP.ai.currentItemVendors=[];
+  document.getElementById("aiActiveCatLabel").textContent=cat;
+  // Populate item dropdown for this category
+  const items=APP.itemVendors.filter(function(i){ return i.Category===cat; });
   const sel=document.getElementById("aiItemSel");
   sel.innerHTML=`<option value="">— Select item —</option>`+
-    items.map(i=>`<option value="${i.Item_Name}">${i.Item_Name}</option>`).join("");
-  // Add "Other" option
-  sel.innerHTML+=`<option value="__other__">Other (type below)</option>`;
+    items.map(function(i){ return `<option value="${i.Item_Name}">${i.Item_Name}</option>`; }).join("")+
+    `<option value="__other__">Other (type here)</option>`;
+  // Reset fields
+  document.getElementById("aiQty").value="";
+  document.getElementById("aiUnit").value="pax";
   document.getElementById("aiVendorChips").innerHTML="";
+  document.getElementById("aiOtherNameRow").style.display="none";
+  document.getElementById("aiOtherName").value="";
+  // Show items already added for this category
+  renderCatPendingItems();
+  document.getElementById("aiCatItemCount").textContent=
+    (APP.ai.pendingItems.filter(function(i){ return i.itemCat===cat; }).length)+" item(s) added so far";
+  aiShowStep(2);
+}
+
+function aiBackToCategories(){
   APP.ai.selectedVendors=[];
+  APP.ai.currentItemVendors=[];
+  aiShowStep(1);
+  renderCategoryButtons();
 }
 
 function onItemChange(){
-  const itemName=document.getElementById("aiItemSel").value;
-  if(!itemName||itemName==="__other__"){
+  const val=document.getElementById("aiItemSel").value;
+  // Show/hide custom name field
+  const isOther=val==="__other__";
+  document.getElementById("aiOtherNameRow").style.display=isOther?"block":"none";
+  if(isOther){
+    document.getElementById("aiOtherName").value="";
+    document.getElementById("aiOtherName").focus();
     document.getElementById("aiVendorChips").innerHTML="";
+    APP.ai.selectedVendors=[];
+    APP.ai.currentItemVendors=[];
     return;
   }
+  if(!val){ document.getElementById("aiVendorChips").innerHTML=""; return; }
   // Load vendors for this item
-  const itemData=APP.itemVendors.find(i=>i.Item_Name===itemName);
-  APP.ai.currentItemVendors=itemData?itemData.Vendors:[];
+  const iv=APP.itemVendors.find(function(i){ return i.Item_Name===val; });
+  APP.ai.currentItemVendors=iv?iv.Vendors:[];
   APP.ai.selectedVendors=[];
   renderVendorChips();
 }
 
 function renderVendorChips(){
-  const list=APP.ai.currentItemVendors;
   const el=document.getElementById("aiVendorChips");
-  if(!list.length){
-    el.innerHTML='<div style="font-size:12px;color:var(--muted)">No standard vendors. Use dropdown below.</div>';
-    return;
-  }
-  el.innerHTML='';
-  list.forEach(function(name){
-    const sel=APP.ai.selectedVendors.some(function(v){return v.name===name;});
-    const span=document.createElement('span');
-    span.className='chip'+(sel?' selected':'');
-    span.textContent=(sel?'\u2713 ':'')+name;
-    span.onclick=function(){toggleVendorChip(name);};
+  if(!APP.ai.currentItemVendors.length){ el.innerHTML="<span style='color:var(--muted);font-size:12px'>No vendors mapped — use dropdown below</span>"; return; }
+  el.innerHTML="";
+  APP.ai.currentItemVendors.forEach(function(name){
+    const sel=APP.ai.selectedVendors.some(function(v){ return v.name===name; });
+    const safeName=name.replace(/'/g,"__APOS__");
+    const span=document.createElement("span");
+    span.className="chip"+(sel?" selected":"");
+    span.textContent=(sel?"✓ ":"")+name;
+    span.onclick=function(){ toggleVendorChip(safeName); };
     el.appendChild(span);
   });
 }
 
 function toggleVendorChip(safeName){
   const name=safeName.replace(/__APOS__/g,"'");
-  const idx=APP.ai.selectedVendors.findIndex(v=>v.name===name);
-  if(idx>=0) APP.ai.selectedVendors.splice(idx,1);
-  else {
-    const vendor=APP.vendors.find(v=>v.Agency_Name===name);
-    APP.ai.selectedVendors.push({name,vendor_id:vendor?.Vendor_ID||"",vendor});
+  const idx=APP.ai.selectedVendors.findIndex(function(v){ return v.name===name; });
+  if(idx>=0){
+    APP.ai.selectedVendors.splice(idx,1);
+  } else {
+    const vendor=APP.vendors.find(function(v){ return v.Agency_Name===name; });
+    APP.ai.selectedVendors.push({name:name, vendor_id:vendor?vendor.Vendor_ID:""});
   }
   renderVendorChips();
 }
 
 function addExtraVendor(){
-  const val=document.getElementById("aiExtraVendor").value;
+  const sel=document.getElementById("aiExtraVendor");
+  const val=sel.value;
   if(!val)return;
-  const [vendor_id,name]=val.split("|");
-  if(!APP.ai.selectedVendors.some(v=>v.vendor_id===vendor_id)){
-    const vendor=APP.vendors.find(v=>v.Vendor_ID===vendor_id);
-    APP.ai.selectedVendors.push({name,vendor_id,vendor});
-    // Add to chips list if not there
-    if(!APP.ai.currentItemVendors.includes(name)) APP.ai.currentItemVendors.push(name);
-    renderVendorChips();
+  const parts=val.split("|");
+  const vid=parts[0], vname=parts[1]||parts[0];
+  if(APP.ai.selectedVendors.some(function(v){ return v.name===vname; })){
+    sel.value=""; return;
   }
-  document.getElementById("aiExtraVendor").value="";
+  // Add to chips list so it renders
+  if(!APP.ai.currentItemVendors.includes(vname)){
+    APP.ai.currentItemVendors.push(vname);
+  }
+  APP.ai.selectedVendors.push({name:vname, vendor_id:vid});
+  renderVendorChips();
+  sel.value="";
 }
 
 function addItemToList(){
+  const cat=APP.ai.activeCat||"Other";
   let itemName=document.getElementById("aiItemSel").value;
-  let itemCat=document.getElementById("aiCat").value||"Other";
-  // Handle "other"
   if(itemName==="__other__"){
-    itemName=prompt("Enter item name:");
-    if(!itemName)return;
+    itemName=document.getElementById("aiOtherName").value.trim();
+    if(!itemName){alert("Please type an item name.");return;}
   }
   if(!itemName){alert("Please select an item.");return;}
   const qty=document.getElementById("aiQty").value.trim();
@@ -977,53 +1093,70 @@ function addItemToList(){
   if(!APP.ai.selectedVendors.length){alert("Please select at least one vendor.");return;}
   const unit=document.getElementById("aiUnit").value;
 
-  APP.ai.pendingItems.push({
-    itemName, itemCat, qty, unit,
-    vendors:[...APP.ai.selectedVendors]
-  });
+  APP.ai.pendingItems.push({itemName:itemName, itemCat:cat, qty:qty, unit:unit, vendors:[...APP.ai.selectedVendors]});
 
-  renderPendingItems();
-
-  // Reset form for next item
-  document.getElementById("aiCat").value="";
-  document.getElementById("aiItemSel").innerHTML=`<option value="">— Select —</option><option value="__other__">Other (type below)</option>`;
+  // Reset for next item in same category
+  document.getElementById("aiItemSel").value="";
+  document.getElementById("aiOtherNameRow").style.display="none";
+  document.getElementById("aiOtherName").value="";
   document.getElementById("aiQty").value="";
   document.getElementById("aiVendorChips").innerHTML="";
   APP.ai.selectedVendors=[];
   APP.ai.currentItemVendors=[];
 
-  if(APP.ai.pendingItems.length>0){
-    document.getElementById("aiSendSection").style.display="block";
-  }
+  const catItems=APP.ai.pendingItems.filter(function(i){ return i.itemCat===cat; });
+  document.getElementById("aiCatItemCount").textContent=catItems.length+" item(s) added so far";
+  renderCatPendingItems();
+  document.getElementById("aiCatDoneRow").style.display="block";
 }
 
-function renderPendingItems(){
-  const items=APP.ai.pendingItems;
+function renderCatPendingItems(){
+  const cat=APP.ai.activeCat;
+  const items=APP.ai.pendingItems.filter(function(i){ return i.itemCat===cat; });
   const el=document.getElementById("aiItemsList");
   if(!items.length){ el.innerHTML=""; return; }
-  el.innerHTML="";
-  const label=document.createElement('div');
-  label.className='section-label';
-  label.style.marginBottom='8px';
-  label.textContent='Items to save ('+items.length+'):';
-  el.appendChild(label);
-  items.forEach(function(item,i){
-    const div=document.createElement('div');
-    div.className='sel-item';
-    div.style.cssText='flex-direction:column;align-items:stretch';
-    div.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center">'+
-      '<div><div class="sel-item-name">'+item.itemName+'</div>'+
-      '<div class="sel-item-sub">'+item.qty+' '+item.unit+' · '+item.vendors.map(function(v){return v.name;}).join(', ')+'</div></div>'+
-      '<button class="remove-btn">×</button></div>';
-    div.querySelector('.remove-btn').onclick=function(){removePendingItem(i);};
+  el.innerHTML="<div class='section-label' style='margin:12px 0 8px'>Added in "+cat+":</div>";
+  items.forEach(function(item){
+    const globalIdx=APP.ai.pendingItems.indexOf(item);
+    const div=document.createElement("div");
+    div.className="sel-item";
+    div.style.cssText="flex-direction:column;align-items:stretch;margin-bottom:6px";
+    div.innerHTML="<div style='display:flex;justify-content:space-between;align-items:center'>"+
+      "<div><div class='sel-item-name'>"+item.itemName+"</div>"+
+      "<div class='sel-item-sub'>"+item.qty+" "+item.unit+" · "+item.vendors.map(function(v){ return v.name; }).join(", ")+"</div></div>"+
+      "<button class='remove-btn' onclick='removePendingItem("+globalIdx+")'>×</button></div>";
     el.appendChild(div);
   });
 }
 
 function removePendingItem(i){
   APP.ai.pendingItems.splice(i,1);
-  renderPendingItems();
-  if(!APP.ai.pendingItems.length) document.getElementById("aiSendSection").style.display="none";
+  renderCatPendingItems();
+  const cat=APP.ai.activeCat;
+  const catItems=APP.ai.pendingItems.filter(function(i){ return i.itemCat===cat; });
+  document.getElementById("aiCatItemCount").textContent=catItems.length+" item(s) added so far";
+  if(!APP.ai.pendingItems.length) document.getElementById("aiCatDoneRow").style.display="none";
+}
+
+function aiShowSendSection(){
+  // Show summary of all items
+  const el=document.getElementById("aiAllItemsSummary");
+  const byCat={};
+  APP.ai.pendingItems.forEach(function(it){
+    if(!byCat[it.itemCat]) byCat[it.itemCat]=[];
+    byCat[it.itemCat].push(it);
+  });
+  let html="";
+  Object.keys(byCat).forEach(function(cat){
+    html+=`<div style="margin-bottom:8px"><div style="font-weight:600;font-size:13px;color:var(--gold);margin-bottom:4px">${cat}</div>`;
+    byCat[cat].forEach(function(it){
+      html+=`<div class="sel-item" style="margin-bottom:4px"><div class="sel-item-name">${it.itemName}</div>
+        <div class="sel-item-sub">${it.qty} ${it.unit} · ${it.vendors.map(function(v){ return v.name; }).join(", ")}</div></div>`;
+    });
+    html+="</div>";
+  });
+  el.innerHTML=html;
+  aiShowStep(3);
 }
 
 // -- SEND QUOTES -----------------------------------------------
@@ -1034,11 +1167,12 @@ async function sendFunctionQuotes(){
 
 async function sendClientQuotes(){
   await saveAllPendingItems();
-  const clientFns=APP.allEvents.filter(e=>e.Client_ID===APP.currentClient.Client_ID);
+  const clientFns=APP.allEvents.filter(function(e){ return e.Client_ID===APP.currentClient.Client_ID; });
   buildAndShowQuoteMsgs(clientFns);
 }
 
 async function saveAllPendingItems(){
+  showToast("Saving items...",2000);
   const ev=APP.currentEvent;
   for(const item of APP.ai.pendingItems){
     const itemRes=await apiWrite("addEventItem",{
@@ -1059,6 +1193,7 @@ async function saveAllPendingItems(){
   APP.currentEventItems=await apiGet("getEventItems","&event_id="+ev.Event_ID);
   APP.currentEventVendors=await apiGet("getEventVendors","&event_id="+ev.Event_ID);
 }
+
 
 async function buildAndShowQuoteMsgs(functions){
   const sig=APP.settings.Signature||"UVI Luxury Catering & Decor";
@@ -1190,6 +1325,7 @@ async function saveNewFunction(){
   if(!APP.currentClient){alert("No client selected");return;}
   const btn=document.getElementById("saveFunctionBtn");
   btn.textContent="Saving...";btn.disabled=true;
+  showToast("Saving function...", 8000);
   const res=await apiWrite("addEvent",{
     Client_ID:APP.currentClient.Client_ID,
     Client_Name:APP.currentClient.Client_Name,
@@ -1432,6 +1568,14 @@ function toggleDropdown(btn){
 function openModal(id){document.getElementById(id).classList.add("open");}
 function closeModal(id){document.getElementById(id).classList.remove("open");}
 
+
+function showToast(msg, duration){
+  const el=document.getElementById("appToast");
+  el.textContent=msg;
+  el.style.display="block";
+  clearTimeout(window._toastTimer);
+  window._toastTimer=setTimeout(function(){ el.style.display="none"; }, duration||2000);
+}
 </script>
 </body>
 </html>
