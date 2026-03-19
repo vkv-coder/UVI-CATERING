@@ -746,16 +746,18 @@ function renderClients(){
   }
   document.getElementById("clientList").innerHTML=clients.map(c=>{
     const fns=APP.allEvents.filter(e=>e.Client_ID===c.Client_ID);
-    return `<div class="client-card" onclick="openClient('${c.Client_ID}')">
+    return `<div class="client-card">
       <div class="client-left-bar"></div>
-      <div style="padding-left:12px">
-        <div class="client-card-name">${c.Client_Name}</div>
-        <div class="client-card-sub">${c.Contact_Person||""} ${c.Phone?"· "+c.Phone:""}</div>
+      <div style="padding-left:12px;flex:1">
+        <div onclick="openClient('${c.Client_ID}')" style="cursor:pointer">
+          <div class="client-card-name">${c.Client_Name}</div>
+          <div class="client-card-sub">${c.Contact_Person||""} ${c.Phone?"· "+c.Phone:""}</div>
+        </div>
         <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
           ${fns.map(f=>{
             const color=STAGE_COLORS[parseInt(f.Stage)||1];
             const tod=f.Time_of_Day?` · ${f.Time_of_Day}`:"";
-            return `<span class="tag" style="background:${color}18;color:${color};border:1px solid ${color}30">${f.Function} · ${f.Date}${tod}</span>`;
+            return `<span class="tag" onclick="openClientAndFunction('${c.Client_ID}','${f.Event_ID}')" style="background:${color}18;color:${color};border:1px solid ${color}30;cursor:pointer">${f.Function} · ${f.Date}${tod}</span>`;
           }).join("")}
           ${!fns.length?`<span style="font-size:12px;color:var(--muted)">No functions yet</span>`:""}
         </div>
@@ -770,6 +772,12 @@ async function openClient(clientId){
   const fns=APP.allEvents.filter(e=>e.Client_ID===clientId);
   renderClientDetail(fns);
   showClientDetail();
+}
+
+async function openClientAndFunction(clientId, eventId){
+  APP.currentClient=APP.clients.find(c=>c.Client_ID===clientId);
+  if(!APP.currentClient)return;
+  await openFunction(eventId);
 }
 
 function renderClientDetail(fns){
@@ -885,7 +893,7 @@ function renderFunctionDetailScreen(){
     ${actions?`<div style="margin-bottom:14px">${actions}</div>`:""}
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
       <div class="section-label" style="margin-bottom:0">Items & Quotes (${items.length})</div>
-      <button class="btn btn-gold btn-sm" style="width:auto;padding:8px 14px" onclick="openAddItems()">+ Add Items</button>
+      <button class="btn btn-gold" style="width:auto;padding:10px 18px;font-size:14px" onclick="openAddItems()">+ Add Items</button>
     </div>
     <div id="fnItemsList">${itemsHtml}</div>
     ${items.length?`<button class="btn btn-outline" style="margin-top:8px" onclick="openSendQuotes()">📤 Send Quote Requests</button>`:""}`;
