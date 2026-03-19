@@ -600,7 +600,7 @@ let APP = {
   vendors:[], clients:[], allEvents:[], tasks:[], settings:{}, itemVendors:[],
   currentClient:null, currentEvent:null,
   currentEventItems:[], currentEventVendors:[],
-  currentUser:"",
+  currentUser:"", eventItemCounts:{},
   // Add items flow
   ai:{pendingItems:[], selectedVendors:[], currentItemVendors:[]},
   _waMsg:"", _waLink:"",
@@ -777,6 +777,10 @@ async function openClient(clientId){
   const fns=APP.allEvents.filter(e=>e.Client_ID===clientId);
   renderClientDetail(fns);
   showClientDetail();
+  // Load item counts in background then re-render
+  await refreshEventItemCounts();
+  const fns2=APP.allEvents.filter(e=>e.Client_ID===clientId);
+  renderClientDetail(fns2);
 }
 
 async function openClientAndFunction(clientId, eventId){
@@ -811,6 +815,10 @@ function renderFunctionCard(f){
   const color=STAGE_COLORS[stage]||STAGE_COLORS[1];
   const tod=f.Time_of_Day?` · ${f.Time_of_Day}`:"";
   const meal=f.Meal_Type?` · ${f.Meal_Type}`:"";
+  const itemCount=APP.eventItemCounts&&APP.eventItemCounts[f.Event_ID]||0;
+  const itemBadge=itemCount>0
+    ?`<span style="display:inline-flex;align-items:center;gap:4px;background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7;border-radius:10px;padding:3px 9px;font-size:11px;font-weight:600;margin-top:6px">✓ ${itemCount} item${itemCount!==1?"s":""} ready for quote</span>`
+    :`<span style="display:inline-flex;align-items:center;background:#fff8e1;color:#b8860b;border:1px solid #ffe082;border-radius:10px;padding:3px 9px;font-size:11px;margin-top:6px">No items yet</span>`;
   return `<div class="fn-card" onclick="openFunction('${f.Event_ID}')">
     <div class="fn-card-left" style="background:${color}"></div>
     <div class="fn-card-inner">
@@ -819,8 +827,19 @@ function renderFunctionCard(f){
         <span class="tag" style="background:${color}18;color:${color};border:1px solid ${color}30">Stage ${stage}</span>
       </div>
       <div class="fn-sub">📅 ${f.Date||"Date TBD"}${tod}${meal} · 👥 ${f.Pax||0} pax${f.Venue?" · 📍 "+f.Venue:""}</div>
+      <div>${itemBadge}</div>
     </div>
   </div>`;
+}
+
+async function refreshEventItemCounts(){
+  if(!APP.currentClient) return;
+  const fns=APP.allEvents.filter(function(e){ return e.Client_ID===APP.currentClient.Client_ID; });
+  if(!APP.eventItemCounts) APP.eventItemCounts={};
+  for(const fn of fns){
+    const items=await apiGet("getEventItems","&event_id="+fn.Event_ID);
+    APP.eventItemCounts[fn.Event_ID]=Array.isArray(items)?items.length:0;
+  }
 }
 
 async function openFunction(eventId){
@@ -1035,17 +1054,25 @@ function aiBackToCategories(){
 }
 
 async function aiSaveAndNext(){
-  if(APP.ai.pendingItems.length){
-    showToast("Saving items...", 8000);
-    await saveAllPendingItems();
-    showToast("Saved! Select next function.", 2500);
-  }
+  // Close modal immediately — don't make user wait
   closeModal("modal-addItems");
-  // Go back to client detail so user can tap another function
+  // Go back to client detail right away
   if(APP.currentClient){
     const fns=APP.allEvents.filter(function(e){ return e.Client_ID===APP.currentClient.Client_ID; });
     renderClientDetail(fns);
     showClientDetail();
+  }
+  // Save in background
+  if(APP.ai.pendingItems.length){
+    showToast("Saving "+APP.ai.pendingItems.length+" item(s)...", 8000);
+    await saveAllPendingItems();
+    showToast("✓ Saved! Tap next function.", 2500);
+    // Re-render client detail with updated item counts
+    if(APP.currentClient){
+      await refreshEventItemCounts();
+      const fns=APP.allEvents.filter(function(e){ return e.Client_ID===APP.currentClient.Client_ID; });
+      renderClientDetail(fns);
+    }
   }
 }
 
