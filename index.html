@@ -551,7 +551,7 @@ let APP = {
   menuFileName:"", menuAttached:false
 };
 
-// ── API ───────────────────────────────────────────────────────
+// -- API -------------------------------------------------------
 async function apiGet(action, params="") {
   const r = await fetch(`${API}?action=${action}${params}`);
   return r.json();
@@ -561,7 +561,7 @@ async function apiWrite(action, data) {
   return r.json();
 }
 
-// ── PIN ───────────────────────────────────────────────────────
+// -- PIN -------------------------------------------------------
 let pinValue="";
 function pinPress(d){if(pinValue.length>=4)return;pinValue+=d;updatePinDots();if(pinValue.length===4)setTimeout(checkPin,200);}
 function pinDel(){pinValue=pinValue.slice(0,-1);updatePinDots();document.getElementById("pinError").textContent="";}
@@ -580,7 +580,7 @@ async function checkPin(){
   }
 }
 
-// ── INIT ──────────────────────────────────────────────────────
+// -- INIT ------------------------------------------------------
 async function initApp(){
   setTodayHeader();
   await Promise.all([loadSettings(),loadVendors(),loadClients(),loadAllEvents(),loadTasks(),loadItemVendors()]);
@@ -593,7 +593,7 @@ async function loadAllEvents()   { APP.allEvents   = await apiGet("getEvents"); 
 async function loadTasks()       { APP.tasks       = await apiGet("getTasks"); }
 async function loadItemVendors() { APP.itemVendors = await apiGet("getItemVendors"); }
 
-// ── NAV ───────────────────────────────────────────────────────
+// -- NAV -------------------------------------------------------
 function switchScreen(name, btn){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active"));
@@ -631,7 +631,7 @@ function showFunctionDetail(){
   document.getElementById("fab").style.display="flex";
 }
 
-// ── TODAY ─────────────────────────────────────────────────────
+// -- TODAY -----------------------------------------------------
 function setTodayHeader(){
   const now=new Date();
   document.getElementById("todayDay").textContent=DAYS[now.getDay()].toUpperCase();
@@ -681,7 +681,7 @@ async function doneTask(rowId,btn){
   await loadTasks(); renderToday();
 }
 
-// ── CLIENTS ───────────────────────────────────────────────────
+// -- CLIENTS ---------------------------------------------------
 function renderClients(){
   const clients=APP.clients||[];
   document.getElementById("clientCount").textContent=`${clients.length} active clients`;
@@ -851,7 +851,7 @@ async function deleteItemRow(rowId){
   renderFunctionDetailScreen();
 }
 
-// ── VENDOR QUOTE ──────────────────────────────────────────────
+// -- VENDOR QUOTE ----------------------------------------------
 function openVendorQuote(rowId){
   const v=APP.currentEventVendors.find(x=>x.Row_ID===rowId);if(!v)return;
   const vendor=APP.vendors.find(x=>x.Vendor_ID===v.Vendor_ID);
@@ -872,7 +872,7 @@ Please revert at the earliest.
   showWAMsg(msg,wa,`Quote Request → ${v.Agency_Name}`);
 }
 
-// ── ADD ITEMS FLOW ────────────────────────────────────────────
+// -- ADD ITEMS FLOW --------------------------------------------
 function openAddItems(){
   APP.ai={pendingItems:[], selectedVendors:[], currentItemVendors:[]};
   const ev=APP.currentEvent;
@@ -922,17 +922,24 @@ function onItemChange(){
 
 function renderVendorChips(){
   const list=APP.ai.currentItemVendors;
+  const el=document.getElementById("aiVendorChips");
   if(!list.length){
-    document.getElementById("aiVendorChips").innerHTML=`<div style="font-size:12px;color:var(--muted)">No standard vendors. Use dropdown below.</div>`;
+    el.innerHTML='<div style="font-size:12px;color:var(--muted)">No standard vendors. Use dropdown below.</div>';
     return;
   }
-  document.getElementById("aiVendorChips").innerHTML=list.map(name=>{
-    const sel=APP.ai.selectedVendors.some(v=>v.name===name);
-    return `<span class="chip ${sel?"selected":""}" onclick="toggleVendorChip('${name.replace(/'/g,"\'")}')">${sel?"✓ ":""}${name}</span>`;
-  }).join("");
+  el.innerHTML='';
+  list.forEach(function(name){
+    const sel=APP.ai.selectedVendors.some(function(v){return v.name===name;});
+    const span=document.createElement('span');
+    span.className='chip'+(sel?' selected':'');
+    span.textContent=(sel?'\u2713 ':'')+name;
+    span.onclick=function(){toggleVendorChip(name);};
+    el.appendChild(span);
+  });
 }
 
-function toggleVendorChip(name){
+function toggleVendorChip(safeName){
+  const name=safeName.replace(/__APOS__/g,"'");
   const idx=APP.ai.selectedVendors.findIndex(v=>v.name===name);
   if(idx>=0) APP.ai.selectedVendors.splice(idx,1);
   else {
@@ -992,22 +999,25 @@ function addItemToList(){
 
 function renderPendingItems(){
   const items=APP.ai.pendingItems;
-  if(!items.length){
-    document.getElementById("aiItemsList").innerHTML="";
-    return;
-  }
-  document.getElementById("aiItemsList").innerHTML=`
-    <div class="section-label" style="margin-bottom:8px">Items to save (${items.length}):</div>`+
-    items.map((item,i)=>`
-    <div class="sel-item" style="flex-direction:column;align-items:stretch">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div>
-          <div class="sel-item-name">${item.itemName}</div>
-          <div class="sel-item-sub">${item.qty} ${item.unit} · ${item.vendors.map(v=>v.name).join(", ")}</div>
-        </div>
-        <button class="remove-btn" onclick="removePendingItem(${i})">×</button>
-      </div>
-    </div>`).join("");
+  const el=document.getElementById("aiItemsList");
+  if(!items.length){ el.innerHTML=""; return; }
+  el.innerHTML="";
+  const label=document.createElement('div');
+  label.className='section-label';
+  label.style.marginBottom='8px';
+  label.textContent='Items to save ('+items.length+'):';
+  el.appendChild(label);
+  items.forEach(function(item,i){
+    const div=document.createElement('div');
+    div.className='sel-item';
+    div.style.cssText='flex-direction:column;align-items:stretch';
+    div.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center">'+
+      '<div><div class="sel-item-name">'+item.itemName+'</div>'+
+      '<div class="sel-item-sub">'+item.qty+' '+item.unit+' · '+item.vendors.map(function(v){return v.name;}).join(', ')+'</div></div>'+
+      '<button class="remove-btn">×</button></div>';
+    div.querySelector('.remove-btn').onclick=function(){removePendingItem(i);};
+    el.appendChild(div);
+  });
 }
 
 function removePendingItem(i){
@@ -1016,7 +1026,7 @@ function removePendingItem(i){
   if(!APP.ai.pendingItems.length) document.getElementById("aiSendSection").style.display="none";
 }
 
-// ── SEND QUOTES ───────────────────────────────────────────────
+// -- SEND QUOTES -----------------------------------------------
 async function sendFunctionQuotes(){
   await saveAllPendingItems();
   buildAndShowQuoteMsgs([APP.currentEvent]);
@@ -1052,9 +1062,7 @@ async function saveAllPendingItems(){
 
 async function buildAndShowQuoteMsgs(functions){
   const sig=APP.settings.Signature||"UVI Luxury Catering & Decor";
-  // Load all items and vendors for each function
-  const vendorMap={}; // vendor_id → {vendor, items:[{fn, itemName, qty, unit}]}
-
+  const vendorMap={};
   for(const fn of functions){
     const items=await apiGet("getEventItems","&event_id="+fn.Event_ID);
     const vendors=await apiGet("getEventVendors","&event_id="+fn.Event_ID);
@@ -1063,73 +1071,70 @@ async function buildAndShowQuoteMsgs(functions){
     vendors.forEach(v=>{
       if(!vendorMap[v.Agency_Name]) vendorMap[v.Agency_Name]={vendor:APP.vendors.find(x=>x.Vendor_ID===v.Vendor_ID),items:[]};
       const item=itemMap[v.Item_Row_ID];
-      if(item) vendorMap[v.Agency_Name].items.push({
-        fn:fn.Function, date:fn.Date, tod:fn.Time_of_Day||"", meal:fn.Meal_Type||"",
-        pax:fn.Pax, itemName:item.Item_Name, qty:item.Qty, unit:item.Unit
-      });
+      if(item) vendorMap[v.Agency_Name].items.push({fn:fn.Function,date:fn.Date,tod:fn.Time_of_Day||"",pax:fn.Pax,itemName:item.Item_Name,qty:item.Qty,unit:item.Unit});
     });
   }
-
-  // Build one message per vendor
-  let html="<div class='section-label' style='margin-bottom:10px'>Quote Requests — one per vendor:</div>";
+  document.getElementById("aiQuoteMsgs").innerHTML="";
   const vendorEntries=Object.entries(vendorMap);
   if(!vendorEntries.length){
-    document.getElementById("aiQuoteMsgs").innerHTML=`<div class="error-box"><div class="title">No vendor assignments found.</div></div>`;
+    document.getElementById("aiQuoteMsgs").innerHTML='<div class="error-box"><div class="title">No vendor assignments found. Add items first.</div></div>';
     return;
   }
-
   vendorEntries.forEach(([agencyName,{vendor,items}],idx)=>{
-    // Group items by function
     const fnGroups={};
     items.forEach(i=>{
-      const key=`${i.fn}|${i.date}|${i.tod}|${i.pax}`;
+      const key=i.fn+"|"+i.date+"|"+i.tod+"|"+i.pax;
       if(!fnGroups[key])fnGroups[key]={fn:i.fn,date:i.date,tod:i.tod,pax:i.pax,items:[]};
-      fnGroups[key].items.push(`• ${i.itemName} — ${i.qty} ${i.unit}`);
+      fnGroups[key].items.push("* "+i.itemName+" -- "+i.qty+" "+i.unit);
     });
-
-    let msgBody=`Dear ${agencyName.split(" ")[0]},
-
-We request your best quote for the following:
-`;
+    const NL="\n";
+    let msg="Dear "+agencyName.split(" ")[0]+","+NL+NL+"We request your best quote for:"+NL;
     Object.values(fnGroups).forEach(g=>{
-      const tod=g.tod?` (${g.tod})`:"";
-      msgBody+=`
-*${g.fn}${tod} — ${g.date} — ${g.pax} pax*
-${g.items.join("
-")}
-`;
+      const tod=g.tod?" ("+g.tod+")":"";
+      msg+=NL+g.fn+tod+" -- "+g.date+" -- "+g.pax+" pax"+NL+g.items.join(NL)+NL;
     });
-    msgBody+=`
-Kindly revert at the earliest.
-
-*${sig}*`;
-
-    const wa=vendor?.WhatsApp_Group_Link||(vendor?.Contact_Number?`https://wa.me/91${vendor.Contact_Number}`:"");
-
-    html+=`<div class="card" style="margin-bottom:12px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <strong style="font-size:14px">${agencyName}</strong>
-        <span style="font-size:11px;color:var(--muted)">${items.length} item(s)</span>
-      </div>
-      <div class="wa-preview" id="qmsg_${idx}">${msgBody}</div>
-      <div style="display:flex;gap:8px">
-        <button class="btn btn-gold btn-sm" style="flex:2" onclick="showQuoteWA(${idx},'${agencyName.replace(/'/g,"\'")}','${(wa||'').replace(/'/g,"\'")}')">📋 Copy + WhatsApp</button>
-        <button id="qmark_${idx}" onclick="markQSent(${idx})" style="flex:1;padding:9px;border-radius:10px;cursor:pointer;font-family:var(--sans);font-size:12px;border:1.5px solid var(--border);background:var(--card-alt);color:var(--muted)">Mark Sent</button>
-      </div>
-    </div>`;
-    // Store for copy
-    window[`_qmsg_${idx}`]=msgBody;
-    window[`_qwa_${idx}`]=wa;
+    msg+=NL+"Kindly revert at the earliest."+NL+NL+"*"+sig+"*";
+    const wa=vendor&&vendor.WhatsApp_Group_Link?vendor.WhatsApp_Group_Link:(vendor&&vendor.Contact_Number?"https://wa.me/91"+vendor.Contact_Number:"");
+    window["_qmsg_"+idx]=msg;
+    window["_qwa_"+idx]=wa;
+    window["_qname_"+idx]=agencyName;
+    const card=document.createElement("div");
+    card.className="card";
+    card.style.marginBottom="12px";
+    const preview=document.createElement("div");
+    preview.className="wa-preview";
+    preview.id="qmsg_"+idx;
+    preview.textContent=msg;
+    const header=document.createElement("div");
+    header.style.cssText="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px";
+    header.innerHTML='<strong style="font-size:14px">'+agencyName+'</strong><span style="font-size:11px;color:var(--muted)">'+items.length+' item(s)</span>';
+    const btnRow=document.createElement("div");
+    btnRow.style.cssText="display:flex;gap:8px;margin-top:10px";
+    const b1=document.createElement("button");
+    b1.className="btn btn-gold btn-sm";
+    b1.style.flex="2";
+    b1.textContent="Copy + Open WhatsApp";
+    b1.onclick=()=>showQuoteWA(idx);
+    const b2=document.createElement("button");
+    b2.id="qmark_"+idx;
+    b2.style.cssText="flex:1;padding:9px;border-radius:10px;cursor:pointer;font-size:12px;border:1.5px solid var(--border);background:var(--card-alt);color:var(--muted)";
+    b2.textContent="Mark Sent";
+    b2.onclick=()=>markQSent(idx);
+    btnRow.appendChild(b1);
+    btnRow.appendChild(b2);
+    card.appendChild(header);
+    card.appendChild(preview);
+    card.appendChild(btnRow);
+    document.getElementById("aiQuoteMsgs").appendChild(card);
   });
-
-  document.getElementById("aiQuoteMsgs").innerHTML=html;
-  // Scroll to messages
   document.getElementById("aiQuoteMsgs").scrollIntoView({behavior:"smooth"});
 }
 
-function showQuoteWA(idx,name,wa){
-  const msg=window[`_qmsg_${idx}`]||"";
-  showWAMsg(msg,wa,`Quote Request → ${name}`);
+function showQuoteWA(idx){
+  const msg=window["_qmsg_"+idx]||"";
+  const wa=window["_qwa_"+idx]||"";
+  const name=window["_qname_"+idx]||"";
+  showWAMsg(msg,wa,"Quote Request → "+name);
 }
 
 function markQSent(idx){
@@ -1159,7 +1164,7 @@ function openSendQuotes(){
   buildAndShowQuoteMsgs([APP.currentEvent]);
 }
 
-// ── NEW CLIENT ────────────────────────────────────────────────
+// -- NEW CLIENT ------------------------------------------------
 async function saveNewClient(){
   const name=document.getElementById("nc-name").value.trim();
   if(!name){alert("Client name is required");return;}
@@ -1180,7 +1185,7 @@ async function saveNewClient(){
   btn.textContent="Create Client";btn.disabled=false;
 }
 
-// ── NEW FUNCTION ──────────────────────────────────────────────
+// -- NEW FUNCTION ----------------------------------------------
 async function saveNewFunction(){
   if(!APP.currentClient){alert("No client selected");return;}
   const btn=document.getElementById("saveFunctionBtn");
@@ -1207,7 +1212,7 @@ async function saveNewFunction(){
   btn.textContent="Add Function";btn.disabled=false;
 }
 
-// ── EDIT/CANCEL FUNCTION ──────────────────────────────────────
+// -- EDIT/CANCEL FUNCTION --------------------------------------
 function editFunction(){
   document.getElementById("fnDropdown").classList.remove("open");
   const ev=APP.currentEvent;
@@ -1264,7 +1269,7 @@ async function cancelFunction(){
   goBackToClient();
 }
 
-// ── SEND MENU ─────────────────────────────────────────────────
+// -- SEND MENU -------------------------------------------------
 function openSendMenu(){
   APP.menuAttached=false;APP.menuFileName="";
   document.getElementById("menuAttachIcon").textContent="📁";
@@ -1319,7 +1324,7 @@ async function markMenuSent(){
   }
 }
 
-// ── PRICE QUOTE ───────────────────────────────────────────────
+// -- PRICE QUOTE -----------------------------------------------
 function sendPriceQuote(){
   const ev=APP.currentEvent;const c=APP.currentClient;
   const sig=APP.settings.Signature||"UVI Luxury Catering & Decor";
@@ -1339,7 +1344,7 @@ Kindly confirm to proceed.
   showWAMsg(msg,"",`Price Quote → ${c?.Client_Name}`);
 }
 
-// ── VENDORS ───────────────────────────────────────────────────
+// -- VENDORS ---------------------------------------------------
 let vendorFilter="All";
 function renderVendors(){
   const vendors=APP.vendors||[];
@@ -1386,7 +1391,7 @@ async function saveNewVendor(){
   }
 }
 
-// ── WA MESSAGE ────────────────────────────────────────────────
+// -- WA MESSAGE ------------------------------------------------
 function showWAMsg(msg,waLink,recipientLabel){
   APP._waMsg=msg;APP._waLink=waLink;
   document.getElementById("waMsgText").textContent=msg;
@@ -1407,14 +1412,14 @@ function execCopy(text){
   document.body.removeChild(ta);
 }
 
-// ── STEP NAV ──────────────────────────────────────────────────
+// -- STEP NAV --------------------------------------------------
 function goStep(prefix,step,btn){
   [1,2,3,4].forEach(i=>{const el=document.getElementById(`${prefix}-step-${i}`);if(el)el.style.display=i===step?"block":"none";});
   if(btn){document.querySelectorAll(".step-tab").forEach(b=>b.classList.remove("active"));btn.classList.add("active");}
   if(prefix==="menu"&&step===2)updateMenuPreview();
 }
 
-// ── DROPDOWN ──────────────────────────────────────────────────
+// -- DROPDOWN --------------------------------------------------
 function toggleDropdown(btn){
   const dd=document.getElementById("fnDropdown");
   dd.classList.toggle("open");
@@ -1423,9 +1428,10 @@ function toggleDropdown(btn){
   });
 }
 
-// ── MODALS ────────────────────────────────────────────────────
+// -- MODALS ----------------------------------------------------
 function openModal(id){document.getElementById(id).classList.add("open");}
 function closeModal(id){document.getElementById(id).classList.remove("open");}
 
+</script>
 </body>
 </html>
