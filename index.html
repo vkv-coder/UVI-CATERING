@@ -476,9 +476,10 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);max-width:48
       <!-- Done with category -->
       <div id="aiCatDoneRow" style="display:none;margin-top:12px">
         <div class="gold-line"></div>
-        <div style="display:flex;gap:8px;margin-top:12px">
-          <button class="btn btn-outline" style="flex:1" onclick="aiBackToCategories()">+ Add Another Category</button>
-          <button class="btn btn-gold" style="flex:1" onclick="aiShowSendSection()">Done → Send Quotes</button>
+        <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+          <button class="btn btn-outline" style="flex:1;min-width:120px" onclick="aiBackToCategories()">+ Add Another Category</button>
+          <button class="btn btn-outline" style="flex:1;min-width:120px" onclick="aiSaveAndNext()">💾 Save & Next Function</button>
+          <button class="btn btn-gold" style="flex:1;min-width:120px" onclick="aiShowSendSection()">Done → Send Quotes</button>
         </div>
       </div>
     </div>
@@ -992,8 +993,11 @@ function renderCategoryButtons(){
   }
   if(hasPending){
     sendBtn.innerHTML=`<div class="gold-line" style="margin-bottom:12px"></div>
-      <div style="color:var(--muted);font-size:12px;margin-bottom:8px">${APP.ai.pendingItems.length} item(s) ready to send</div>
-      <button class="btn btn-gold" onclick="aiShowSendSection()" style="margin-bottom:8px">Done → Send Quotes</button>`;
+      <div style="color:var(--muted);font-size:12px;margin-bottom:8px">${APP.ai.pendingItems.length} item(s) ready</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-outline" style="flex:1;min-width:120px" onclick="aiSaveAndNext()">💾 Save & Next Function</button>
+        <button class="btn btn-gold" style="flex:1;min-width:120px" onclick="aiShowSendSection()">Done → Send Quotes</button>
+      </div>`;
   } else {
     sendBtn.innerHTML="";
   }
@@ -1028,6 +1032,21 @@ function aiBackToCategories(){
   APP.ai.currentItemVendors=[];
   aiShowStep(1);
   renderCategoryButtons();
+}
+
+async function aiSaveAndNext(){
+  if(APP.ai.pendingItems.length){
+    showToast("Saving items...", 8000);
+    await saveAllPendingItems();
+    showToast("Saved! Select next function.", 2500);
+  }
+  closeModal("modal-addItems");
+  // Go back to client detail so user can tap another function
+  if(APP.currentClient){
+    const fns=APP.allEvents.filter(function(e){ return e.Client_ID===APP.currentClient.Client_ID; });
+    renderClientDetail(fns);
+    showClientDetail();
+  }
 }
 
 function onItemChange(){
