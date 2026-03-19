@@ -1,11 +1,3 @@
-
-.pin-enter-btn {
-  display:block; width:100%; margin-top:14px; padding:14px;
-  background:var(--gold); color:#fff; border:none; border-radius:12px;
-  font-family:'DM Sans',sans-serif; font-size:16px; font-weight:600;
-  cursor:pointer; letter-spacing:1px;
-}
-.pin-enter-btn:active { background:var(--gold-dark); }
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -250,6 +242,14 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);max-width:48
   border-radius:20px; font-size:13px; font-family:'DM Sans',sans-serif;
   z-index:9999; display:none; white-space:nowrap;
 }
+
+.pin-enter-btn {
+  display:block; width:100%; margin-top:18px; padding:16px;
+  background:var(--gold); color:#fff; border:none; border-radius:14px;
+  font-family:'DM Sans',sans-serif; font-size:17px; font-weight:700;
+  cursor:pointer; letter-spacing:1px; box-shadow:0 4px 14px rgba(201,168,76,.4);
+}
+.pin-enter-btn:active { background:var(--gold-dark); transform:scale(.98); }
 </style>
 </head>
 <body>
@@ -277,7 +277,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);max-width:48
     <button class="pin-key" onclick="pinPress('7')">7</button><button class="pin-key" onclick="pinPress('8')">8</button><button class="pin-key" onclick="pinPress('9')">9</button>
     <button class="pin-key empty"></button><button class="pin-key" onclick="pinPress('0')">0</button><button class="pin-key del" onclick="pinDel()">⌫</button>
   </div>
-  <button class="pin-enter-btn" onclick="checkPin()">Enter ↵</button>
+  <button id="pinEnterBtn" class="pin-enter-btn" onclick="checkPin()">Enter ↵</button>
 </div>
 
 <!-- MAIN APP -->
@@ -622,7 +622,11 @@ function pinPress(d){if(pinValue.length>=4)return;pinValue+=d;updatePinDots();if
 function pinDel(){pinValue=pinValue.slice(0,-1);updatePinDots();document.getElementById("pinError").textContent="";}
 function updatePinDots(){for(let i=0;i<4;i++)document.getElementById("pd"+i).classList.toggle("filled",i<pinValue.length);}
 async function checkPin(){
+  if(!pinValue){document.getElementById("pinError").textContent="Please enter your PIN.";return;}
+  const btn=document.getElementById("pinEnterBtn");
+  btn.textContent="Checking..."; btn.disabled=true;
   const res=await apiGet("checkPin","&pin="+pinValue);
+  btn.textContent="Enter ↵"; btn.disabled=false;
   if(res.success){
     APP.currentUser=res.name;
     document.getElementById("pinScreen").style.display="none";
@@ -852,7 +856,7 @@ function renderFunctionDetailScreen(){
           <div class="item-row-name">${item.Item_Name}</div>
           <div class="item-row-sub">${item.Qty} ${item.Unit} · ${item.Category}</div>
         </div>
-        <button onclick="deleteItemRow('${item.Row_ID}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;padding:4px">×</button>
+        <button onclick="deleteItemRow('${item.Row_ID}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:22px;padding:6px 10px;line-height:1">×</button>
       </div>
       ${iv.length?`<div style="display:flex;gap:6px;flex-wrap:wrap">
         ${iv.map(v=>{
@@ -907,10 +911,11 @@ async function goBackToClient(){
 }
 
 async function deleteItemRow(rowId){
-  if(!confirm("Remove this item?"))return;
+  showToast("Removing...", 5000);
   await apiWrite("deleteEventItem",{Row_ID:rowId});
   APP.currentEventItems=await apiGet("getEventItems","&event_id="+APP.currentEvent.Event_ID);
   APP.currentEventVendors=await apiGet("getEventVendors","&event_id="+APP.currentEvent.Event_ID);
+  showToast("Item removed", 1500);
   renderFunctionDetailScreen();
 }
 
