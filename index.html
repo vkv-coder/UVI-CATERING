@@ -743,44 +743,73 @@ async function checkPin(){
 }
 
 // -- INIT ------------------------------------------------------
+// -- LOCAL STORAGE CACHE ---------------------------------------
+const LS_KEY = "uvi_appdata_v1";
+
+function saveToLocal(data){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(data)); }catch(e){}
+}
+function loadFromLocal(){
+  try{ const d=localStorage.getItem(LS_KEY); return d?JSON.parse(d):null; }catch(e){ return null; }
+}
+function applyAppData(data){
+  if(!data) return false;
+  if(!data.settings || !data.clients) return false;
+  APP.settings    = data.settings    || {};
+  APP.vendors     = Array.isArray(data.vendors)     ? data.vendors     : [];
+  APP.clients     = Array.isArray(data.clients)     ? data.clients     : [];
+  APP.allEvents   = Array.isArray(data.events)      ? data.events      : [];
+  APP.tasks       = Array.isArray(data.tasks)       ? data.tasks       : [];
+  APP.itemVendors = Array.isArray(data.itemVendors) ? data.itemVendors : [];
+  APP.allEventItemsCache   = Array.isArray(data.allEventItems)   ? data.allEventItems   : [];
+  APP.allEventVendorsCache = Array.isArray(data.allEventVendors) ? data.allEventVendors : [];
+  return true;
+}
+
 async function initApp(){
   setTodayHeader();
-  // Show app shell immediately — don't wait
-  renderToday(); renderVendors(); renderClients();
-  hideLoading();
-  showToast("Loading data...", 15000);
-  // Try single bulk call first (fast if Apps Script deployed)
-  let loaded = false;
-  try {
+
+  // 1. Load from localStorage INSTANTLY
+  const local = loadFromLocal();
+  if(local && applyAppData(local)){
+    buildEventItemCounts();
+    renderToday(); renderVendors(); renderClients();
+    hideLoading();
+    showToast("Syncing...", 10000);
+  } else {
+    // First ever load — no local cache yet
+    showLoading("Loading...", "First time setup");
+  }
+
+  // 2. Sync from sheet in background
+  try{
     const data = await apiGet("getAppData");
     if(data && data.settings && data.clients){
-      APP.settings    = data.settings    || {};
-      APP.vendors     = Array.isArray(data.vendors)     ? data.vendors     : [];
-      APP.clients     = Array.isArray(data.clients)     ? data.clients     : [];
-      APP.allEvents   = Array.isArray(data.events)      ? data.events      : [];
-      APP.tasks       = Array.isArray(data.tasks)       ? data.tasks       : [];
-      APP.itemVendors = Array.isArray(data.itemVendors) ? data.itemVendors : [];
-      APP.allEventItemsCache   = Array.isArray(data.allEventItems)   ? data.allEventItems   : [];
-      APP.allEventVendorsCache = Array.isArray(data.allEventVendors) ? data.allEventVendors : [];
-      loaded = true;
+      applyAppData(data);
+      saveToLocal(data); // save to localStorage for next time
     }
-  } catch(e){}
-  if(!loaded){
-    // Fallback: load in parallel batches
-    showToast("Loading (fallback)...", 15000);
-    await Promise.all([loadSettings(),loadVendors(),loadClients(),loadAllEvents(),loadTasks(),loadItemVendors()]);
-    await Promise.all([loadAllEventItemsCache(), loadAllEventVendorsCache()]);
+  } catch(e){
+    console.error("Sync failed:", e);
   }
+
+  // 3. Re-render with fresh data
   buildEventItemCounts();
   renderToday(); renderVendors(); renderClients();
+  hideLoading();
   showToast("Ready ✓", 1500);
+
+  // 4. If client detail open, refresh badges
+  if(APP.currentClient){
+    const fns=APP.allEvents.filter(function(e){ return e.Client_ID===APP.currentClient.Client_ID; });
+    renderClientDetail(fns);
+  }
 }
+
 async function loadAllEventItemsCache(){
   const res = await apiGet("getAllEventItems");
   if(Array.isArray(res) && res.length>0){
     APP.allEventItemsCache = res;
   } else {
-    // Fallback: fetch all events in PARALLEL (not sequential)
     const results = await Promise.all(
       APP.allEvents.map(function(ev){ return apiGet("getEventItems","&event_id="+ev.Event_ID); })
     );
@@ -793,7 +822,6 @@ async function loadAllEventVendorsCache(){
   if(Array.isArray(res) && res.length>0){
     APP.allEventVendorsCache = res;
   } else {
-    // Fallback: fetch all events in PARALLEL
     const results = await Promise.all(
       APP.allEvents.map(function(ev){ return apiGet("getEventVendors","&event_id="+ev.Event_ID); })
     );
@@ -801,6 +829,20 @@ async function loadAllEventVendorsCache(){
     results.forEach(function(vendors){ if(Array.isArray(vendors)) APP.allEventVendorsCache.push(...vendors); });
   }
 }
+function buildEventItemCounts(){
+  APP.eventItemCounts = {};
+  (APP.allEventItemsCache||[]).forEach(function(it){
+    APP.eventItemCounts[it.Event_ID] = (APP.eventItemCounts[it.Event_ID]||0) + 1;
+  });
+}
+async function loadSettings()    { APP.settings    = await apiGet("getSettings"); }
+async function loadVendors()     { APP.vendors     = await apiGet("getVendors"); }
+async function loadClients()     { APP.clients     = await apiGet("getClients"); }
+async function loadAllEvents()   { APP.allEvents   = await apiGet("getEvents"); }
+async function loadTasks()       { APP.tasks       = await apiGet("getTasks"); }
+async function loadItemVendors() { APP.itemVendors = await apiGet("getItemVendors"); }
+
+
 function buildEventItemCounts(){
   APP.eventItemCounts = {};
   (APP.allEventItemsCache||[]).forEach(function(it){
@@ -952,7 +994,9 @@ function renderSimpleTask(t,color){
 async function doneTask(rowId,btn){
   btn.textContent="✓";btn.style.color="var(--green)";
   await apiWrite("completeTask",{Row_ID:rowId});
-  await loadTasks(); renderToday();
+  await loadTasks();
+  saveToLocal({settings:APP.settings,vendors:APP.vendors,clients:APP.clients,events:APP.allEvents,tasks:APP.tasks,itemVendors:APP.itemVendors,allEventItems:APP.allEventItemsCache,allEventVendors:APP.allEventVendorsCache});
+  renderToday();
 }
 
 // -- CLIENTS ---------------------------------------------------
@@ -1218,6 +1262,7 @@ async function deleteItemRow(rowId){
   const evId=APP.currentEvent.Event_ID;
   APP.currentEventItems=(APP.allEventItemsCache||[]).filter(function(i){ return i.Event_ID===evId; });
   APP.currentEventVendors=(APP.allEventVendorsCache||[]).filter(function(v){ return v.Event_ID===evId; });
+  saveToLocal({settings:APP.settings,vendors:APP.vendors,clients:APP.clients,events:APP.allEvents,tasks:APP.tasks,itemVendors:APP.itemVendors,allEventItems:APP.allEventItemsCache,allEventVendors:APP.allEventVendorsCache});
   showToast("Item removed", 1500);
   renderFunctionDetailScreen();
 }
@@ -1551,6 +1596,8 @@ async function saveAllPendingItems(){
   // Update current event from cache
   APP.currentEventItems=(APP.allEventItemsCache||[]).filter(function(i){ return i.Event_ID===ev.Event_ID; });
   APP.currentEventVendors=(APP.allEventVendorsCache||[]).filter(function(v){ return v.Event_ID===ev.Event_ID; });
+  // Persist to localStorage
+  saveToLocal({settings:APP.settings,vendors:APP.vendors,clients:APP.clients,events:APP.allEvents,tasks:APP.tasks,itemVendors:APP.itemVendors,allEventItems:APP.allEventItemsCache,allEventVendors:APP.allEventVendorsCache});
 }
 
 
@@ -1732,7 +1779,9 @@ async function saveNewClient(){
   });
   if(res.success){
     document.getElementById("newClientMsg").innerHTML=`<div class="success-box"><div class="title">✓ Client Added</div></div>`;
-    await loadClients();await loadAllEvents();renderClients();
+    await loadClients();await loadAllEvents();
+  saveToLocal({settings:APP.settings,vendors:APP.vendors,clients:APP.clients,events:APP.allEvents,tasks:APP.tasks,itemVendors:APP.itemVendors,allEventItems:APP.allEventItemsCache,allEventVendors:APP.allEventVendorsCache});
+    renderClients();
     setTimeout(()=>{closeModal("modal-newClient");document.getElementById("newClientMsg").innerHTML="";},1200);
   }
   btn.textContent="Create Client";btn.disabled=false;
@@ -1758,7 +1807,9 @@ async function saveNewFunction(){
   });
   if(res.success){
     document.getElementById("newFunctionMsg").innerHTML=`<div class="success-box"><div class="title">✓ Function Added</div><div class="sub">Tasks auto-generated.</div></div>`;
-    await loadAllEvents();await loadTasks();renderToday();
+    await loadAllEvents();await loadTasks();
+  saveToLocal({settings:APP.settings,vendors:APP.vendors,clients:APP.clients,events:APP.allEvents,tasks:APP.tasks,itemVendors:APP.itemVendors,allEventItems:APP.allEventItemsCache,allEventVendors:APP.allEventVendorsCache});
+    renderToday();
     const fns=APP.allEvents.filter(e=>e.Client_ID===APP.currentClient.Client_ID);
     renderClientDetail(fns);
     setTimeout(()=>{closeModal("modal-newFunction");document.getElementById("newFunctionMsg").innerHTML="";},1200);
