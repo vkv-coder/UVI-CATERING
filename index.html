@@ -692,12 +692,30 @@ let APP = {
 
 // -- API -------------------------------------------------------
 async function apiGet(action, params="") {
-  const r = await fetch(`${API}?action=${action}${params}`);
-  return r.json();
+  const controller = new AbortController();
+  const timer = setTimeout(()=>controller.abort(), 25000);
+  try {
+    const r = await fetch(`${API}?action=${action}${params}`, {signal:controller.signal});
+    clearTimeout(timer);
+    return r.json();
+  } catch(e) {
+    clearTimeout(timer);
+    console.error("apiGet failed:", action, e.message);
+    return {};
+  }
 }
 async function apiWrite(action, data) {
-  const r = await fetch(`${API}?action=${action}&d=${encodeURIComponent(JSON.stringify(data))}`);
-  return r.json();
+  const controller = new AbortController();
+  const timer = setTimeout(()=>controller.abort(), 25000);
+  try {
+    const r = await fetch(`${API}?action=${action}&d=${encodeURIComponent(JSON.stringify(data))}`, {signal:controller.signal});
+    clearTimeout(timer);
+    return r.json();
+  } catch(e) {
+    clearTimeout(timer);
+    console.error("apiWrite failed:", action, e.message);
+    return {};
+  }
 }
 
 // -- PIN -------------------------------------------------------
@@ -711,13 +729,13 @@ async function checkPin(){
   btn.textContent="Checking..."; btn.disabled=true;
   const res=await apiGet("checkPin","&pin="+pinValue);
   btn.textContent="Enter ↵"; btn.disabled=false;
-  if(res.success){
+  if(res && res.success){
     APP.currentUser=res.name;
+    // Show app immediately — no loading screen
     document.getElementById("pinScreen").style.display="none";
     document.getElementById("mainApp").style.display="block";
     document.getElementById("userBadge").textContent=res.name;
-    showLoading("Loading...");
-    initApp();
+    initApp(); // loads data in background
   } else {
     document.getElementById("pinError").textContent="Incorrect PIN. Try again.";
     pinValue=""; updatePinDots();
@@ -726,26 +744,36 @@ async function checkPin(){
 
 // -- INIT ------------------------------------------------------
 async function initApp(){
-  showLoading("Loading...", "");
   setTodayHeader();
-  const data = await apiGet("getAppData");
-  if(data && data.settings){
-    APP.settings    = data.settings    || {};
-    APP.vendors     = Array.isArray(data.vendors)     ? data.vendors     : [];
-    APP.clients     = Array.isArray(data.clients)     ? data.clients     : [];
-    APP.allEvents   = Array.isArray(data.events)      ? data.events      : [];
-    APP.tasks       = Array.isArray(data.tasks)       ? data.tasks       : [];
-    APP.itemVendors = Array.isArray(data.itemVendors) ? data.itemVendors : [];
-    APP.allEventItemsCache   = Array.isArray(data.allEventItems)   ? data.allEventItems   : [];
-    APP.allEventVendorsCache = Array.isArray(data.allEventVendors) ? data.allEventVendors : [];
-  } else {
-    // Fallback if getAppData not deployed yet
+  // Show app shell immediately — don't wait
+  renderToday(); renderVendors(); renderClients();
+  hideLoading();
+  showToast("Loading data...", 15000);
+  // Try single bulk call first (fast if Apps Script deployed)
+  let loaded = false;
+  try {
+    const data = await apiGet("getAppData");
+    if(data && data.settings && data.clients){
+      APP.settings    = data.settings    || {};
+      APP.vendors     = Array.isArray(data.vendors)     ? data.vendors     : [];
+      APP.clients     = Array.isArray(data.clients)     ? data.clients     : [];
+      APP.allEvents   = Array.isArray(data.events)      ? data.events      : [];
+      APP.tasks       = Array.isArray(data.tasks)       ? data.tasks       : [];
+      APP.itemVendors = Array.isArray(data.itemVendors) ? data.itemVendors : [];
+      APP.allEventItemsCache   = Array.isArray(data.allEventItems)   ? data.allEventItems   : [];
+      APP.allEventVendorsCache = Array.isArray(data.allEventVendors) ? data.allEventVendors : [];
+      loaded = true;
+    }
+  } catch(e){}
+  if(!loaded){
+    // Fallback: load in parallel batches
+    showToast("Loading (fallback)...", 15000);
     await Promise.all([loadSettings(),loadVendors(),loadClients(),loadAllEvents(),loadTasks(),loadItemVendors()]);
     await Promise.all([loadAllEventItemsCache(), loadAllEventVendorsCache()]);
   }
   buildEventItemCounts();
   renderToday(); renderVendors(); renderClients();
-  hideLoading();
+  showToast("Ready ✓", 1500);
 }
 async function loadAllEventItemsCache(){
   const res = await apiGet("getAllEventItems");
