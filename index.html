@@ -514,22 +514,31 @@ button:active, .btn:active, .fn-card:active, .client-card:active, .cat-pill:acti
 
     <!-- STEP 3: SEND -->
     <div id="aiStep3" style="display:none">
-      <div class="section-label" style="margin-bottom:4px">All Items</div>
-      <div id="aiAllItemsSummary" style="margin-bottom:14px"></div>
-      <div class="gold-line"></div>
-      <div class="section-label" style="margin:10px 0">Send Quote Requests</div>
-      <button class="btn btn-gold" onclick="sendFunctionQuotes()" style="margin-bottom:8px" id="btnSendThisFn">
-        📤 Send for This Function
-      </button>
-      <button class="btn btn-outline" onclick="sendClientQuotes()" style="margin-bottom:8px">
-        📤 Send for All Functions (Client)
-      </button>
-      <button class="btn btn-outline btn-sm" onclick="aiBackToCategories()" style="margin-top:4px">
-        ← Add More Items
-      </button>
+      <!-- Phase A: function selector (before sending) -->
+      <div id="aiStep3Selector">
+        <div class="section-label" style="margin-bottom:4px">All Items</div>
+        <div id="aiAllItemsSummary" style="margin-bottom:14px"></div>
+        <div class="gold-line"></div>
+        <div class="section-label" style="margin:10px 0">Send Quote Requests</div>
+        <button class="btn btn-gold" onclick="sendFunctionQuotes()" style="margin-bottom:8px" id="btnSendThisFn">
+          📤 Send for This Function
+        </button>
+        <button class="btn btn-outline" onclick="sendClientQuotes()" style="margin-bottom:8px">
+          📤 Send for All Functions (Client)
+        </button>
+        <button class="btn btn-outline btn-sm" onclick="aiBackToCategories()" style="margin-top:4px">
+          ← Add More Items
+        </button>
+      </div>
+      <!-- Phase B: vendor messages (after sending) -->
+      <div id="aiStep3Messages" style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <div class="section-label" style="margin-bottom:0">WhatsApp Messages</div>
+          <button class="btn btn-outline btn-sm" style="width:auto;padding:6px 12px" onclick="aiResetToSelector()">← Back</button>
+        </div>
+        <div id="aiQuoteMsgs"></div>
+      </div>
     </div>
-
-    <div id="aiQuoteMsgs" style="margin-top:10px"></div>
   </div>
 </div>
 
@@ -933,7 +942,6 @@ async function sendSelectedFunctions(){
     return cb&&cb.checked&&!cb.disabled;
   });
   if(!selected.length){ showToast("Select at least one function",2000); return; }
-  showToast("Building messages for "+selected.length+" function(s)...",10000);
   await buildAndShowQuoteMsgs(selected);
 }
 
@@ -1392,6 +1400,11 @@ async function buildAndShowQuoteMsgs(functions){
   }
   el.innerHTML="";
   hideLoading();
+  // Switch to Phase B — show messages panel
+  const selDiv=document.getElementById("aiStep3Selector");
+  const msgDiv=document.getElementById("aiStep3Messages");
+  if(selDiv) selDiv.style.display="none";
+  if(msgDiv) msgDiv.style.display="block";
   const vendorEntries=Object.entries(vendorMap);
   if(!vendorEntries.length){
     el.innerHTML='<div class="error-box"><div class="title">No vendor assignments found. Add items first.</div></div>';
@@ -1461,7 +1474,22 @@ async function buildAndShowQuoteMsgs(functions){
     card.appendChild(btnRow);
     document.getElementById("aiQuoteMsgs").appendChild(card);
   });
-  document.getElementById("aiQuoteMsgs").scrollIntoView({behavior:"smooth"});
+  // Scroll modal to top so first vendor card is visible
+  const modal=document.querySelector("#modal-addItems .modal");
+  if(modal) modal.scrollTop=0;
+}
+
+function aiResetToSelector(){
+  const selDiv=document.getElementById("aiStep3Selector");
+  const msgDiv=document.getElementById("aiStep3Messages");
+  if(selDiv) selDiv.style.display="block";
+  if(msgDiv) msgDiv.style.display="none";
+  document.getElementById("aiQuoteMsgs").innerHTML="";
+  // Reset send button
+  const sendBtn=document.getElementById("btnSendThisFn");
+  if(sendBtn){ sendBtn.style.display="block"; sendBtn.onclick=sendFunctionQuotes; }
+  const sumEl=document.getElementById("aiAllItemsSummary");
+  if(sumEl) sumEl.style.display="block";
 }
 
 function showQuoteWA(idx){
