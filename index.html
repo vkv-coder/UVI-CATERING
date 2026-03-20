@@ -727,18 +727,15 @@ async function checkPin(){
 async function initApp(){
   showLoading("Loading...");
   setTodayHeader();
-  // First batch — everything needed to render the app
+  // Load all core data in parallel
   await Promise.all([loadSettings(),loadVendors(),loadClients(),loadAllEvents(),loadTasks(),loadItemVendors()]);
-  buildEventItemCounts(); // empty for now — fills after background load
+  buildEventItemCounts();
   renderToday(); renderVendors(); renderClients();
-  hideLoading(); // Show app immediately — don't wait for item cache
-  // Load item/vendor cache in background — badges update silently
-  loadAllEventItemsCache().then(function(){
-    return loadAllEventVendorsCache();
-  }).then(function(){
+  hideLoading();
+  // Load items + vendors cache in parallel (not sequential)
+  Promise.all([loadAllEventItemsCache(), loadAllEventVendorsCache()]).then(function(){
     buildEventItemCounts();
-    renderToday(); // refresh vendor reminders
-    // If client detail is open, refresh badges
+    renderToday(); // vendor reminders now visible
     if(APP.currentClient){
       const fns=APP.allEvents.filter(function(e){ return e.Client_ID===APP.currentClient.Client_ID; });
       renderClientDetail(fns);
@@ -864,7 +861,7 @@ function renderToday(){
 
   // VENDOR REMINDERS — events today/tomorrow that have items saved
   const urgentEvents=APP.allEvents.filter(function(e){
-    return (e.Date===todayStr||e.Date===tomorrowStr) && APP.eventItemCounts&&APP.eventItemCounts[e.Event_ID]>0;
+    return (e.Date===todayStr||e.Date===tomorrowStr);
   });
   if(urgentEvents.length){
     html+=`<div class="task-section">
@@ -875,6 +872,9 @@ function renderToday(){
           .filter(function(v){ return v.Event_ID===e.Event_ID; })
           .map(function(v){ return v.Agency_Name; })
           .filter(function(n,i,a){ return a.indexOf(n)===i; });
+        const vendorLine=vendorNames.length>0
+          ? vendorNames.length+" vendor"+(vendorNames.length!==1?"s":"")+": "+vendorNames.join(", ")
+          : (APP.allEventVendorsCache&&APP.allEventVendorsCache.length>0?"No vendors assigned":"Loading vendors...");
         return `<div class="task-row" onclick="openVendorReminderScreen('${e.Event_ID}')" style="cursor:pointer">
           <div class="task-time" style="color:#C9A84C">${isToday?"Today":"Tomorrow"}</div>
           <div class="task-bar" style="background:#C9A84C"></div>
@@ -883,7 +883,7 @@ function renderToday(){
               <div class="task-text" style="font-weight:600">${e.Client_Name} · ${e.Function}${e.Time_of_Day?" · "+e.Time_of_Day:""}</div>
               <span style="font-size:11px;color:var(--gold);font-weight:600">Tap →</span>
             </div>
-            <div class="task-meta" style="margin-top:4px;font-size:12px;color:var(--muted)">${vendorNames.length} vendor${vendorNames.length!==1?"s":""}: ${vendorNames.join(", ")||"None"}</div>
+            <div class="task-meta" style="margin-top:4px;font-size:12px;color:var(--muted)">${vendorLine}</div>
           </div>
         </div>`;
       }).join("")}
