@@ -921,19 +921,25 @@ function renderFunctionCard(f){
 }
 
 async function sendAllClientQuotes(){
-  // Open modal in step 3 with all ready functions pre-selected
-  APP.ai={pendingItems:[],selectedVendors:[],currentItemVendors:[],activeCat:""};
-  const fns=APP.allEvents.filter(function(e){ return e.Client_ID===APP.currentClient.Client_ID; });
+  if(!APP.currentClient){ showToast("No client selected",2000); return; }
+  // Store clientId at modal open time — don't rely on APP.currentClient later
+  const clientId=APP.currentClient.Client_ID;
+  const clientName=APP.currentClient.Client_Name;
+  APP.ai={pendingItems:[],selectedVendors:[],currentItemVendors:[],activeCat:"",quoteClientId:clientId};
+  const fns=APP.allEvents.filter(function(e){ return e.Client_ID===clientId; });
   const readyFns=fns.filter(function(f){ return APP.eventItemCounts&&APP.eventItemCounts[f.Event_ID]>0; });
-  // Set subtitle
   document.getElementById("aiModalSubtitle").innerHTML=
-    `<span style="font-weight:700">${APP.currentClient.Client_Name}</span> &nbsp;·&nbsp; ${readyFns.length} function${readyFns.length!==1?"s":""} with items`;
+    `<span style="font-weight:700">${clientName}</span> &nbsp;·&nbsp; ${readyFns.length} function${readyFns.length!==1?"s":""} with items`;
   document.getElementById("aiExtraVendor").innerHTML=
     `<option value="">+ Add other vendor</option>`+
     APP.vendors.map(v=>`<option value="${v.Vendor_ID}|${v.Agency_Name}">${v.Agency_Name}</option>`).join("");
   document.getElementById("aiQuoteMsgs").innerHTML="";
-  // Show step 3 with function selector
   aiShowStep(3);
+  // Reset Phase A/B
+  const selDiv=document.getElementById("aiStep3Selector");
+  const msgDiv=document.getElementById("aiStep3Messages");
+  if(selDiv) selDiv.style.display="block";
+  if(msgDiv) msgDiv.style.display="none";
   document.getElementById("aiAllItemsSummary").innerHTML=
     `<div style="margin-bottom:12px">`+
     fns.map(function(f){
@@ -949,14 +955,20 @@ async function sendAllClientQuotes(){
       </label>`;
     }).join("")+
     `</div>`;
-  // Override send buttons
-  document.getElementById("btnSendThisFn").textContent="📤 Send for Selected Functions";
-  document.getElementById("btnSendThisFn").onclick=sendSelectedFunctions;
+  const sendBtn=document.getElementById("btnSendThisFn");
+  if(sendBtn){
+    sendBtn.style.display="block";
+    sendBtn.textContent="📤 Send for Selected Functions";
+    sendBtn.onclick=sendSelectedFunctions;
+  }
   openModal("modal-addItems");
 }
 
 async function sendSelectedFunctions(){
-  const fns=APP.allEvents.filter(function(e){ return e.Client_ID===APP.currentClient.Client_ID; });
+  // Use stored clientId — don't rely on APP.currentClient which may be null
+  const clientId=APP.ai&&APP.ai.quoteClientId;
+  if(!clientId){ showToast("Client context lost — please try again",2000); return; }
+  const fns=APP.allEvents.filter(function(e){ return e.Client_ID===clientId; });
   const selected=fns.filter(function(f){
     const cb=document.getElementById("fnCheck_"+f.Event_ID);
     return cb&&cb.checked&&!cb.disabled;
