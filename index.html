@@ -283,6 +283,7 @@ button:active, .btn:active, .fn-card:active, .client-card:active, .cat-pill:acti
 <div id="loadingOverlay">
   <div class="spinner"></div>
   <div class="load-msg" id="loadingMsg">Loading...</div>
+  <div style="font-size:11px;color:var(--muted);margin-top:4px" id="loadingSubMsg"></div>
 </div>
 
 
@@ -725,22 +726,20 @@ async function checkPin(){
 
 // -- INIT ------------------------------------------------------
 async function initApp(){
-  showLoading("Loading...");
+  showLoading("Connecting...", "Fetching your data");
   setTodayHeader();
-  // Load all core data in parallel
   await Promise.all([loadSettings(),loadVendors(),loadClients(),loadAllEvents(),loadTasks(),loadItemVendors()]);
   buildEventItemCounts();
   renderToday(); renderVendors(); renderClients();
+  showLoading("Almost ready...", "Loading vendor assignments");
+  await Promise.all([loadAllEventItemsCache(), loadAllEventVendorsCache()]);
+  buildEventItemCounts();
+  renderToday();
+  if(APP.currentClient){
+    const fns=APP.allEvents.filter(function(e){ return e.Client_ID===APP.currentClient.Client_ID; });
+    renderClientDetail(fns);
+  }
   hideLoading();
-  // Load items + vendors cache in parallel (not sequential)
-  Promise.all([loadAllEventItemsCache(), loadAllEventVendorsCache()]).then(function(){
-    buildEventItemCounts();
-    renderToday(); // vendor reminders now visible
-    if(APP.currentClient){
-      const fns=APP.allEvents.filter(function(e){ return e.Client_ID===APP.currentClient.Client_ID; });
-      renderClientDetail(fns);
-    }
-  });
 }
 async function loadAllEventItemsCache(){
   const res = await apiGet("getAllEventItems");
@@ -2137,8 +2136,9 @@ function showToast(msg, duration){
   clearTimeout(window._toastTimer);
   window._toastTimer=setTimeout(function(){ el.style.display="none"; }, duration||2000);
 }
-function showLoading(msg){
+function showLoading(msg, sub){
   document.getElementById("loadingMsg").textContent=msg||"Loading...";
+  document.getElementById("loadingSubMsg").textContent=sub||"";
   document.getElementById("loadingOverlay").style.display="flex";
 }
 function hideLoading(){
