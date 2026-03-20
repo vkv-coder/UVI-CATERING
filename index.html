@@ -322,7 +322,7 @@ button:active, .btn:active, .fn-card:active, .client-card:active, .cat-pill:acti
     <div class="header-brand-text"><h1>UVI</h1><p>Luxury Catering & Decor</p></div>
   </div>
   <div class="header-right">
-    <div id="overdueBadge" style="display:none" class="badge-red">0 Overdue</div>
+    
     <div id="userBadge" class="user-badge">—</div>
   </div>
 </div>
@@ -335,7 +335,7 @@ button:active, .btn:active, .fn-card:active, .client-card:active, .cat-pill:acti
     <div class="summary" id="todaySummary">Loading...</div>
   </div>
   <div class="stat-row">
-    <div class="stat-card" style="border-top-color:#C0392B"><div class="n" id="statOverdue" style="color:#C0392B">—</div><div class="l">Overdue</div></div>
+    
     <div class="stat-card" style="border-top-color:#A8841E"><div class="n" id="statToday" style="color:#A8841E">—</div><div class="l">Today</div></div>
     <div class="stat-card" style="border-top-color:#553C9A"><div class="n" id="statTomorrow" style="color:#553C9A">—</div><div class="l">Tomorrow</div></div>
   </div>
@@ -365,15 +365,48 @@ button:active, .btn:active, .fn-card:active, .client-card:active, .cat-pill:acti
 <!-- FAB -->
 <button class="fab" id="fab" onclick="onFabClick()">+</button>
 
+<!-- REMINDERS SCREEN -->
+<div id="screen-reminders" class="screen">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+    <div>
+      <h2 style="font-family:var(--serif);font-size:26px;margin:0">Reminders</h2>
+      <div style="font-size:13px;color:var(--muted);margin-top:3px" id="reminderCount">0 reminders</div>
+    </div>
+    <button class="btn btn-gold btn-sm" style="width:auto;padding:10px 16px" onclick="openNewReminder()">+ Add</button>
+  </div>
+  <div id="reminderList"></div>
+</div>
+
 <!-- NAV -->
 <nav class="nav">
   <button class="nav-btn active" onclick="switchScreen('today',this)"><span class="icon">◉</span><span class="label">Today</span><div class="underline"></div></button>
   <button class="nav-btn" onclick="switchScreen('clients',this)"><span class="icon">◈</span><span class="label">Clients</span><div class="underline"></div></button>
   <button class="nav-btn" onclick="switchScreen('vendors',this)"><span class="icon">◎</span><span class="label">Vendors</span><div class="underline"></div></button>
+  <button class="nav-btn" onclick="switchScreen('reminders',this)"><span class="icon">🔔</span><span class="label">Reminders</span><div class="underline"></div></button>
 </nav>
 </div>
 
 <!-- MODALS -->
+
+<!-- New Reminder -->
+<div class="modal-overlay" id="modal-newReminder">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="reminderModalTitle">New Reminder</div>
+      <button class="modal-close" onclick="closeModal('modal-newReminder')">×</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Reminder</label>
+      <input class="form-input" id="rem-text" type="text" placeholder="e.g. Get dry ice, Check vehicle">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Date</label>
+      <input class="form-input" id="rem-date" type="date">
+    </div>
+    <div id="reminderMsg"></div>
+    <button class="btn btn-gold" id="saveReminderBtn" onclick="saveReminder()">Save Reminder</button>
+  </div>
+</div>
 
 <!-- New Client -->
 <div class="modal-overlay" id="modal-newClient">
@@ -734,6 +767,7 @@ function switchScreen(name, btn){
   document.getElementById("fab").style.display = (name==="clients")?"flex":"none";
   if(name==="clients"){ renderClients(); showClientList(); }
   if(name==="vendors") renderVendors();
+  if(name==="reminders") renderReminders();
 }
 
 function onFabClick(){
@@ -775,13 +809,10 @@ function renderToday(){
   const tomorrow=tasks.filter(t=>t.urgency==="tomorrow");
   const overdue=tasks.filter(t=>t.urgency==="overdue");
   // Stats
-  document.getElementById("statOverdue").textContent=overdue.length;
   document.getElementById("statToday").textContent=today.length;
   document.getElementById("statTomorrow").textContent=tomorrow.length;
   document.getElementById("todaySummary").textContent=`${today.length+tomorrow.length} actions · ${APP.clients.length} clients · ${APP.allEvents.length} functions`;
-  const badge=document.getElementById("overdueBadge");
-  if(overdue.length){badge.style.display="block";badge.textContent=overdue.length+" Overdue";}
-  else badge.style.display="none";
+
 
   let html="";
 
@@ -1913,6 +1944,88 @@ function toggleDropdown(btn){
 function openModal(id){document.getElementById(id).classList.add("open");}
 function closeModal(id){document.getElementById(id).classList.remove("open");}
 
+
+// -- REMINDERS -------------------------------------------------
+function renderReminders(){
+  const reminders=(APP.tasks||[]).filter(function(t){ return t.Type==="reminder"; });
+  document.getElementById("reminderCount").textContent=reminders.length+" reminder"+(reminders.length!==1?"s":"");
+  if(!reminders.length){
+    document.getElementById("reminderList").innerHTML=
+      `<div class="empty-state"><div class="icon">🔔</div><p>No reminders yet. Tap + to add one.</p></div>`;
+    return;
+  }
+  // Sort by date
+  reminders.sort(function(a,b){ return (a.Due_Date||"").localeCompare(b.Due_Date||""); });
+  const today=fmtDate(new Date());
+  document.getElementById("reminderList").innerHTML=reminders.map(function(r){
+    const isToday=r.Due_Date===today;
+    const isPast=r.Due_Date&&r.Due_Date<today;
+    const color=isPast?"#C0392B":isToday?"#A8841E":"var(--text)";
+    const dateLbl=isPast?"⚠ "+r.Due_Date:isToday?"Today":r.Due_Date||"No date";
+    return `<div class="card" style="margin-bottom:10px;display:flex;align-items:center;gap:12px">
+      <div style="flex:1">
+        <div style="font-weight:600;font-size:15px;color:var(--text)">${r.Task||""}</div>
+        <div style="font-size:12px;color:${color};margin-top:4px;font-weight:${isToday||isPast?"600":"400"}">${dateLbl}</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button onclick="editReminder('${r.Row_ID}','${(r.Task||"").replace(/'/g,"__")}','${r.Due_Date||""}')"
+          style="background:none;border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer;font-size:13px">✏️</button>
+        <button onclick="deleteReminder('${r.Row_ID}')"
+          style="background:none;border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer;font-size:13px;color:var(--red)">🗑</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function openNewReminder(){
+  document.getElementById("reminderModalTitle").textContent="New Reminder";
+  document.getElementById("rem-text").value="";
+  document.getElementById("rem-date").value="";
+  document.getElementById("reminderMsg").innerHTML="";
+  document.getElementById("saveReminderBtn").onclick=saveReminder;
+  document.getElementById("saveReminderBtn").textContent="Save Reminder";
+  delete window._editReminderId;
+  openModal("modal-newReminder");
+}
+
+function editReminder(rowId, text, date){
+  document.getElementById("reminderModalTitle").textContent="Edit Reminder";
+  document.getElementById("rem-text").value=text.replace(/__/g,"'");
+  document.getElementById("rem-date").value=date;
+  document.getElementById("reminderMsg").innerHTML="";
+  window._editReminderId=rowId;
+  document.getElementById("saveReminderBtn").textContent="Save Changes";
+  document.getElementById("saveReminderBtn").onclick=saveReminder;
+  openModal("modal-newReminder");
+}
+
+async function saveReminder(){
+  const text=document.getElementById("rem-text").value.trim();
+  const date=document.getElementById("rem-date").value;
+  if(!text){ alert("Please enter a reminder."); return; }
+  if(!date){ alert("Please select a date."); return; }
+  const btn=document.getElementById("saveReminderBtn");
+  btn.textContent="Saving..."; btn.disabled=true;
+  if(window._editReminderId){
+    await apiWrite("completeTask",{Row_ID:window._editReminderId});
+  }
+  await apiWrite("addTask",{
+    Event_ID:"", Due_Date:date, Task:text,
+    Tag:"REMINDER", Status:"pending", Type:"reminder"
+  });
+  await loadTasks();
+  renderReminders();
+  btn.textContent="Saved!";
+  setTimeout(function(){ closeModal("modal-newReminder"); btn.disabled=false; }, 800);
+}
+
+async function deleteReminder(rowId){
+  showToast("Deleting...",3000);
+  await apiWrite("completeTask",{Row_ID:rowId});
+  await loadTasks();
+  renderReminders();
+  showToast("Deleted",1500);
+}
 
 function showToast(msg, duration){
   const el=document.getElementById("appToast");
