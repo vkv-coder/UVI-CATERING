@@ -715,6 +715,7 @@ async function checkPin(){
     document.getElementById("pinScreen").style.display="none";
     document.getElementById("mainApp").style.display="block";
     document.getElementById("userBadge").textContent=res.name;
+    showLoading("Loading...");
     initApp();
   } else {
     document.getElementById("pinError").textContent="Incorrect PIN. Try again.";
@@ -724,26 +725,37 @@ async function checkPin(){
 
 // -- INIT ------------------------------------------------------
 async function initApp(){
-  showLoading("Loading your data...");
+  showLoading("Loading...");
   setTodayHeader();
+  // First batch — everything needed to render the app
   await Promise.all([loadSettings(),loadVendors(),loadClients(),loadAllEvents(),loadTasks(),loadItemVendors()]);
-  // Pre-load ALL event items and vendors in one call each — no per-event fetching needed
-  await Promise.all([loadAllEventItemsCache(), loadAllEventVendorsCache()]);
-  buildEventItemCounts();
-  renderToday(); renderVendors();
-  hideLoading();
+  buildEventItemCounts(); // empty for now — fills after background load
+  renderToday(); renderVendors(); renderClients();
+  hideLoading(); // Show app immediately — don't wait for item cache
+  // Load item/vendor cache in background — badges update silently
+  loadAllEventItemsCache().then(function(){
+    return loadAllEventVendorsCache();
+  }).then(function(){
+    buildEventItemCounts();
+    renderToday(); // refresh vendor reminders
+    // If client detail is open, refresh badges
+    if(APP.currentClient){
+      const fns=APP.allEvents.filter(function(e){ return e.Client_ID===APP.currentClient.Client_ID; });
+      renderClientDetail(fns);
+    }
+  });
 }
 async function loadAllEventItemsCache(){
   const res = await apiGet("getAllEventItems");
   if(Array.isArray(res) && res.length>0){
     APP.allEventItemsCache = res;
   } else {
-    // Fallback: fetch per event (Apps Script not yet redeployed)
+    // Fallback: fetch all events in PARALLEL (not sequential)
+    const results = await Promise.all(
+      APP.allEvents.map(function(ev){ return apiGet("getEventItems","&event_id="+ev.Event_ID); })
+    );
     APP.allEventItemsCache = [];
-    for(const ev of APP.allEvents){
-      const items = await apiGet("getEventItems","&event_id="+ev.Event_ID);
-      if(Array.isArray(items)) APP.allEventItemsCache.push(...items);
-    }
+    results.forEach(function(items){ if(Array.isArray(items)) APP.allEventItemsCache.push(...items); });
   }
 }
 async function loadAllEventVendorsCache(){
@@ -751,12 +763,12 @@ async function loadAllEventVendorsCache(){
   if(Array.isArray(res) && res.length>0){
     APP.allEventVendorsCache = res;
   } else {
-    // Fallback: fetch per event
+    // Fallback: fetch all events in PARALLEL
+    const results = await Promise.all(
+      APP.allEvents.map(function(ev){ return apiGet("getEventVendors","&event_id="+ev.Event_ID); })
+    );
     APP.allEventVendorsCache = [];
-    for(const ev of APP.allEvents){
-      const vendors = await apiGet("getEventVendors","&event_id="+ev.Event_ID);
-      if(Array.isArray(vendors)) APP.allEventVendorsCache.push(...vendors);
-    }
+    results.forEach(function(vendors){ if(Array.isArray(vendors)) APP.allEventVendorsCache.push(...vendors); });
   }
 }
 function buildEventItemCounts(){
