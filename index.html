@@ -771,40 +771,87 @@ function setTodayHeader(){
 }
 function renderToday(){
   const tasks=APP.tasks||[];
-  const overdue=tasks.filter(t=>t.urgency==="overdue");
   const today=tasks.filter(t=>t.urgency==="today");
   const tomorrow=tasks.filter(t=>t.urgency==="tomorrow");
-  const future=tasks.filter(t=>t.urgency==="future");
+  const overdue=tasks.filter(t=>t.urgency==="overdue");
+  // Stats
   document.getElementById("statOverdue").textContent=overdue.length;
   document.getElementById("statToday").textContent=today.length;
   document.getElementById("statTomorrow").textContent=tomorrow.length;
-  document.getElementById("todaySummary").textContent=`${tasks.length} actions · ${APP.clients.length} clients · ${APP.allEvents.length} functions`;
+  document.getElementById("todaySummary").textContent=`${today.length+tomorrow.length} actions · ${APP.clients.length} clients · ${APP.allEvents.length} functions`;
   const badge=document.getElementById("overdueBadge");
   if(overdue.length){badge.style.display="block";badge.textContent=overdue.length+" Overdue";}
   else badge.style.display="none";
+
   let html="";
-  if(overdue.length)  html+=renderTaskSection("OVERDUE","#C0392B",overdue);
-  if(today.length)    html+=renderTaskSection("TODAY","#A8841E",today);
-  if(tomorrow.length) html+=renderTaskSection("TOMORROW","#553C9A",tomorrow);
-  if(future.length)   html+=renderTaskSection("UPCOMING","#8A7A65",future);
-  if(!tasks.length)   html=`<div class="empty-state"><div class="icon">✅</div><p>No tasks yet. Add a client to get started.</p></div>`;
+
+  // TODAY tasks
+  if(today.length){
+    html+=`<div class="task-section">
+      <div class="task-section-head"><div class="task-section-bar" style="background:#A8841E"></div><div class="task-section-title" style="color:#A8841E">TODAY (${today.length})</div></div>
+      ${today.map(t=>renderSimpleTask(t,"#A8841E")).join("")}
+    </div>`;
+  }
+
+  // TOMORROW tasks
+  if(tomorrow.length){
+    html+=`<div class="task-section">
+      <div class="task-section-head"><div class="task-section-bar" style="background:#553C9A"></div><div class="task-section-title" style="color:#553C9A">TOMORROW (${tomorrow.length})</div></div>
+      ${tomorrow.map(t=>renderSimpleTask(t,"#553C9A")).join("")}
+    </div>`;
+  }
+
+  // VENDOR REMINDERS — events today/tomorrow that have items saved
+  const todayStr=fmtDate(new Date());
+  const tomorrowStr=fmtDate(new Date(Date.now()+86400000));
+  const urgentEvents=APP.allEvents.filter(function(e){
+    return (e.Date===todayStr||e.Date===tomorrowStr) && APP.eventItemCounts&&APP.eventItemCounts[e.Event_ID]>0;
+  });
+  if(urgentEvents.length){
+    html+=`<div class="task-section">
+      <div class="task-section-head"><div class="task-section-bar" style="background:#C9A84C"></div><div class="task-section-title" style="color:#C9A84C">VENDOR REMINDERS</div></div>
+      ${urgentEvents.map(function(e){
+        const isToday=e.Date===todayStr;
+        const vendorNames=(APP.allEventVendorsCache||[])
+          .filter(function(v){ return v.Event_ID===e.Event_ID; })
+          .map(function(v){ return v.Agency_Name; })
+          .filter(function(n,i,a){ return a.indexOf(n)===i; });
+        return `<div class="task-row">
+          <div class="task-time" style="color:#C9A84C">${isToday?"Today":"Tomorrow"}</div>
+          <div class="task-bar" style="background:#C9A84C"></div>
+          <div class="task-body">
+            <div class="task-text" style="font-weight:600">${e.Client_Name} · ${e.Function}</div>
+            <div class="task-meta" style="margin-top:4px;font-size:12px;color:var(--muted)">${vendorNames.join(", ")||"No vendors assigned"}</div>
+          </div>
+        </div>`;
+      }).join("")}
+    </div>`;
+  }
+
+  if(!today.length&&!tomorrow.length&&!urgentEvents.length){
+    html=`<div class="empty-state"><div class="icon">✅</div><p>All clear for today and tomorrow.</p></div>`;
+  }
   document.getElementById("taskList").innerHTML=html;
 }
-function renderTaskSection(label,color,tasks){
-  return `<div class="task-section">
-    <div class="task-section-head"><div class="task-section-bar" style="background:${color}"></div><div class="task-section-title" style="color:${color}">${label} (${tasks.length})</div></div>
-    ${tasks.map(t=>`<div class="task-row">
-      <div class="task-time" style="color:${color}">${t.Due_Date||"—"}</div>
-      <div class="task-bar" style="background:${color}"></div>
-      <div class="task-body">
-        <div class="task-text">${t.Task}</div>
-        <div class="task-meta">
-          <span class="task-event">${t.Event_ID||""}</span>
-          <span class="tag" style="background:${color}18;color:${color};border:1px solid ${color}30">${t.Tag||""}</span>
-          <button class="task-done-btn" onclick="doneTask('${t.Row_ID}',this)">Done</button>
-        </div>
+
+function fmtDate(d){
+  return `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
+}
+
+function renderSimpleTask(t,color){
+  // Extract client·function from task label e.g. "vkv — Haldi — Send Menu Quote"
+  const parts=(t.Task||"").split(" — ");
+  const label=parts.length>=3?`<span style="font-weight:600">${parts[0]} · ${parts[1]}</span> — ${parts.slice(2).join(" — ")}`:t.Task;
+  return `<div class="task-row">
+    <div class="task-time" style="color:${color}">${t.Due_Date||"—"}</div>
+    <div class="task-bar" style="background:${color}"></div>
+    <div class="task-body">
+      <div class="task-text">${label}</div>
+      <div class="task-meta">
+        <span class="tag" style="background:${color}18;color:${color};border:1px solid ${color}30">${t.Tag||""}</span>
+        <button class="task-done-btn" onclick="doneTask('${t.Row_ID}',this)">Done</button>
       </div>
-    </div>`).join("")}
+    </div>
   </div>`;
 }
 async function doneTask(rowId,btn){
@@ -1463,6 +1510,7 @@ async function buildAndShowQuoteMsgs(functions){
     window["_qmsg_"+idx]=msg;
     window["_qwa_"+idx]=wa;
     window["_qname_"+idx]=agencyName;
+    window["_qcontact_"+idx]=contactName;
     const card=document.createElement("div");
     card.className="card";
     card.style.marginBottom="12px";
@@ -1473,37 +1521,56 @@ async function buildAndShowQuoteMsgs(functions){
     const header=document.createElement("div");
     header.style.cssText="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px";
     header.innerHTML='<strong style="font-size:14px">'+agencyName+'</strong><span style="font-size:11px;color:var(--muted)">'+items.length+' item(s)</span>';
+
+    // Build ORDER message (different from quote message)
+    let orderMsg="Dear "+contactName+",\n("+agencyName+")\n\n"+
+      "Greetings from *"+sig+"*\n\n"+
+      "Please confirm the following order:\n";
+    Object.values(fnGroups).forEach(function(g){
+      const tod=g.tod?" ("+g.tod+")":"";
+      orderMsg+="\n"+g.fn+tod+" -- "+g.date+" -- "+g.pax+" pax\n"+g.items.join("\n")+"\n";
+    });
+    orderMsg+="\nAdvance will follow as discussed.\n\n*"+sig+"*";
+    window["_omsg_"+idx]=orderMsg;
+
     const btnRow=document.createElement("div");
-    btnRow.style.cssText="display:flex;gap:8px;margin-top:10px";
+    btnRow.style.cssText="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px";
+
+    // Helper to build WA open function
+    function makeWAHandler(btn, msgKey, labelDefault){
+      return function(){
+        const msg=window[msgKey]||"";
+        const waRaw=window["_qwa_"+idx]||"";
+        fallbackCopyStr(msg);
+        btn.textContent="✓ Copied!";
+        setTimeout(function(){ btn.textContent=labelDefault; }, 2000);
+        const encoded=encodeURIComponent(msg);
+        let url=waRaw;
+        if(!url){ url="https://wa.me/?text="+encoded; }
+        else if(url.includes("wa.me/")&&!url.includes("chat.whatsapp.com")){ url=url.split("?")[0]+"?text="+encoded; }
+        setTimeout(function(){ window.open(url,"_blank"); }, 300);
+      };
+    }
+
     const b1=document.createElement("button");
-    b1.className="btn btn-gold btn-sm";
-    b1.style.flex="2";
-    b1.textContent="📤 Send via WhatsApp";
-    b1.onclick=function(){
-      const msg=window["_qmsg_"+idx]||"";
-      const waRaw=window["_qwa_"+idx]||"";
-      // Copy message first
-      fallbackCopyStr(msg);
-      b1.textContent="✓ Copied!";
-      setTimeout(function(){ b1.textContent="📤 Send via WhatsApp"; }, 2000);
-      // Build URL with pre-filled text
-      const encoded=encodeURIComponent(msg);
-      let url=waRaw;
-      if(!url){
-        url="https://wa.me/?text="+encoded;
-      } else if(url.includes("wa.me/") && !url.includes("chat.whatsapp.com")){
-        url=url.split("?")[0]+"?text="+encoded;
-      }
-      // Small delay so copy registers before switching app
-      setTimeout(function(){ window.open(url,"_blank"); }, 300);
-    };
+    b1.className="btn btn-outline btn-sm";
+    b1.textContent="💰 Get Quote";
+    b1.onclick=makeWAHandler(b1,"_qmsg_"+idx,"💰 Get Quote");
+
     const b2=document.createElement("button");
-    b2.id="qmark_"+idx;
-    b2.style.cssText="flex:1;padding:9px;border-radius:10px;cursor:pointer;font-size:12px;border:1.5px solid var(--border);background:var(--card-alt);color:var(--muted)";
-    b2.textContent="Mark Sent";
-    b2.onclick=()=>markQSent(idx);
+    b2.className="btn btn-gold btn-sm";
+    b2.textContent="🛒 Place Order";
+    b2.onclick=makeWAHandler(b2,"_omsg_"+idx,"🛒 Place Order");
+
+    const b3=document.createElement("button");
+    b3.id="qmark_"+idx;
+    b3.style.cssText="grid-column:1/-1;padding:9px;border-radius:10px;cursor:pointer;font-size:12px;border:1.5px solid var(--border);background:var(--card-alt);color:var(--muted)";
+    b3.textContent="Mark Sent";
+    b3.onclick=function(){ markQSent(idx); };
+
     btnRow.appendChild(b1);
     btnRow.appendChild(b2);
+    btnRow.appendChild(b3);
     card.appendChild(header);
     card.appendChild(preview);
     card.appendChild(btnRow);
