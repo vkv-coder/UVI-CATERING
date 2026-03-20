@@ -51,7 +51,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);max-width:48
 
 /* NAV */
 .nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--surface);border-top:1px solid var(--border);box-shadow:0 -2px 10px rgba(0,0,0,0.07);display:flex;z-index:100}
-.nav-btn{flex:1;padding:11px 4px 6px;background:transparent;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
+.nav-btn{flex:1;padding:11px 2px 6px;background:transparent;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
 .nav-btn .icon{font-size:20px;transition:all 0.2s}
 .nav-btn .label{font-size:9px;text-transform:uppercase;letter-spacing:1.2px;font-weight:500;color:var(--muted)}
 .nav-btn.active .label{color:var(--gold-dark);font-weight:700}
@@ -851,7 +851,7 @@ function renderToday(){
           <div class="task-time" style="color:#C9A84C">${isToday?"Today":"Tomorrow"}</div>
           <div class="task-bar" style="background:#C9A84C"></div>
           <div class="task-body">
-            <div class="task-text" style="font-weight:600">${e.Client_Name} · ${e.Function}</div>
+            <div class="task-text" style="font-weight:600">${e.Client_Name} · ${e.Function}${e.Time_of_Day?" · "+e.Time_of_Day:""}</div>
             <div class="task-meta" style="margin-top:4px;font-size:12px;color:var(--muted)">${vendorNames.join(", ")||"No vendors assigned"}</div>
           </div>
         </div>`;
