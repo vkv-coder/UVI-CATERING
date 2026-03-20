@@ -834,9 +834,13 @@ function renderToday(){
   const today=tasks.filter(t=>t.urgency==="today");
   const tomorrow=tasks.filter(t=>t.urgency==="tomorrow");
   const overdue=tasks.filter(t=>t.urgency==="overdue");
-  // Stats
-  document.getElementById("statToday").textContent=today.length;
-  document.getElementById("statTomorrow").textContent=tomorrow.length;
+  // Stats — count both tasks and events
+  const todayStr=fmtDate(new Date());
+  const tomorrowStr=fmtDate(new Date(Date.now()+86400000));
+  const todayEvents=APP.allEvents.filter(function(e){ return e.Date===todayStr; });
+  const tomorrowEvents=APP.allEvents.filter(function(e){ return e.Date===tomorrowStr; });
+  document.getElementById("statToday").textContent=today.length||todayEvents.length;
+  document.getElementById("statTomorrow").textContent=tomorrow.length||tomorrowEvents.length;
   document.getElementById("todaySummary").textContent=`${today.length+tomorrow.length} actions · ${APP.clients.length} clients · ${APP.allEvents.length} functions`;
 
 
@@ -859,8 +863,6 @@ function renderToday(){
   }
 
   // VENDOR REMINDERS — events today/tomorrow that have items saved
-  const todayStr=fmtDate(new Date());
-  const tomorrowStr=fmtDate(new Date(Date.now()+86400000));
   const urgentEvents=APP.allEvents.filter(function(e){
     return (e.Date===todayStr||e.Date===tomorrowStr) && APP.eventItemCounts&&APP.eventItemCounts[e.Event_ID]>0;
   });
