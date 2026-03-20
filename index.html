@@ -626,6 +626,7 @@ const MONTHS = ["January","February","March","April","May","June","July","August
 
 let APP = {
   vendors:[], clients:[], allEvents:[], tasks:[], settings:{}, itemVendors:[],
+  allEventItemsCache:[], allEventVendorsCache:{},
   currentClient:null, currentEvent:null,
   currentEventItems:[], currentEventVendors:[],
   currentUser:"", eventItemCounts:{},
@@ -673,8 +674,25 @@ async function initApp(){
   showLoading("Loading your data...");
   setTodayHeader();
   await Promise.all([loadSettings(),loadVendors(),loadClients(),loadAllEvents(),loadTasks(),loadItemVendors()]);
+  // Pre-load ALL event items and vendors in one call each — no per-event fetching needed
+  await Promise.all([loadAllEventItemsCache(), loadAllEventVendorsCache()]);
+  buildEventItemCounts();
   renderToday(); renderVendors();
   hideLoading();
+}
+async function loadAllEventItemsCache(){
+  const res = await apiGet("getAllEventItems");
+  APP.allEventItemsCache = Array.isArray(res) ? res : [];
+}
+async function loadAllEventVendorsCache(){
+  const res = await apiGet("getAllEventVendors");
+  APP.allEventVendorsCache = Array.isArray(res) ? res : [];
+}
+function buildEventItemCounts(){
+  APP.eventItemCounts = {};
+  (APP.allEventItemsCache||[]).forEach(function(it){
+    APP.eventItemCounts[it.Event_ID] = (APP.eventItemCounts[it.Event_ID]||0) + 1;
+  });
 }
 async function loadSettings()    { APP.settings    = await apiGet("getSettings"); }
 async function loadVendors()     { APP.vendors     = await apiGet("getVendors"); }
@@ -920,21 +938,17 @@ async function sendSelectedFunctions(){
 }
 
 async function refreshEventItemCounts(){
-  if(!APP.currentClient) return;
-  const fns=APP.allEvents.filter(function(e){ return e.Client_ID===APP.currentClient.Client_ID; });
-  if(!APP.eventItemCounts) APP.eventItemCounts={};
-  for(const fn of fns){
-    const items=await apiGet("getEventItems","&event_id="+fn.Event_ID);
-    APP.eventItemCounts[fn.Event_ID]=Array.isArray(items)?items.length:0;
-  }
+  // Just rebuild from cache — no API calls
+  buildEventItemCounts();
 }
 
 async function openFunction(eventId){
   showLoading("Opening function...");
   APP.currentEvent=APP.allEvents.find(e=>e.Event_ID===eventId);
   if(!APP.currentEvent){ hideLoading(); return; }
-  APP.currentEventItems=await apiGet("getEventItems","&event_id="+eventId);
-  APP.currentEventVendors=await apiGet("getEventVendors","&event_id="+eventId);
+  // Serve from cache — instant
+  APP.currentEventItems=(APP.allEventItemsCache||[]).filter(function(i){ return i.Event_ID===eventId; });
+  APP.currentEventVendors=(APP.allEventVendorsCache||[]).filter(function(v){ return v.Event_ID===eventId; });
   renderFunctionDetailScreen();
   showFunctionDetail();
   hideLoading();
@@ -1022,8 +1036,11 @@ async function goBackToClient(){
 async function deleteItemRow(rowId){
   showToast("Removing...", 5000);
   await apiWrite("deleteEventItem",{Row_ID:rowId});
-  APP.currentEventItems=await apiGet("getEventItems","&event_id="+APP.currentEvent.Event_ID);
-  APP.currentEventVendors=await apiGet("getEventVendors","&event_id="+APP.currentEvent.Event_ID);
+  await Promise.all([loadAllEventItemsCache(), loadAllEventVendorsCache()]);
+  buildEventItemCounts();
+  const evId=APP.currentEvent.Event_ID;
+  APP.currentEventItems=(APP.allEventItemsCache||[]).filter(function(i){ return i.Event_ID===evId; });
+  APP.currentEventVendors=(APP.allEventVendorsCache||[]).filter(function(v){ return v.Event_ID===evId; });
   showToast("Item removed", 1500);
   renderFunctionDetailScreen();
 }
@@ -1347,9 +1364,12 @@ async function saveAllPendingItems(){
     }
   }
   APP.ai.pendingItems=[];
-  // Refresh
-  APP.currentEventItems=await apiGet("getEventItems","&event_id="+ev.Event_ID);
-  APP.currentEventVendors=await apiGet("getEventVendors","&event_id="+ev.Event_ID);
+  // Refresh bulk cache in 2 parallel calls
+  await Promise.all([loadAllEventItemsCache(), loadAllEventVendorsCache()]);
+  buildEventItemCounts();
+  // Update current event from cache
+  APP.currentEventItems=(APP.allEventItemsCache||[]).filter(function(i){ return i.Event_ID===ev.Event_ID; });
+  APP.currentEventVendors=(APP.allEventVendorsCache||[]).filter(function(v){ return v.Event_ID===ev.Event_ID; });
 }
 
 
@@ -1359,8 +1379,8 @@ async function buildAndShowQuoteMsgs(functions){
   const sig=APP.settings.Signature||"UVI Luxury Catering & Decor";
   const vendorMap={};
   for(const fn of functions){
-    const items=await apiGet("getEventItems","&event_id="+fn.Event_ID);
-    const vendors=await apiGet("getEventVendors","&event_id="+fn.Event_ID);
+    const items=(APP.allEventItemsCache||[]).filter(function(i){ return i.Event_ID===fn.Event_ID; });
+    const vendors=(APP.allEventVendorsCache||[]).filter(function(v){ return v.Event_ID===fn.Event_ID; });
     const itemMap={};
     items.forEach(i=>itemMap[i.Row_ID]=i);
     vendors.forEach(v=>{
