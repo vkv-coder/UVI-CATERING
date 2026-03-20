@@ -388,6 +388,20 @@ button:active, .btn:active, .fn-card:active, .client-card:active, .cat-pill:acti
 
 <!-- MODALS -->
 
+<!-- Vendor Reminder Modal -->
+<div class="modal-overlay" id="modal-vendorReminder">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Send Reminder</div>
+        <div style="font-size:13px;color:var(--gold);font-weight:600;margin-top:3px" id="vrModalSubtitle"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal('modal-vendorReminder')">×</button>
+    </div>
+    <div id="vrVendorList"></div>
+  </div>
+</div>
+
 <!-- New Reminder -->
 <div class="modal-overlay" id="modal-newReminder">
   <div class="modal">
@@ -847,12 +861,15 @@ function renderToday(){
           .filter(function(v){ return v.Event_ID===e.Event_ID; })
           .map(function(v){ return v.Agency_Name; })
           .filter(function(n,i,a){ return a.indexOf(n)===i; });
-        return `<div class="task-row">
+        return `<div class="task-row" onclick="openVendorReminderScreen('${e.Event_ID}')" style="cursor:pointer">
           <div class="task-time" style="color:#C9A84C">${isToday?"Today":"Tomorrow"}</div>
           <div class="task-bar" style="background:#C9A84C"></div>
           <div class="task-body">
-            <div class="task-text" style="font-weight:600">${e.Client_Name} · ${e.Function}${e.Time_of_Day?" · "+e.Time_of_Day:""}</div>
-            <div class="task-meta" style="margin-top:4px;font-size:12px;color:var(--muted)">${vendorNames.join(", ")||"No vendors assigned"}</div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div class="task-text" style="font-weight:600">${e.Client_Name} · ${e.Function}${e.Time_of_Day?" · "+e.Time_of_Day:""}</div>
+              <span style="font-size:11px;color:var(--gold);font-weight:600">Tap →</span>
+            </div>
+            <div class="task-meta" style="margin-top:4px;font-size:12px;color:var(--muted)">${vendorNames.length} vendor${vendorNames.length!==1?"s":""}: ${vendorNames.join(", ")||"None"}</div>
           </div>
         </div>`;
       }).join("")}
@@ -1944,6 +1961,78 @@ function toggleDropdown(btn){
 function openModal(id){document.getElementById(id).classList.add("open");}
 function closeModal(id){document.getElementById(id).classList.remove("open");}
 
+
+function openVendorReminderScreen(eventId){
+  const ev=APP.allEvents.find(function(e){ return e.Event_ID===eventId; });
+  if(!ev) return;
+  const sig=APP.settings.Signature||"UVI LUXURY CATERING & DECOR";
+  const tod=ev.Time_of_Day?" ("+ev.Time_of_Day+")":"";
+  document.getElementById("vrModalSubtitle").textContent=
+    ev.Client_Name+" · "+ev.Function+" · "+ev.Date+tod+" · "+ev.Pax+" pax";
+
+  // Get unique vendors for this event with their items
+  const evVendors=(APP.allEventVendorsCache||[]).filter(function(v){ return v.Event_ID===eventId; });
+  const evItems=(APP.allEventItemsCache||[]).filter(function(i){ return i.Event_ID===eventId; });
+  const itemMap={};
+  evItems.forEach(function(i){ itemMap[i.Row_ID]=i; });
+
+  // Group by vendor
+  const vendorMap={};
+  evVendors.forEach(function(v){
+    if(!vendorMap[v.Agency_Name]) vendorMap[v.Agency_Name]={vendor:APP.vendors.find(function(x){ return x.Vendor_ID===v.Vendor_ID; }),items:[]};
+    const item=itemMap[v.Item_Row_ID];
+    if(item) vendorMap[v.Agency_Name].items.push("• "+item.Item_Name+" — "+item.Qty+" "+item.Unit);
+  });
+
+  const entries=Object.entries(vendorMap);
+  if(!entries.length){
+    document.getElementById("vrVendorList").innerHTML='<div class="empty-state"><p>No vendors assigned yet.</p></div>';
+    openModal("modal-vendorReminder");
+    return;
+  }
+
+  document.getElementById("vrVendorList").innerHTML=entries.map(function(entry,idx){
+    const agencyName=entry[0], vendorData=entry[1];
+    const vendor=vendorData.vendor;
+    const contactName=vendor&&vendor.Contact_Person?vendor.Contact_Person:agencyName.split(" ")[0];
+    const itemLines=vendorData.items.join("\n");
+    const reminderMsg="Dear "+contactName+",\n("+agencyName+")\n\n"+
+      "Greetings from *"+sig+"*\n\n"+
+      "This is a reminder for the upcoming event:\n\n"+
+      "*"+ev.Function+tod+"* — "+ev.Date+" — "+ev.Pax+" pax\n\n"+
+      "Your items:\n"+itemLines+"\n\n"+
+      "Kindly confirm your availability.\n\n*"+sig+"*";
+    const wa=vendor&&vendor.WhatsApp_Group_Link?vendor.WhatsApp_Group_Link:
+             (vendor&&vendor.Contact_Number?"https://wa.me/91"+vendor.Contact_Number:"");
+    window["_vrmsg_"+idx]=reminderMsg;
+    window["_vrwa_"+idx]=wa;
+    return `<div class="card" style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+        <div>
+          <div style="font-weight:600;font-size:14px">${agencyName}</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px">${contactName} · ${vendorData.items.length} item(s)</div>
+        </div>
+      </div>
+      <div class="wa-preview" style="font-size:12px;margin-bottom:10px">${reminderMsg.replace(/\n/g,"<br>")}</div>
+      <button class="btn btn-gold btn-sm" onclick="sendVendorReminder(${idx},this)">📤 Send Reminder</button>
+    </div>`;
+  }).join("");
+
+  openModal("modal-vendorReminder");
+}
+
+function sendVendorReminder(idx, btn){
+  const msg=window["_vrmsg_"+idx]||"";
+  const waRaw=window["_vrwa_"+idx]||"";
+  fallbackCopyStr(msg);
+  btn.textContent="✓ Copied!";
+  setTimeout(function(){ btn.textContent="📤 Send Reminder"; }, 2000);
+  const encoded=encodeURIComponent(msg);
+  let url=waRaw;
+  if(!url){ url="https://wa.me/?text="+encoded; }
+  else if(url.includes("wa.me/")&&!url.includes("chat.whatsapp.com")){ url=url.split("?")[0]+"?text="+encoded; }
+  setTimeout(function(){ window.open(url,"_blank"); }, 300);
+}
 
 // -- REMINDERS -------------------------------------------------
 function renderReminders(){
