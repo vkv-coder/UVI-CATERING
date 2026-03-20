@@ -726,19 +726,25 @@ async function checkPin(){
 
 // -- INIT ------------------------------------------------------
 async function initApp(){
-  showLoading("Connecting...", "Fetching your data");
+  showLoading("Loading...", "");
   setTodayHeader();
-  await Promise.all([loadSettings(),loadVendors(),loadClients(),loadAllEvents(),loadTasks(),loadItemVendors()]);
+  const data = await apiGet("getAppData");
+  if(data && data.settings){
+    APP.settings    = data.settings    || {};
+    APP.vendors     = Array.isArray(data.vendors)     ? data.vendors     : [];
+    APP.clients     = Array.isArray(data.clients)     ? data.clients     : [];
+    APP.allEvents   = Array.isArray(data.events)      ? data.events      : [];
+    APP.tasks       = Array.isArray(data.tasks)       ? data.tasks       : [];
+    APP.itemVendors = Array.isArray(data.itemVendors) ? data.itemVendors : [];
+    APP.allEventItemsCache   = Array.isArray(data.allEventItems)   ? data.allEventItems   : [];
+    APP.allEventVendorsCache = Array.isArray(data.allEventVendors) ? data.allEventVendors : [];
+  } else {
+    // Fallback if getAppData not deployed yet
+    await Promise.all([loadSettings(),loadVendors(),loadClients(),loadAllEvents(),loadTasks(),loadItemVendors()]);
+    await Promise.all([loadAllEventItemsCache(), loadAllEventVendorsCache()]);
+  }
   buildEventItemCounts();
   renderToday(); renderVendors(); renderClients();
-  showLoading("Almost ready...", "Loading vendor assignments");
-  await Promise.all([loadAllEventItemsCache(), loadAllEventVendorsCache()]);
-  buildEventItemCounts();
-  renderToday();
-  if(APP.currentClient){
-    const fns=APP.allEvents.filter(function(e){ return e.Client_ID===APP.currentClient.Client_ID; });
-    renderClientDetail(fns);
-  }
   hideLoading();
 }
 async function loadAllEventItemsCache(){
