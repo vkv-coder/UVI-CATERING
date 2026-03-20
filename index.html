@@ -1087,7 +1087,11 @@ function openVendorQuote(rowId){
   const ev=APP.currentEvent;
   const sig=APP.settings.Signature||"UVI Luxury Catering & Decor";
   const tod=ev.Time_of_Day?` (${ev.Time_of_Day})`:"";
-  const msg=`Dear ${(v.Agency_Name||"").split(" ")[0]},
+  const contactName=vendor&&vendor.Contact_Person?vendor.Contact_Person:(v.Agency_Name||"").split(" ")[0];
+  const msg=`Dear ${contactName},
+(${v.Agency_Name})
+
+Greetings from *${sig}*
 
 We are planning an *${ev.Function}${tod}* on *${ev.Date}* (${ev.Pax} pax).
 
@@ -1445,7 +1449,11 @@ async function buildAndShowQuoteMsgs(functions){
       fnGroups[key].items.push("* "+i.itemName+" -- "+i.qty+" "+i.unit);
     });
     const NL="\n";
-    let msg="Dear "+agencyName.split(" ")[0]+","+NL+NL+"We request your best quote for:"+NL;
+    const contactName=vendor&&vendor.Contact_Person?vendor.Contact_Person:agencyName.split(" ")[0];
+    let msg="Dear "+contactName+","+NL+
+      "("+agencyName+")"+NL+NL+
+      "Greetings from *"+sig+"*"+NL+NL+
+      "We request your best quote for:"+NL;
     Object.values(fnGroups).forEach(g=>{
       const tod=g.tod?" ("+g.tod+")":"";
       msg+=NL+g.fn+tod+" -- "+g.date+" -- "+g.pax+" pax"+NL+g.items.join(NL)+NL;
