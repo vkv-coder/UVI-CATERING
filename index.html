@@ -224,7 +224,31 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);max-width:48
 .s1{--sc:#3B5BDB} .s2{--sc:#D4500A} .s3{--sc:#B7900A}
 .s4{--sc:#862E62} .s5{--sc:#553C9A} .s6{--sc:#C9A84C}
 
-/* Category pills */
+
+/* Instant tap feedback on all buttons */
+button:active, .btn:active, .fn-card:active, .client-card:active, .cat-pill:active {
+  opacity: 0.7;
+  transform: scale(0.97);
+  transition: none !important;
+}
+.fn-card, .client-card { transition: transform .1s, opacity .1s; }
+
+/* Full-screen loading overlay */
+#loadingOverlay {
+  position:fixed; inset:0; background:rgba(248,244,238,0.85);
+  display:none; align-items:center; justify-content:center;
+  flex-direction:column; gap:12px; z-index:9998;
+}
+#loadingOverlay .spinner {
+  width:36px; height:36px; border:3px solid var(--gold-border);
+  border-top-color:var(--gold); border-radius:50%;
+  animation: spin .7s linear infinite;
+}
+#loadingOverlay .load-msg {
+  font-family:'DM Sans',sans-serif; font-size:14px; color:var(--gold-dark); font-weight:600;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+
 .cat-pill {
   padding:10px 16px; border-radius:20px; border:1.5px solid var(--gold-border);
   background:#fff; color:var(--text); font-family:'DM Sans',sans-serif;
@@ -254,6 +278,10 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);max-width:48
 </head>
 <body>
 <div id="appToast"></div>
+<div id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="load-msg" id="loadingMsg">Loading...</div>
+</div>
 
 
 <!-- PIN -->
@@ -642,9 +670,11 @@ async function checkPin(){
 
 // -- INIT ------------------------------------------------------
 async function initApp(){
+  showLoading("Loading your data...");
   setTodayHeader();
   await Promise.all([loadSettings(),loadVendors(),loadClients(),loadAllEvents(),loadTasks(),loadItemVendors()]);
   renderToday(); renderVendors();
+  hideLoading();
 }
 async function loadSettings()    { APP.settings    = await apiGet("getSettings"); }
 async function loadVendors()     { APP.vendors     = await apiGet("getVendors"); }
@@ -791,6 +821,16 @@ async function openClientAndFunction(clientId, eventId){
 
 function renderClientDetail(fns){
   const c=APP.currentClient;
+  const readyFns=fns.filter(f=>APP.eventItemCounts&&APP.eventItemCounts[f.Event_ID]>0);
+  const totalItems=readyFns.reduce(function(s,f){ return s+(APP.eventItemCounts[f.Event_ID]||0); },0);
+  const sendBar=readyFns.length?`
+    <div style="background:var(--gold-glow);border:1.5px solid var(--gold-border);border-radius:14px;padding:14px 16px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-weight:600;font-size:13px;color:var(--gold-dark)">✓ ${totalItems} items across ${readyFns.length} function${readyFns.length!==1?"s":""}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Ready to send vendor quotes</div>
+      </div>
+      <button class="btn btn-gold btn-sm" style="width:auto;padding:10px 16px;white-space:nowrap" onclick="sendAllClientQuotes()">📤 Send Quotes</button>
+    </div>`:"";
   document.getElementById("clientDetail").innerHTML=`
     <button class="back-btn" onclick="showClientList();APP.currentClient=null">← All Clients</button>
     <div class="card" style="margin-bottom:16px">
@@ -803,6 +843,7 @@ function renderClientDetail(fns){
         <div style="font-size:14px;color:var(--gold-dark);font-weight:700">${fns.length} function${fns.length!==1?"s":""}</div>
       </div>
     </div>
+    ${sendBar}
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
       <div class="section-label" style="margin-bottom:0">Functions</div>
       <button class="btn btn-gold btn-sm" style="width:auto;padding:8px 14px" onclick="openModal('modal-newFunction')">+ Add Function</button>
@@ -832,6 +873,52 @@ function renderFunctionCard(f){
   </div>`;
 }
 
+async function sendAllClientQuotes(){
+  // Open modal in step 3 with all ready functions pre-selected
+  APP.ai={pendingItems:[],selectedVendors:[],currentItemVendors:[],activeCat:""};
+  const fns=APP.allEvents.filter(function(e){ return e.Client_ID===APP.currentClient.Client_ID; });
+  const readyFns=fns.filter(function(f){ return APP.eventItemCounts&&APP.eventItemCounts[f.Event_ID]>0; });
+  // Set subtitle
+  document.getElementById("aiModalSubtitle").innerHTML=
+    `<span style="font-weight:700">${APP.currentClient.Client_Name}</span> &nbsp;·&nbsp; ${readyFns.length} function${readyFns.length!==1?"s":""} with items`;
+  document.getElementById("aiExtraVendor").innerHTML=
+    `<option value="">+ Add other vendor</option>`+
+    APP.vendors.map(v=>`<option value="${v.Vendor_ID}|${v.Agency_Name}">${v.Agency_Name}</option>`).join("");
+  document.getElementById("aiQuoteMsgs").innerHTML="";
+  // Show step 3 with function selector
+  aiShowStep(3);
+  document.getElementById("aiAllItemsSummary").innerHTML=
+    `<div style="margin-bottom:12px">`+
+    fns.map(function(f){
+      const count=APP.eventItemCounts&&APP.eventItemCounts[f.Event_ID]||0;
+      const checked=count>0?"checked":"disabled";
+      const color=count>0?"var(--text)":"var(--muted)";
+      return `<label style="display:flex;align-items:center;gap:10px;padding:10px;border:1.5px solid var(--border);border-radius:10px;margin-bottom:6px;cursor:${count>0?"pointer":"default"}">
+        <input type="checkbox" id="fnCheck_${f.Event_ID}" ${checked} style="width:18px;height:18px;accent-color:var(--gold)">
+        <div style="flex:1">
+          <div style="font-weight:600;color:${color}">${f.Function}</div>
+          <div style="font-size:11px;color:var(--muted)">${f.Date} · ${f.Pax} pax · ${count>0?count+" items":"no items"}</div>
+        </div>
+      </label>`;
+    }).join("")+
+    `</div>`;
+  // Override send buttons
+  document.getElementById("btnSendThisFn").textContent="📤 Send for Selected Functions";
+  document.getElementById("btnSendThisFn").onclick=sendSelectedFunctions;
+  openModal("modal-addItems");
+}
+
+async function sendSelectedFunctions(){
+  const fns=APP.allEvents.filter(function(e){ return e.Client_ID===APP.currentClient.Client_ID; });
+  const selected=fns.filter(function(f){
+    const cb=document.getElementById("fnCheck_"+f.Event_ID);
+    return cb&&cb.checked&&!cb.disabled;
+  });
+  if(!selected.length){ showToast("Select at least one function",2000); return; }
+  showToast("Building messages for "+selected.length+" function(s)...",10000);
+  await buildAndShowQuoteMsgs(selected);
+}
+
 async function refreshEventItemCounts(){
   if(!APP.currentClient) return;
   const fns=APP.allEvents.filter(function(e){ return e.Client_ID===APP.currentClient.Client_ID; });
@@ -843,12 +930,14 @@ async function refreshEventItemCounts(){
 }
 
 async function openFunction(eventId){
+  showLoading("Opening function...");
   APP.currentEvent=APP.allEvents.find(e=>e.Event_ID===eventId);
-  if(!APP.currentEvent)return;
+  if(!APP.currentEvent){ hideLoading(); return; }
   APP.currentEventItems=await apiGet("getEventItems","&event_id="+eventId);
   APP.currentEventVendors=await apiGet("getEventVendors","&event_id="+eventId);
   renderFunctionDetailScreen();
   showFunctionDetail();
+  hideLoading();
 }
 
 function renderFunctionDetailScreen(){
@@ -1265,8 +1354,8 @@ async function saveAllPendingItems(){
 
 
 async function buildAndShowQuoteMsgs(functions){
+  showLoading("Building vendor messages...");
   const el=document.getElementById("aiQuoteMsgs");
-  el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted)">Building messages...</div>';
   const sig=APP.settings.Signature||"UVI Luxury Catering & Decor";
   const vendorMap={};
   for(const fn of functions){
@@ -1282,6 +1371,7 @@ async function buildAndShowQuoteMsgs(functions){
     });
   }
   el.innerHTML="";
+  hideLoading();
   const vendorEntries=Object.entries(vendorMap);
   if(!vendorEntries.length){
     el.innerHTML='<div class="error-box"><div class="title">No vendor assignments found. Add items first.</div></div>';
@@ -1320,8 +1410,25 @@ async function buildAndShowQuoteMsgs(functions){
     const b1=document.createElement("button");
     b1.className="btn btn-gold btn-sm";
     b1.style.flex="2";
-    b1.textContent="Copy + Open WhatsApp";
-    b1.onclick=()=>showQuoteWA(idx);
+    b1.textContent="📤 Send via WhatsApp";
+    b1.onclick=function(){
+      const msg=window["_qmsg_"+idx]||"";
+      const waRaw=window["_qwa_"+idx]||"";
+      // Copy message first
+      fallbackCopyStr(msg);
+      b1.textContent="✓ Copied!";
+      setTimeout(function(){ b1.textContent="📤 Send via WhatsApp"; }, 2000);
+      // Build URL with pre-filled text
+      const encoded=encodeURIComponent(msg);
+      let url=waRaw;
+      if(!url){
+        url="https://wa.me/?text="+encoded;
+      } else if(url.includes("wa.me/") && !url.includes("chat.whatsapp.com")){
+        url=url.split("?")[0]+"?text="+encoded;
+      }
+      // Small delay so copy registers before switching app
+      setTimeout(function(){ window.open(url,"_blank"); }, 300);
+    };
     const b2=document.createElement("button");
     b2.id="qmark_"+idx;
     b2.style.cssText="flex:1;padding:9px;border-radius:10px;cursor:pointer;font-size:12px;border:1.5px solid var(--border);background:var(--card-alt);color:var(--muted)";
@@ -1601,8 +1708,30 @@ function showWAMsg(msg,waLink,recipientLabel){
   document.getElementById("copyWABtn").textContent="📋 Copy Message";
   openModal("modal-waMsg");
 }
-function copyWAMsg(){fallbackCopyStr(APP._waMsg);document.getElementById("copyWABtn").textContent="✓ Copied!";}
-function openWALink(){if(APP._waLink)window.open(APP._waLink,"_blank");else alert("No WhatsApp link. Open manually.");}
+function copyWAMsg(){
+  fallbackCopyStr(APP._waMsg);
+  document.getElementById("copyWABtn").textContent="✓ Copied!";
+  setTimeout(function(){ document.getElementById("copyWABtn").textContent="📋 Copy Message"; }, 2500);
+}
+function openWALink(){
+  const msg=APP._waMsg||"";
+  const encoded=encodeURIComponent(msg);
+  // If we have a group link, append text param; if phone number link, append text param
+  let url=APP._waLink||"";
+  if(!url){
+    // No link — open wa.me with just the text so user can pick contact
+    url="https://wa.me/?text="+encoded;
+  } else if(url.includes("wa.me") || url.includes("chat.whatsapp.com")){
+    // Group link — can't pre-fill group, just open it
+    // But for personal wa.me links add text
+    if(url.includes("wa.me/") && !url.includes("chat.whatsapp.com")){
+      url=url.split("?")[0]+"?text="+encoded;
+    }
+  } else if(url.startsWith("https://wa.me/")){
+    url=url+"?text="+encoded;
+  }
+  window.open(url,"_blank");
+}
 function fallbackCopyStr(text){
   if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).catch(()=>execCopy(text));}
   else execCopy(text);
@@ -1641,6 +1770,13 @@ function showToast(msg, duration){
   el.style.display="block";
   clearTimeout(window._toastTimer);
   window._toastTimer=setTimeout(function(){ el.style.display="none"; }, duration||2000);
+}
+function showLoading(msg){
+  document.getElementById("loadingMsg").textContent=msg||"Loading...";
+  document.getElementById("loadingOverlay").style.display="flex";
+}
+function hideLoading(){
+  document.getElementById("loadingOverlay").style.display="none";
 }
 </script>
 </body>
