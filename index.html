@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍽️</text></svg>">
 <meta name="theme-color" content="#F8F4EE">
 <title>UVI Catering OS</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -691,11 +693,29 @@ async function initApp(){
 }
 async function loadAllEventItemsCache(){
   const res = await apiGet("getAllEventItems");
-  APP.allEventItemsCache = Array.isArray(res) ? res : [];
+  if(Array.isArray(res) && res.length>0){
+    APP.allEventItemsCache = res;
+  } else {
+    // Fallback: fetch per event (Apps Script not yet redeployed)
+    APP.allEventItemsCache = [];
+    for(const ev of APP.allEvents){
+      const items = await apiGet("getEventItems","&event_id="+ev.Event_ID);
+      if(Array.isArray(items)) APP.allEventItemsCache.push(...items);
+    }
+  }
 }
 async function loadAllEventVendorsCache(){
   const res = await apiGet("getAllEventVendors");
-  APP.allEventVendorsCache = Array.isArray(res) ? res : [];
+  if(Array.isArray(res) && res.length>0){
+    APP.allEventVendorsCache = res;
+  } else {
+    // Fallback: fetch per event
+    APP.allEventVendorsCache = [];
+    for(const ev of APP.allEvents){
+      const vendors = await apiGet("getEventVendors","&event_id="+ev.Event_ID);
+      if(Array.isArray(vendors)) APP.allEventVendorsCache.push(...vendors);
+    }
+  }
 }
 function buildEventItemCounts(){
   APP.eventItemCounts = {};
