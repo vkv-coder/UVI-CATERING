@@ -909,8 +909,8 @@ function renderToday(){
   // Stats — count both tasks and events
   const todayStr=fmtDate(new Date());
   const tomorrowStr=fmtDate(new Date(Date.now()+86400000));
-  const todayEvents=APP.allEvents.filter(function(e){ return e.Date===todayStr; });
-  const tomorrowEvents=APP.allEvents.filter(function(e){ return e.Date===tomorrowStr; });
+  const todayEvents=APP.allEvents.filter(function(e){ return normDate(e.Date)===normDate(todayStr); });
+  const tomorrowEvents=APP.allEvents.filter(function(e){ return normDate(e.Date)===normDate(tomorrowStr); });
   document.getElementById("statToday").textContent=today.length||todayEvents.length;
   document.getElementById("statTomorrow").textContent=tomorrow.length||tomorrowEvents.length;
   document.getElementById("todaySummary").textContent=`${today.length+tomorrow.length} actions · ${APP.clients.length} clients · ${APP.allEvents.length} functions`;
@@ -934,9 +934,19 @@ function renderToday(){
     </div>`;
   }
 
-  // VENDOR REMINDERS — events today/tomorrow that have items saved
+  // VENDOR REMINDERS — events today/tomorrow
+  // Normalize date for comparison — handle d/m/yyyy and d/mm/yyyy
+  function normDate(d){ 
+    if(!d) return "";
+    const p=String(d).split("/");
+    if(p.length===3) return parseInt(p[0])+"/"+parseInt(p[1])+"/"+p[2];
+    return String(d);
+  }
+  const todayNorm=normDate(todayStr);
+  const tomorrowNorm=normDate(tomorrowStr);
   const urgentEvents=APP.allEvents.filter(function(e){
-    return (e.Date===todayStr||e.Date===tomorrowStr);
+    const ed=normDate(e.Date);
+    return (ed===todayNorm||ed===tomorrowNorm);
   });
   if(urgentEvents.length){
     html+=`<div class="task-section">
@@ -1683,40 +1693,57 @@ async function buildAndShowQuoteMsgs(functions){
 
     // Update the card
     const sentCount=orderVendors.length+quoteVendors.length;
+    const allDone=sentCount===entries.length;
     const subEl=document.getElementById("internalSummaryCount");
-    if(subEl) subEl.textContent=sentCount+" of "+entries.length+" vendor(s) actioned";
+    if(subEl){
+      if(allDone){
+        subEl.textContent="✓ All "+entries.length+" vendor(s) actioned — ready to send";
+        subEl.style.color="var(--green)";
+      } else {
+        const pending=entries.length-sentCount;
+        subEl.textContent=pending+" vendor(s) still pending — send them first";
+        subEl.style.color="var(--red)";
+      }
+    }
+
+    // Lock/unlock summary buttons
+    const vBtn=document.getElementById("internalVijayBtn");
+    const aBtn=document.getElementById("internalAdityaBtn");
+    [vBtn,aBtn].forEach(function(btn){
+      if(!btn) return;
+      btn.disabled=!allDone;
+      btn.style.opacity=allDone?"1":"0.4";
+      btn.title=allDone?"":"Send to all vendors first";
+    });
 
     // Store for send buttons
     window["_summaryMsg"]=summaryMsg;
-    const vBtn=document.getElementById("internalVijayBtn");
-    const aBtn=document.getElementById("internalAdityaBtn");
-    if(vBtn) vBtn.onclick=function(){
+    if(vBtn) vBtn.onclick=allDone?function(){
       fallbackCopyStr(summaryMsg);
       vBtn.textContent="✓ Copied!";
       setTimeout(function(){ vBtn.textContent="📱 Send to Vijay"; },2000);
       if(vijayNum) setTimeout(function(){ window.open(vijayNum+"?text="+encodeURIComponent(summaryMsg),"_blank"); },300);
-    };
-    if(aBtn) aBtn.onclick=function(){
+    }:function(){ showToast(entries.length-sentCount+" vendor(s) still pending",2000); };
+    if(aBtn) aBtn.onclick=allDone?function(){
       fallbackCopyStr(summaryMsg);
       aBtn.textContent="✓ Copied!";
       setTimeout(function(){ aBtn.textContent="📱 Send to Aditya"; },2000);
       if(adityaNum) setTimeout(function(){ window.open(adityaNum+"?text="+encodeURIComponent(summaryMsg),"_blank"); },300);
-    };
+    }:function(){ showToast(entries.length-sentCount+" vendor(s) still pending",2000); };
   }
 
-  // Initial summary card (all vendors pending)
+  // Initial summary card at BOTTOM — locked until all vendors done
   const internalCard=document.createElement("div");
   internalCard.className="card";
-  internalCard.style.cssText="margin-bottom:16px;background:var(--gold-glow);border:2px solid var(--gold)";
+  internalCard.id="internalSummaryCard";
+  internalCard.style.cssText="margin-top:16px;background:var(--gold-glow);border:2px solid var(--gold-border)";
   internalCard.innerHTML=`<div style="font-weight:700;font-size:14px;color:var(--gold-dark);margin-bottom:4px">📋 Send Summary to Partner</div>
     <div style="font-size:11px;color:var(--muted);margin-bottom:10px" id="internalSummaryCount">0 of ${vendorEntries.length} vendor(s) actioned — tap vendors first</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
       ${APP.currentUser&&APP.currentUser.toUpperCase()==="VIJAY"?"":`<button class="btn btn-gold btn-sm" id="internalVijayBtn">📱 Send to Vijay</button>`}
       ${APP.currentUser&&APP.currentUser.toUpperCase()==="ADITYA"?"":`<button class="btn btn-gold btn-sm" id="internalAdityaBtn">📱 Send to Aditya</button>`}
     </div>`;
-  el.appendChild(internalCard);
-  // Initial build
-  rebuildSummaryCard(vendorEntries, sig);
+  // Build vendor cards
   vendorEntries.forEach(([agencyName,{vendor,items}],idx)=>{
     const fnGroups={};
     items.forEach(i=>{
@@ -1751,16 +1778,25 @@ async function buildAndShowQuoteMsgs(functions){
     header.style.cssText="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px";
     header.innerHTML='<strong style="font-size:14px">'+agencyName+'</strong><span style="font-size:11px;color:var(--muted)">'+items.length+' item(s)</span>';
 
-    // Build ORDER message (different from quote message)
-    let orderMsg="Dear "+contactName+",\n("+agencyName+")\n\n"+
-      "Greetings from *"+sig+"*\n\n"+
-      "Please confirm the following order:\n";
-    Object.values(fnGroups).forEach(function(g){
-      const tod=g.tod?" ("+g.tod+")":"";
-      orderMsg+="\n"+g.fn+tod+" -- "+g.date+" -- "+g.pax+" pax\n"+g.items.join("\n")+"\n";
-    });
-    orderMsg+="\nAdvance will follow as discussed.\n\n*"+sig+"*";
-    window["_omsg_"+idx]=orderMsg;
+    // Build ORDER messages — two variants (pickup vs delivery)
+    function buildOrderMsg(delivery){
+      const logistic=delivery
+        ?"Kindly arrange delivery at the venue at the agreed time."
+        :"We shall pick up from your end at the agreed time.";
+      let m="Dear "+contactName+",\n("+agencyName+")\n\n"+
+        "Greetings from *"+sig+"*\n\n"+
+        "Please confirm the following order:\n";
+      Object.values(fnGroups).forEach(function(g){
+        const tod=g.tod?" ("+g.tod+")":"";
+        m+="\n"+g.fn+tod+" -- "+g.date+" -- "+g.pax+" pax\n"+g.items.join("\n")+"\n";
+      });
+      m+="\n"+logistic+"\n\nPayment will follow as agreed.\n\n*"+sig+"*";
+      return m;
+    }
+    window["_omsg_pickup_"+idx]=buildOrderMsg(false);
+    window["_omsg_delivery_"+idx]=buildOrderMsg(true);
+    // Default order msg (pickup) for summary tracking
+    window["_omsg_"+idx]=window["_omsg_pickup_"+idx];
 
     const btnRow=document.createElement("div");
     btnRow.style.cssText="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px";
@@ -1782,6 +1818,16 @@ async function buildAndShowQuoteMsgs(functions){
         const type=msgKey.startsWith("_omsg_")?"order":"quote";
         window["_vsent_"+idx]=type;
         rebuildSummaryCard(vendorEntries, sig);
+        // Auto-scroll to next vendor card
+        setTimeout(function(){
+          const cards=document.querySelectorAll("#aiQuoteMsgs .card:not(#internalSummaryCard)");
+          if(cards[idx+1]) cards[idx+1].scrollIntoView({behavior:"smooth",block:"center"});
+          else {
+            // All done — scroll to summary
+            const sc=document.getElementById("internalSummaryCard");
+            if(sc) sc.scrollIntoView({behavior:"smooth",block:"center"});
+          }
+        }, 400);
         setTimeout(function(){ window.open(url,"_blank"); }, 300);
       };
     }
@@ -1797,10 +1843,30 @@ async function buildAndShowQuoteMsgs(functions){
     b1.textContent="💰 Get Quote";
     b1.onclick=makeWAHandler(b1,"_qmsg_"+idx,"💰 Get Quote");
 
-    const b2=document.createElement("button");
-    b2.className="btn btn-gold btn-sm";
-    b2.textContent="🛒 Place Order";
-    b2.onclick=makeWAHandler(b2,"_omsg_"+idx,"🛒 Place Order");
+    // Place Order expands to two options
+    const orderWrap=document.createElement("div");
+    orderWrap.style.cssText="display:grid;grid-template-columns:1fr 1fr;gap:6px;grid-column:1/-1";
+
+    const bPickup=document.createElement("button");
+    bPickup.className="btn btn-gold btn-sm";
+    bPickup.style.fontSize="12px";
+    bPickup.textContent="🛒 Order · We Pick Up";
+    bPickup.onclick=function(){
+      window["_omsg_"+idx]=window["_omsg_pickup_"+idx];
+      makeWAHandler(bPickup,"_omsg_pickup_"+idx,"🛒 Order · We Pick Up")();
+    };
+
+    const bDeliver=document.createElement("button");
+    bDeliver.className="btn btn-gold btn-sm";
+    bDeliver.style.fontSize="12px";
+    bDeliver.textContent="🛒 Order · You Send";
+    bDeliver.onclick=function(){
+      window["_omsg_"+idx]=window["_omsg_delivery_"+idx];
+      makeWAHandler(bDeliver,"_omsg_delivery_"+idx,"🛒 Order · You Send")();
+    };
+
+    orderWrap.appendChild(bPickup);
+    orderWrap.appendChild(bDeliver);
 
     // Internal copy buttons — same msg, to Vijay & Aditya
     const bVijay=document.createElement("button");
@@ -1826,13 +1892,17 @@ async function buildAndShowQuoteMsgs(functions){
     b3.onclick=function(){ markQSent(idx); };
 
     btnRow.appendChild(b1);
-    btnRow.appendChild(b2);
+    btnRow.appendChild(orderWrap);
     btnRow.appendChild(b3);
     card.appendChild(header);
     card.appendChild(preview);
     card.appendChild(btnRow);
     document.getElementById("aiQuoteMsgs").appendChild(card);
   });
+
+  // Summary card at bottom
+  el.appendChild(internalCard);
+  rebuildSummaryCard(vendorEntries, sig);
 
   // Scroll modal to top so first vendor card is visible
   const modal=document.querySelector("#modal-addItems .modal");
@@ -2219,7 +2289,7 @@ function openVendorReminderScreen(eventId){
       "This is a reminder for the upcoming event:\n\n"+
       "*"+ev.Function+tod+"* — "+ev.Date+" — "+ev.Pax+" pax\n\n"+
       "Your items:\n"+itemLines+"\n\n"+
-      "Kindly confirm your availability.\n\n*"+sig+"*";
+      "As discussed — kindly ensure timely supply.\n\n*"+sig+"*";
     const wa=vendor&&vendor.WhatsApp_Group_Link?vendor.WhatsApp_Group_Link:
              (vendor&&vendor.Contact_Number?"https://wa.me/91"+vendor.Contact_Number:"");
     window["_vrmsg_"+idx]=reminderMsg;
