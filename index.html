@@ -2472,10 +2472,19 @@ async function deleteReminder(rowId){
 }
 
 function userBadgeTap(){
-  if(confirm("Clear local cache and reload fresh data from server?")){
+  // Use toast-based confirmation instead of confirm() which is blocked on mobile
+  const badge=document.getElementById("userBadge");
+  if(window._clearPending){
+    // Second tap — confirm clear
+    window._clearPending=false;
     localStorage.clear();
     showToast("Cache cleared — reloading...", 2000);
     setTimeout(function(){ location.reload(); }, 1500);
+  } else {
+    // First tap — ask
+    window._clearPending=true;
+    showToast("Tap VIJAY again to clear cache & reload", 3000);
+    setTimeout(function(){ window._clearPending=false; }, 3000);
   }
 }
 
