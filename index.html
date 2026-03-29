@@ -276,6 +276,9 @@ button:active, .btn:active, .fn-card:active, .client-card:active, .cat-pill:acti
   cursor:pointer; letter-spacing:1px; box-shadow:0 4px 14px rgba(201,168,76,.4);
 }
 .pin-enter-btn:active { background:var(--gold-dark); transform:scale(.98); }
+
+.fn-card-served { opacity: 0.6; }
+.fn-card-served .fn-card-left { background: #ccc !important; }
 </style>
 </head>
 <body>
@@ -907,6 +910,13 @@ function renderToday(){
   const tomorrow=tasks.filter(t=>t.urgency==="tomorrow");
   const overdue=tasks.filter(t=>t.urgency==="overdue");
   // Stats — count both tasks and events
+  // Date normalizer — handles d/m/yyyy vs dd/mm/yyyy
+  function normDate(d){
+    if(!d) return "";
+    const p=String(d).trim().split("/");
+    if(p.length===3) return parseInt(p[0])+"/"+parseInt(p[1])+"/"+parseInt(p[2]);
+    return String(d).trim();
+  }
   const todayStr=fmtDate(new Date());
   const tomorrowStr=fmtDate(new Date(Date.now()+86400000));
   const todayEvents=APP.allEvents.filter(function(e){ return normDate(e.Date)===normDate(todayStr); });
@@ -935,13 +945,6 @@ function renderToday(){
   }
 
   // VENDOR REMINDERS — events today/tomorrow
-  // Normalize date for comparison — handle d/m/yyyy and d/mm/yyyy
-  function normDate(d){ 
-    if(!d) return "";
-    const p=String(d).split("/");
-    if(p.length===3) return parseInt(p[0])+"/"+parseInt(p[1])+"/"+p[2];
-    return String(d);
-  }
   const todayNorm=normDate(todayStr);
   const tomorrowNorm=normDate(tomorrowStr);
   const urgentEvents=APP.allEvents.filter(function(e){
@@ -1086,29 +1089,66 @@ function renderClientDetail(fns){
       <div class="section-label" style="margin-bottom:0">Functions</div>
       <button class="btn btn-gold btn-sm" style="width:auto;padding:8px 14px" onclick="openModal('modal-newFunction')">+ Add Function</button>
     </div>
-    ${fns.length?fns.map(f=>renderFunctionCard(f)).join(""):`<div class="empty-state"><div class="icon">📅</div><p>No functions yet.</p></div>`}`;
+    ${(function(){
+      const active=fns.filter(function(f){ return parseInt(f.Stage)!==0; });
+      const served=fns.filter(function(f){ return parseInt(f.Stage)===0; });
+      let html=active.length?active.map(function(f){ return renderFunctionCard(f,true); }).join("")
+        :`<div class="empty-state"><div class="icon">📅</div><p>No active functions.</p></div>`;
+      if(served.length){
+        html+=`<div style="margin-top:16px">
+          <div onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'" 
+            style="cursor:pointer;display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px;margin-bottom:8px">
+            <span>▶ Past / Served (${served.length})</span>
+          </div>
+          <div style="display:none">
+            ${served.map(function(f){ return renderFunctionCard(f,false); }).join("")}
+          </div>
+        </div>`;
+      }
+      return html;
+    })()}`;
 }
 
-function renderFunctionCard(f){
+function renderFunctionCard(f, showServedBtn){
   const stage=parseInt(f.Stage)||1;
-  const color=STAGE_COLORS[stage]||STAGE_COLORS[1];
+  const isServed=stage===0;
+  const color=isServed?"#888":STAGE_COLORS[stage]||STAGE_COLORS[1];
   const tod=f.Time_of_Day?` · ${f.Time_of_Day}`:"";
   const meal=f.Meal_Type?` · ${f.Meal_Type}`:"";
   const itemCount=APP.eventItemCounts&&APP.eventItemCounts[f.Event_ID]||0;
-  const itemBadge=itemCount>0
+  const itemBadge=isServed
+    ?`<span style="display:inline-flex;align-items:center;background:#f5f5f5;color:#888;border:1px solid #ddd;border-radius:10px;padding:3px 9px;font-size:11px;margin-top:6px">✓ Served</span>`
+    :itemCount>0
     ?`<span style="display:inline-flex;align-items:center;gap:4px;background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7;border-radius:10px;padding:3px 9px;font-size:11px;font-weight:600;margin-top:6px">✓ ${itemCount} item${itemCount!==1?"s":""} ready for quote</span>`
     :`<span style="display:inline-flex;align-items:center;background:#fff8e1;color:#b8860b;border:1px solid #ffe082;border-radius:10px;padding:3px 9px;font-size:11px;margin-top:6px">No items yet</span>`;
-  return `<div class="fn-card" onclick="openFunction('${f.Event_ID}')">
+  const servedBtn=(!isServed&&showServedBtn)
+    ?`<button onclick="event.stopPropagation();markFunctionServed('${f.Event_ID}')" style="margin-top:8px;background:none;border:1px solid #ccc;border-radius:8px;padding:4px 10px;font-size:11px;color:#888;cursor:pointer">✓ Mark Served</button>`
+    :"";
+  return `<div class="fn-card${isServed?" fn-card-served":""}" onclick="openFunction('${f.Event_ID}')">
     <div class="fn-card-left" style="background:${color}"></div>
     <div class="fn-card-inner">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
-        <div class="fn-name">${f.Function}</div>
-        <span class="tag" style="background:${color}18;color:${color};border:1px solid ${color}30">Stage ${stage}</span>
+        <div class="fn-name" style="color:${isServed?"#888":"inherit"}">${f.Function}</div>
+        <span class="tag" style="background:${color}18;color:${color};border:1px solid ${color}30">${isServed?"Served":"Stage "+stage}</span>
       </div>
       <div class="fn-sub">📅 ${f.Date||"Date TBD"}${tod}${meal} · 👥 ${f.Pax||0} pax${f.Venue?" · 📍 "+f.Venue:""}</div>
-      <div>${itemBadge}</div>
+      <div>${itemBadge}${servedBtn}</div>
     </div>
   </div>`;
+}
+
+async function markFunctionServed(eventId){
+  showToast("Marking as served...",3000);
+  await apiWrite("updateEvent",{Event_ID:eventId, Stage:0});
+  // Update local cache
+  const ev=APP.allEvents.find(function(e){ return e.Event_ID===eventId; });
+  if(ev) ev.Stage=0;
+  saveToLocal({settings:APP.settings,vendors:APP.vendors,clients:APP.clients,events:APP.allEvents,tasks:APP.tasks,itemVendors:APP.itemVendors,allEventItems:APP.allEventItemsCache,allEventVendors:APP.allEventVendorsCache});
+  if(APP.currentClient){
+    const fns=APP.allEvents.filter(function(e){ return e.Client_ID===APP.currentClient.Client_ID; });
+    renderClientDetail(fns);
+  }
+  showToast("Marked as served ✓",1500);
 }
 
 async function sendAllClientQuotes(){
@@ -1657,12 +1697,14 @@ async function buildAndShowQuoteMsgs(functions){
 
   // Build summary card — called initially and after each vendor tap
   function rebuildSummaryCard(entries, signature){
-    const orderVendors=[], quoteVendors=[], unsentVendors=[];
+    const orderPickupVendors=[], orderDeliveryVendors=[], quoteVendors=[], unsentVendors=[];
     entries.forEach(function(entry, i){
       const type=window["_vsent_"+i];
-      if(type==="order") orderVendors.push({name:entry[0],items:entry[1].items,idx:i});
-      else if(type==="quote") quoteVendors.push({name:entry[0],items:entry[1].items,idx:i});
-      else unsentVendors.push({name:entry[0],items:entry[1].items,idx:i});
+      const obj={name:entry[0],items:entry[1].items,idx:i};
+      if(type==="order_pickup") orderPickupVendors.push(obj);
+      else if(type==="order_delivery") orderDeliveryVendors.push(obj);
+      else if(type==="quote") quoteVendors.push(obj);
+      else unsentVendors.push(obj);
     });
 
     let summaryMsg="*"+signature+"*\n";
@@ -1687,12 +1729,13 @@ async function buildAndShowQuoteMsgs(functions){
       return s;
     }
 
-    summaryMsg+=buildSection("ORDERS PLACED",orderVendors);
+    summaryMsg+=buildSection("ORDERS — WE PICK UP",orderPickupVendors);
+    summaryMsg+=buildSection("ORDERS — THEY DELIVER",orderDeliveryVendors);
     summaryMsg+=buildSection("QUOTES REQUESTED",quoteVendors);
     summaryMsg+=buildSection("PENDING",unsentVendors);
 
     // Update the card
-    const sentCount=orderVendors.length+quoteVendors.length;
+    const sentCount=orderPickupVendors.length+orderDeliveryVendors.length+quoteVendors.length;
     const allDone=sentCount===entries.length;
     const subEl=document.getElementById("internalSummaryCount");
     if(subEl){
@@ -1815,7 +1858,7 @@ async function buildAndShowQuoteMsgs(functions){
         else if(url.includes("wa.me/")&&!url.includes("chat.whatsapp.com")){ url=url.split("?")[0]+"?text="+encoded; }
         else { url="https://wa.me/"+url.replace(/\D/g,"")+"?text="+encoded; }
         // Track what was sent for this vendor
-        const type=msgKey.startsWith("_omsg_")?"order":"quote";
+        const type=msgKey.startsWith("_omsg_pickup_")?"order_pickup":msgKey.startsWith("_omsg_delivery_")?"order_delivery":msgKey.startsWith("_omsg_")?"order":"quote";
         window["_vsent_"+idx]=type;
         rebuildSummaryCard(vendorEntries, sig);
         // Auto-scroll to next vendor card
@@ -2415,11 +2458,13 @@ async function saveReminder(){
 }
 
 async function deleteReminder(rowId){
-  showToast("Deleting...",3000);
+  showToast("Deleting...",2000);
   await apiWrite("completeTask",{Row_ID:rowId});
-  await loadTasks();
+  // Remove from local cache immediately
+  APP.tasks=APP.tasks.filter(function(t){ return t.Row_ID!==rowId; });
+  saveToLocal({settings:APP.settings,vendors:APP.vendors,clients:APP.clients,events:APP.allEvents,tasks:APP.tasks,itemVendors:APP.itemVendors,allEventItems:APP.allEventItemsCache,allEventVendors:APP.allEventVendorsCache});
   renderReminders();
-  showToast("Deleted",1500);
+  showToast("Deleted ✓",1500);
 }
 
 function showToast(msg, duration){
