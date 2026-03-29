@@ -1638,6 +1638,85 @@ async function buildAndShowQuoteMsgs(functions){
     el.innerHTML='<div class="error-box"><div class="title">No vendor assignments found. Add items first.</div></div>';
     return;
   }
+
+  // Build ONE combined summary message for partner — shown at TOP
+  const vijay=APP.vendors.find(function(v){ return v.Vendor_ID==="V554194"; });
+  const aditya=APP.vendors.find(function(v){ return v.Vendor_ID==="V631466"; });
+  const vijayNum=vijay&&vijay.Contact_Number?"https://wa.me/91"+vijay.Contact_Number:"";
+  const adityaNum=aditya&&aditya.Contact_Number?"https://wa.me/91"+aditya.Contact_Number:"";
+
+  // Build summary card — called initially and after each vendor tap
+  function rebuildSummaryCard(entries, signature){
+    const orderVendors=[], quoteVendors=[], unsentVendors=[];
+    entries.forEach(function(entry, i){
+      const type=window["_vsent_"+i];
+      if(type==="order") orderVendors.push({name:entry[0],items:entry[1].items,idx:i});
+      else if(type==="quote") quoteVendors.push({name:entry[0],items:entry[1].items,idx:i});
+      else unsentVendors.push({name:entry[0],items:entry[1].items,idx:i});
+    });
+
+    let summaryMsg="*"+signature+"*\n";
+
+    function buildSection(title, vendors){
+      if(!vendors.length) return "";
+      let s="\n*── "+title+" ──*\n";
+      vendors.forEach(function(v){
+        const fnGroups={};
+        v.items.forEach(function(i){
+          const key=i.fn+"|"+i.date+"|"+i.tod+"|"+i.pax;
+          if(!fnGroups[key])fnGroups[key]={fn:i.fn,date:i.date,tod:i.tod,pax:i.pax,items:[]};
+          fnGroups[key].items.push("• "+i.vendorItemName+" — "+i.qty+" "+i.unit);
+        });
+        s+="\n*"+v.name+"*";
+        Object.values(fnGroups).forEach(function(g){
+          const tod=g.tod?" ("+g.tod+")":"";
+          s+="\n"+g.fn+tod+" — "+g.date+" — "+g.pax+" pax\n"+g.items.join("\n");
+        });
+        s+="\n";
+      });
+      return s;
+    }
+
+    summaryMsg+=buildSection("ORDERS PLACED",orderVendors);
+    summaryMsg+=buildSection("QUOTES REQUESTED",quoteVendors);
+    summaryMsg+=buildSection("PENDING",unsentVendors);
+
+    // Update the card
+    const sentCount=orderVendors.length+quoteVendors.length;
+    const subEl=document.getElementById("internalSummaryCount");
+    if(subEl) subEl.textContent=sentCount+" of "+entries.length+" vendor(s) actioned";
+
+    // Store for send buttons
+    window["_summaryMsg"]=summaryMsg;
+    const vBtn=document.getElementById("internalVijayBtn");
+    const aBtn=document.getElementById("internalAdityaBtn");
+    if(vBtn) vBtn.onclick=function(){
+      fallbackCopyStr(summaryMsg);
+      vBtn.textContent="✓ Copied!";
+      setTimeout(function(){ vBtn.textContent="📱 Send to Vijay"; },2000);
+      if(vijayNum) setTimeout(function(){ window.open(vijayNum+"?text="+encodeURIComponent(summaryMsg),"_blank"); },300);
+    };
+    if(aBtn) aBtn.onclick=function(){
+      fallbackCopyStr(summaryMsg);
+      aBtn.textContent="✓ Copied!";
+      setTimeout(function(){ aBtn.textContent="📱 Send to Aditya"; },2000);
+      if(adityaNum) setTimeout(function(){ window.open(adityaNum+"?text="+encodeURIComponent(summaryMsg),"_blank"); },300);
+    };
+  }
+
+  // Initial summary card (all vendors pending)
+  const internalCard=document.createElement("div");
+  internalCard.className="card";
+  internalCard.style.cssText="margin-bottom:16px;background:var(--gold-glow);border:2px solid var(--gold)";
+  internalCard.innerHTML=`<div style="font-weight:700;font-size:14px;color:var(--gold-dark);margin-bottom:4px">📋 Send Summary to Partner</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:10px" id="internalSummaryCount">0 of ${vendorEntries.length} vendor(s) actioned — tap vendors first</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      ${APP.currentUser&&APP.currentUser.toUpperCase()==="VIJAY"?"":`<button class="btn btn-gold btn-sm" id="internalVijayBtn">📱 Send to Vijay</button>`}
+      ${APP.currentUser&&APP.currentUser.toUpperCase()==="ADITYA"?"":`<button class="btn btn-gold btn-sm" id="internalAdityaBtn">📱 Send to Aditya</button>`}
+    </div>`;
+  el.appendChild(internalCard);
+  // Initial build
+  rebuildSummaryCard(vendorEntries, sig);
   vendorEntries.forEach(([agencyName,{vendor,items}],idx)=>{
     const fnGroups={};
     items.forEach(i=>{
@@ -1699,6 +1778,10 @@ async function buildAndShowQuoteMsgs(functions){
         if(!url){ url="https://wa.me/?text="+encoded; }
         else if(url.includes("wa.me/")&&!url.includes("chat.whatsapp.com")){ url=url.split("?")[0]+"?text="+encoded; }
         else { url="https://wa.me/"+url.replace(/\D/g,"")+"?text="+encoded; }
+        // Track what was sent for this vendor
+        const type=msgKey.startsWith("_omsg_")?"order":"quote";
+        window["_vsent_"+idx]=type;
+        rebuildSummaryCard(vendorEntries, sig);
         setTimeout(function(){ window.open(url,"_blank"); }, 300);
       };
     }
@@ -1750,54 +1833,6 @@ async function buildAndShowQuoteMsgs(functions){
     card.appendChild(btnRow);
     document.getElementById("aiQuoteMsgs").appendChild(card);
   });
-
-  // Build ONE combined message for Aditya/Vijay covering all vendors
-  const vijay=APP.vendors.find(function(v){ return v.Vendor_ID==="V554194"; });
-  const aditya=APP.vendors.find(function(v){ return v.Vendor_ID==="V631466"; });
-  const vijayNum=vijay&&vijay.Contact_Number?"https://wa.me/91"+vijay.Contact_Number:"";
-  const adityaNum=aditya&&aditya.Contact_Number?"https://wa.me/91"+aditya.Contact_Number:"";
-
-  // Build summary message
-  let summaryMsg="*"+sig+"*\nQuote/Order Summary:\n";
-  vendorEntries.forEach(function(entry){
-    const agencyName=entry[0], vendorData=entry[1];
-    const fnGroups={};
-    vendorData.items.forEach(function(i){
-      const key=i.fn+"|"+i.date+"|"+i.tod+"|"+i.pax;
-      if(!fnGroups[key])fnGroups[key]={fn:i.fn,date:i.date,tod:i.tod,pax:i.pax,items:[]};
-      fnGroups[key].items.push("• "+i.vendorItemName+" — "+i.qty+" "+i.unit);
-    });
-    summaryMsg+="\n*"+agencyName+"*";
-    Object.values(fnGroups).forEach(function(g){
-      const tod=g.tod?" ("+g.tod+")":"";
-      summaryMsg+="\n"+g.fn+tod+" — "+g.date+" — "+g.pax+" pax\n"+g.items.join("\n");
-    });
-    summaryMsg+="\n";
-  });
-
-  // Add internal card with single buttons
-  const internalCard=document.createElement("div");
-  internalCard.className="card";
-  internalCard.style.cssText="margin-bottom:12px;background:var(--gold-glow);border:1.5px solid var(--gold-border)";
-  internalCard.innerHTML=`<div style="font-weight:600;font-size:14px;color:var(--gold-dark);margin-bottom:8px">📋 Send Summary to Partner</div>
-    <div class="wa-preview" style="font-size:11px;margin-bottom:10px;max-height:120px;overflow:auto">${summaryMsg.replace(/\n/g,"<br>")}</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-      ${APP.currentUser&&APP.currentUser.toUpperCase()==="VIJAY"?"":`<button class="btn btn-gold btn-sm" id="internalVijayBtn">📱 Send to Vijay</button>`}
-      ${APP.currentUser&&APP.currentUser.toUpperCase()==="ADITYA"?"":`<button class="btn btn-gold btn-sm" id="internalAdityaBtn">📱 Send to Aditya</button>`}
-    </div>`;
-  document.getElementById("aiQuoteMsgs").appendChild(internalCard);
-
-  // Attach handlers
-  const vBtn=document.getElementById("internalVijayBtn");
-  const aBtn=document.getElementById("internalAdityaBtn");
-  function sendInternal(btn, phone, label){
-    fallbackCopyStr(summaryMsg);
-    btn.textContent="✓ Copied!";
-    setTimeout(function(){ btn.textContent=label; },2000);
-    if(phone){ setTimeout(function(){ window.open(phone+"?text="+encodeURIComponent(summaryMsg),"_blank"); },300); }
-  }
-  if(vBtn) vBtn.onclick=function(){ sendInternal(vBtn,vijayNum,"📱 Send to Vijay"); };
-  if(aBtn) aBtn.onclick=function(){ sendInternal(aBtn,adityaNum,"📱 Send to Aditya"); };
 
   // Scroll modal to top so first vendor card is visible
   const modal=document.querySelector("#modal-addItems .modal");
