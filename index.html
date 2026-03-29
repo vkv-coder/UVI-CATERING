@@ -1275,6 +1275,10 @@ function openVendorQuote(rowId){
   const sig=APP.settings.Signature||"UVI Luxury Catering & Decor";
   const tod=ev.Time_of_Day?` (${ev.Time_of_Day})`:"";
   const contactName=vendor&&vendor.Contact_Person?vendor.Contact_Person:(v.Agency_Name||"").split(" ")[0];
+  // Use vendor item name if available
+  const iv=APP.itemVendors.find(function(x){ return x.Item_Name===v.Item_Name; });
+  const vendorItemName=iv&&iv.Vendor_Item_Name?iv.Vendor_Item_Name:v.Item_Name;
+  const displayItemName=v.Item_Name?v.Item_Name:vendorItemName;
   const msg=`Dear ${contactName},
 (${v.Agency_Name})
 
@@ -1283,7 +1287,7 @@ Greetings from *${sig}*
 We are planning an *${ev.Function}${tod}* on *${ev.Date}* (${ev.Pax} pax).
 
 Kindly share your best quote for:
-• ${v.Item_Name}
+• ${vendorItemName}
 
 Please revert at the earliest.
 
@@ -1613,9 +1617,13 @@ async function buildAndShowQuoteMsgs(functions){
     items.forEach(i=>itemMap[i.Row_ID]=i);
     vendors.forEach(v=>{
       const item=itemMap[v.Item_Row_ID];
-      if(!item) return; // skip orphaned vendor rows — THIS is the fix for 0 item vendors
+      if(!item) return; // skip orphaned vendor rows
       if(!vendorMap[v.Agency_Name]) vendorMap[v.Agency_Name]={vendor:APP.vendors.find(x=>x.Vendor_ID===v.Vendor_ID),items:[]};
-      vendorMap[v.Agency_Name].items.push({fn:fn.Function,date:fn.Date,tod:fn.Time_of_Day||"",pax:fn.Pax,itemName:item.Item_Name,qty:item.Qty,unit:item.Unit});
+      // Find vendor item name from itemVendors mapping
+      const iv=APP.itemVendors.find(function(x){ return x.Item_Name===item.Item_Name; });
+      const vendorItemName=iv&&iv.Vendor_Item_Name?iv.Vendor_Item_Name:item.Item_Name;
+      const displayItemName=item.Item_Name?item.Item_Name:vendorItemName;
+      vendorMap[v.Agency_Name].items.push({fn:fn.Function,date:fn.Date,tod:fn.Time_of_Day||"",pax:fn.Pax,itemName:displayItemName,vendorItemName:vendorItemName,qty:item.Qty,unit:item.Unit});
     });
   }
   el.innerHTML="";
@@ -1635,7 +1643,7 @@ async function buildAndShowQuoteMsgs(functions){
     items.forEach(i=>{
       const key=i.fn+"|"+i.date+"|"+i.tod+"|"+i.pax;
       if(!fnGroups[key])fnGroups[key]={fn:i.fn,date:i.date,tod:i.tod,pax:i.pax,items:[]};
-      fnGroups[key].items.push("* "+i.itemName+" -- "+i.qty+" "+i.unit);
+      fnGroups[key].items.push("* "+i.vendorItemName+" -- "+i.qty+" "+i.unit);
     });
     const NL="\n";
     const contactName=vendor&&vendor.Contact_Person?vendor.Contact_Person:agencyName.split(" ")[0];
@@ -2079,7 +2087,11 @@ function openVendorReminderScreen(eventId){
   evVendors.forEach(function(v){
     if(!vendorMap[v.Agency_Name]) vendorMap[v.Agency_Name]={vendor:APP.vendors.find(function(x){ return x.Vendor_ID===v.Vendor_ID; }),items:[]};
     const item=itemMap[v.Item_Row_ID];
-    if(item) vendorMap[v.Agency_Name].items.push("• "+item.Item_Name+" — "+item.Qty+" "+item.Unit);
+    if(item){
+      const iv=APP.itemVendors.find(function(x){ return x.Item_Name===item.Item_Name; });
+      const vin=iv&&iv.Vendor_Item_Name?iv.Vendor_Item_Name:item.Item_Name;
+      vendorMap[v.Agency_Name].items.push("• "+vin+" — "+item.Qty+" "+item.Unit);
+    }
   });
 
   const entries=Object.entries(vendorMap);
