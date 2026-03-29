@@ -1686,11 +1686,11 @@ async function buildAndShowQuoteMsgs(functions){
     const btnRow=document.createElement("div");
     btnRow.style.cssText="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px";
 
-    // Helper to build WA open function
-    function makeWAHandler(btn, msgKey, labelDefault){
+    // Helper to open WA to specific number with message
+    function makeWAHandler(btn, msgKey, labelDefault, phoneOverride){
       return function(){
         const msg=window[msgKey]||"";
-        const waRaw=window["_qwa_"+idx]||"";
+        const waRaw=phoneOverride||window["_qwa_"+idx]||"";
         fallbackCopyStr(msg);
         btn.textContent="✓ Copied!";
         setTimeout(function(){ btn.textContent=labelDefault; }, 2000);
@@ -1698,9 +1698,16 @@ async function buildAndShowQuoteMsgs(functions){
         let url=waRaw;
         if(!url){ url="https://wa.me/?text="+encoded; }
         else if(url.includes("wa.me/")&&!url.includes("chat.whatsapp.com")){ url=url.split("?")[0]+"?text="+encoded; }
+        else { url="https://wa.me/"+url.replace(/\D/g,"")+"?text="+encoded; }
         setTimeout(function(){ window.open(url,"_blank"); }, 300);
       };
     }
+
+    // Get Vijay & Aditya numbers from vendor list
+    const vijay=APP.vendors.find(function(v){ return v.Vendor_ID==="V554194"; });
+    const aditya=APP.vendors.find(function(v){ return v.Vendor_ID==="V631466"; });
+    const vijayNum=vijay&&vijay.Contact_Number?"https://wa.me/91"+vijay.Contact_Number:"";
+    const adityaNum=aditya&&aditya.Contact_Number?"https://wa.me/91"+aditya.Contact_Number:"";
 
     const b1=document.createElement("button");
     b1.className="btn btn-outline btn-sm";
@@ -1712,6 +1719,23 @@ async function buildAndShowQuoteMsgs(functions){
     b2.textContent="🛒 Place Order";
     b2.onclick=makeWAHandler(b2,"_omsg_"+idx,"🛒 Place Order");
 
+    // Internal copy buttons — same msg, to Vijay & Aditya
+    const bVijay=document.createElement("button");
+    bVijay.className="btn btn-outline btn-sm";
+    bVijay.style.fontSize="12px";
+    bVijay.textContent="📱 Vijay";
+    bVijay.onclick=makeWAHandler(bVijay,"_qmsg_"+idx,"📱 Vijay",vijayNum);
+    // Hide if Vijay is logged in
+    if(APP.currentUser&&APP.currentUser.toUpperCase()==="VIJAY") bVijay.style.display="none";
+
+    const bAditya=document.createElement("button");
+    bAditya.className="btn btn-outline btn-sm";
+    bAditya.style.fontSize="12px";
+    bAditya.textContent="📱 Aditya";
+    bAditya.onclick=makeWAHandler(bAditya,"_qmsg_"+idx,"📱 Aditya",adityaNum);
+    // Hide if Aditya is logged in
+    if(APP.currentUser&&APP.currentUser.toUpperCase()==="ADITYA") bAditya.style.display="none";
+
     const b3=document.createElement("button");
     b3.id="qmark_"+idx;
     b3.style.cssText="grid-column:1/-1;padding:9px;border-radius:10px;cursor:pointer;font-size:12px;border:1.5px solid var(--border);background:var(--card-alt);color:var(--muted)";
@@ -1720,6 +1744,8 @@ async function buildAndShowQuoteMsgs(functions){
 
     btnRow.appendChild(b1);
     btnRow.appendChild(b2);
+    btnRow.appendChild(bVijay);
+    btnRow.appendChild(bAditya);
     btnRow.appendChild(b3);
     card.appendChild(header);
     card.appendChild(preview);
@@ -2124,24 +2150,42 @@ function openVendorReminderScreen(eventId){
         </div>
       </div>
       <div class="wa-preview" style="font-size:12px;margin-bottom:10px">${reminderMsg.replace(/\n/g,"<br>")}</div>
-      <button class="btn btn-gold btn-sm" onclick="sendVendorReminder(${idx},this)">📤 Send Reminder</button>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+        <button class="btn btn-gold btn-sm" style="grid-column:1/-1" onclick="sendVendorReminder(${idx},this,window[\'_vrwa_\'+${idx}])">📤 Send Reminder</button>
+        <button class="btn btn-outline btn-sm" style="font-size:12px" onclick="sendVendorReminderInternal(${idx},this,'V554194','📱 Vijay')" ${APP.currentUser&&APP.currentUser.toUpperCase()==='VIJAY'?'style="display:none"':''}>📱 Vijay</button>
+        <button class="btn btn-outline btn-sm" style="font-size:12px" onclick="sendVendorReminderInternal(${idx},this,'V631466','📱 Aditya')" ${APP.currentUser&&APP.currentUser.toUpperCase()==='ADITYA'?'style="display:none"':''}>📱 Aditya</button>
+      </div>
     </div>`;
   }).join("");
 
   openModal("modal-vendorReminder");
 }
 
-function sendVendorReminder(idx, btn){
+function sendVendorReminder(idx, btn, waUrl){
   const msg=window["_vrmsg_"+idx]||"";
-  const waRaw=window["_vrwa_"+idx]||"";
+  const waRaw=waUrl||window["_vrwa_"+idx]||"";
   fallbackCopyStr(msg);
+  const orig=btn.textContent;
   btn.textContent="✓ Copied!";
-  setTimeout(function(){ btn.textContent="📤 Send Reminder"; }, 2000);
+  setTimeout(function(){ btn.textContent=orig; }, 2000);
   const encoded=encodeURIComponent(msg);
   let url=waRaw;
   if(!url){ url="https://wa.me/?text="+encoded; }
   else if(url.includes("wa.me/")&&!url.includes("chat.whatsapp.com")){ url=url.split("?")[0]+"?text="+encoded; }
   setTimeout(function(){ window.open(url,"_blank"); }, 300);
+}
+
+function sendVendorReminderInternal(idx, btn, vendorId, label){
+  const msg=window["_vrmsg_"+idx]||"";
+  const v=APP.vendors.find(function(x){ return x.Vendor_ID===vendorId; });
+  const phone=v&&v.Contact_Number?"https://wa.me/91"+v.Contact_Number:"";
+  fallbackCopyStr(msg);
+  btn.textContent="✓ Copied!";
+  setTimeout(function(){ btn.textContent=label; }, 2000);
+  if(phone){
+    const url=phone+"?text="+encodeURIComponent(msg);
+    setTimeout(function(){ window.open(url,"_blank"); }, 300);
+  }
 }
 
 // -- REMINDERS -------------------------------------------------
