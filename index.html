@@ -327,7 +327,7 @@ button:active, .btn:active, .fn-card:active, .client-card:active, .cat-pill:acti
   </div>
   <div class="header-right">
     
-    <div id="userBadge" class="user-badge">—</div>
+    <div id="userBadge" class="user-badge" onclick="userBadgeTap()" title="Tap to clear cache">—</div>
   </div>
 </div>
 
@@ -2469,6 +2469,14 @@ async function deleteReminder(rowId){
   saveToLocal({settings:APP.settings,vendors:APP.vendors,clients:APP.clients,events:APP.allEvents,tasks:APP.tasks,itemVendors:APP.itemVendors,allEventItems:APP.allEventItemsCache,allEventVendors:APP.allEventVendorsCache});
   renderReminders();
   showToast("Deleted ✓",1500);
+}
+
+function userBadgeTap(){
+  if(confirm("Clear local cache and reload fresh data from server?")){
+    localStorage.clear();
+    showToast("Cache cleared — reloading...", 2000);
+    setTimeout(function(){ location.reload(); }, 1500);
+  }
 }
 
 function showToast(msg, duration){
