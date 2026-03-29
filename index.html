@@ -695,27 +695,19 @@ let APP = {
 
 // -- API -------------------------------------------------------
 async function apiGet(action, params="") {
-  const controller = new AbortController();
-  const timer = setTimeout(()=>controller.abort(), 25000);
   try {
-    const r = await fetch(`${API}?action=${action}${params}`, {signal:controller.signal});
-    clearTimeout(timer);
+    const r = await fetch(`${API}?action=${action}${params}`);
     return r.json();
   } catch(e) {
-    clearTimeout(timer);
     console.error("apiGet failed:", action, e.message);
     return {};
   }
 }
 async function apiWrite(action, data) {
-  const controller = new AbortController();
-  const timer = setTimeout(()=>controller.abort(), 25000);
   try {
-    const r = await fetch(`${API}?action=${action}&d=${encodeURIComponent(JSON.stringify(data))}`, {signal:controller.signal});
-    clearTimeout(timer);
+    const r = await fetch(`${API}?action=${action}&d=${encodeURIComponent(JSON.stringify(data))}`);
     return r.json();
   } catch(e) {
-    clearTimeout(timer);
     console.error("apiWrite failed:", action, e.message);
     return {};
   }
