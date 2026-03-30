@@ -427,9 +427,9 @@ button:active, .btn:active, .fn-card:active, .client-card:active, .cat-pill:acti
       <button class="modal-close" onclick="closeModal('modal-tasting')">×</button>
     </div>
     <div class="form-group">
-      <label class="form-label">Client & Function</label>
-      <select class="form-select" id="tast-event">
-        <option value="">— Select Function —</option>
+      <label class="form-label">Client</label>
+      <select class="form-select" id="tast-client">
+        <option value="">— Select Client —</option>
       </select>
     </div>
     <div style="display:flex;gap:8px">
@@ -2488,7 +2488,9 @@ function renderTasting(){
   }
   document.getElementById("tastingList").innerHTML=sorted.map(function(t){
     const ev=APP.allEvents.find(function(e){ return e.Event_ID===t.Event_ID; });
-    const evLabel=ev?ev.Client_Name+" · "+ev.Function:"Unknown";
+    const client=APP.clients.find(function(c){ return c.Client_ID===t.Event_ID; })||
+                 (ev?APP.clients.find(function(c){ return c.Client_ID===ev.Client_ID; }):null);
+    const evLabel=client?client.Client_Name+(client.Contact_Person?" · "+client.Contact_Person:""):"Unknown Client";
     const statusColor=t.Status==="done"?"#2e7d32":t.Status==="cancelled"?"#999":"#A8841E";
     const statusBg=t.Status==="done"?"#e8f5e9":t.Status==="cancelled"?"#f5f5f5":"#fff8e1";
     const statusLabel=t.Status==="done"?"✓ Done":t.Status==="cancelled"?"Cancelled":"Scheduled";
@@ -2517,11 +2519,11 @@ function openNewTasting(){
   document.getElementById("tast-venue").value="";
   document.getElementById("tast-venue-type").value="Client's Place";
   document.getElementById("tastingModalMsg").innerHTML="";
-  // Populate event dropdown
-  const sel=document.getElementById("tast-event");
-  sel.innerHTML=`<option value="">— Select Function —</option>`+
-    APP.allEvents.filter(function(e){ return parseInt(e.Stage)!==0; }).map(function(e){
-      return `<option value="${e.Event_ID}">${e.Client_Name} · ${e.Function} · ${e.Date}</option>`;
+  // Populate client dropdown
+  const sel=document.getElementById("tast-client");
+  sel.innerHTML=`<option value="">— Select Client —</option>`+
+    APP.clients.map(function(c){
+      return `<option value="${c.Client_ID}">${c.Client_Name}${c.Contact_Person?" · "+c.Contact_Person:""}</option>`;
     }).join("");
   delete window._editTastingId;
   document.getElementById("saveTastingBtn").textContent="Schedule Tasting";
@@ -2529,14 +2531,14 @@ function openNewTasting(){
 }
 
 async function saveTasting(){
-  const eventId=document.getElementById("tast-event").value;
+  const clientId=document.getElementById("tast-client").value;
   const date=document.getElementById("tast-date").value;
-  if(!eventId){ showToast("Please select a function",2000); return; }
+  if(!clientId){ showToast("Please select a client",2000); return; }
   if(!date){ showToast("Please select a date",2000); return; }
   const btn=document.getElementById("saveTastingBtn");
   btn.textContent="Saving..."; btn.disabled=true;
   const data={
-    Event_ID:eventId,
+    Event_ID:clientId, // storing Client_ID in Event_ID field for now
     Tasting_Date:date,
     Time:document.getElementById("tast-time").value,
     Venue_Type:document.getElementById("tast-venue-type").value,
@@ -2568,20 +2570,18 @@ async function updateTastingStatus(rowId, status){
 function sendTastingMsg(rowId){
   const t=APP.tastings.find(function(x){ return x.Row_ID===rowId; });
   if(!t) return;
-  const ev=APP.allEvents.find(function(e){ return e.Event_ID===t.Event_ID; });
+  const client=APP.clients.find(function(c){ return c.Client_ID===t.Event_ID; });
   const sig=APP.settings.Signature||"UVI LUXURY CATERING & DECOR";
-  const evLabel=ev?ev.Client_Name:"";
-  const msg="Dear "+evLabel+",\n\n"+
+  const clientName=client?client.Client_Name:"";
+  const msg="Dear "+clientName+",\n\n"+
     "Greetings from *"+sig+"*\n\n"+
     "This is a reminder for your scheduled tasting:\n\n"+
-    "📅 *Date:* "+t.Tasting_Date+"\n"+
-    (t.Time?"⏰ *Time:* "+t.Time+"\n":"")+
-    "📍 *Venue:* "+t.Venue_Type+(t.Venue?" — "+t.Venue:"")+"\n\n"+
+    "\ud83d\udcc5 *Date:* "+t.Tasting_Date+"\n"+
+    (t.Time?"\u23f0 *Time:* "+t.Time+"\n":"")+
+    "\ud83d\udccd *Venue:* "+t.Venue_Type+(t.Venue?" \u2014 "+t.Venue:"")+"\n\n"+
     "Kindly confirm your attendance.\n\n*"+sig+"*";
-  // Get client phone
-  const client=ev?APP.clients.find(function(c){ return c.Client_ID===ev.Client_ID; }):null;
   const phone=client&&client.Phone?"https://wa.me/91"+client.Phone.replace(/\D/g,""):"";
-  showWAMsg(msg,phone,"Tasting Reminder → "+evLabel);
+  showWAMsg(msg,phone,"Tasting Reminder \u2192 "+clientName);
 }
 
 // -- REMINDERS -------------------------------------------------
