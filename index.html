@@ -369,6 +369,18 @@ button:active, .btn:active, .fn-card:active, .client-card:active, .cat-pill:acti
 <!-- FAB -->
 <button class="fab" id="fab" onclick="onFabClick()">+</button>
 
+<!-- TASTING SCREEN -->
+<div id="screen-tasting" class="screen">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+    <div>
+      <h2 style="font-family:var(--serif);font-size:26px;margin:0">Tasting</h2>
+      <div style="font-size:13px;color:var(--muted);margin-top:3px" id="tastingCount">0 tastings</div>
+    </div>
+    <button class="btn btn-gold btn-sm" style="width:auto;padding:10px 16px" onclick="openNewTasting()">+ Schedule</button>
+  </div>
+  <div id="tastingList"></div>
+</div>
+
 <!-- REMINDERS SCREEN -->
 <div id="screen-reminders" class="screen">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
@@ -386,6 +398,7 @@ button:active, .btn:active, .fn-card:active, .client-card:active, .cat-pill:acti
   <button class="nav-btn active" onclick="switchScreen('today',this)"><span class="icon">◉</span><span class="label">Today</span><div class="underline"></div></button>
   <button class="nav-btn" onclick="switchScreen('clients',this)"><span class="icon">◈</span><span class="label">Clients</span><div class="underline"></div></button>
   <button class="nav-btn" onclick="switchScreen('vendors',this)"><span class="icon">◎</span><span class="label">Vendors</span><div class="underline"></div></button>
+  <button class="nav-btn" onclick="switchScreen('tasting',this)"><span class="icon">🍽</span><span class="label">Tasting</span><div class="underline"></div></button>
   <button class="nav-btn" onclick="switchScreen('reminders',this)"><span class="icon">🔔</span><span class="label">Reminders</span><div class="underline"></div></button>
 </nav>
 </div>
@@ -403,6 +416,46 @@ button:active, .btn:active, .fn-card:active, .client-card:active, .cat-pill:acti
       <button class="modal-close" onclick="closeModal('modal-vendorReminder')">×</button>
     </div>
     <div id="vrVendorList"></div>
+  </div>
+</div>
+
+<!-- Tasting Modal -->
+<div class="modal-overlay" id="modal-tasting">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="tastingModalTitle">Schedule Tasting</div>
+      <button class="modal-close" onclick="closeModal('modal-tasting')">×</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Client & Function</label>
+      <select class="form-select" id="tast-event">
+        <option value="">— Select Function —</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:8px">
+      <div class="form-group" style="flex:1">
+        <label class="form-label">Date</label>
+        <input class="form-input" id="tast-date" type="date">
+      </div>
+      <div class="form-group" style="flex:1">
+        <label class="form-label">Time</label>
+        <input class="form-input" id="tast-time" type="time">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Venue Type</label>
+      <select class="form-select" id="tast-venue-type">
+        <option value="Client's Place">Client's Place</option>
+        <option value="Our Kitchen">Our Kitchen</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Venue / Address</label>
+      <input class="form-input" id="tast-venue" type="text" placeholder="e.g. 12 Park Street, Vadodara">
+    </div>
+    <div id="tastingModalMsg"></div>
+    <button class="btn btn-gold" id="saveTastingBtn" onclick="saveTasting()">Schedule Tasting</button>
   </div>
 </div>
 
@@ -683,7 +736,7 @@ const MONTHS = ["January","February","March","April","May","June","July","August
 
 let APP = {
   vendors:[], clients:[], allEvents:[], tasks:[], settings:{}, itemVendors:[],
-  allEventItemsCache:[], allEventVendorsCache:{},
+  allEventItemsCache:[], allEventVendorsCache:{}, tastings:[],
   currentClient:null, currentEvent:null,
   currentEventItems:[], currentEventVendors:[],
   currentUser:"", eventItemCounts:{},
@@ -860,6 +913,7 @@ function switchScreen(name, btn){
   document.getElementById("fab").style.display = (name==="clients")?"flex":"none";
   if(name==="clients"){ renderClients(); showClientList(); }
   if(name==="vendors") renderVendors();
+  if(name==="tasting") renderTasting();
   if(name==="reminders") renderReminders();
 }
 
@@ -1007,31 +1061,69 @@ async function doneTask(rowId,btn){
 // -- CLIENTS ---------------------------------------------------
 function renderClients(){
   const clients=APP.clients||[];
-  document.getElementById("clientCount").textContent=`${clients.length} active clients`;
+  document.getElementById("clientCount").textContent=`${clients.length} clients`;
   if(!clients.length){
     document.getElementById("clientList").innerHTML=`<div class="empty-state"><div class="icon">👤</div><p>No clients yet. Tap + to add your first client.</p></div>`;
     return;
   }
-  document.getElementById("clientList").innerHTML=clients.map(c=>{
+
+  function getClientStatus(c){
     const fns=APP.allEvents.filter(e=>e.Client_ID===c.Client_ID);
+    if(c.Status==="not_converted") return {order:4,color:"#C0392B",label:"Not Converted",bg:"#fdecea"};
+    if(c.Status==="served"||(!fns.filter(f=>parseInt(f.Stage)!==0).length && fns.length>0))
+      return {order:3,color:"#2e7d32",label:"✓ Served",bg:"#e8f5e9"};
+    if(!fns.length) return {order:2,color:"#999",label:"New",bg:"#f5f5f5"};
+    const hasItems=fns.some(f=>parseInt(f.Stage)!==0&&APP.eventItemCounts&&APP.eventItemCounts[f.Event_ID]>0);
+    if(hasItems) return {order:0,color:"#A8841E",label:"Active",bg:"#fff8e1"};
+    return {order:1,color:"#3B5BDB",label:"Quote Stage",bg:"#e8eaf6"};
+  }
+
+  // Sort: Active → Quote → New → Served → Not Converted
+  const sorted=[...clients].sort(function(a,b){
+    return getClientStatus(a).order - getClientStatus(b).order;
+  });
+
+  document.getElementById("clientList").innerHTML=sorted.map(c=>{
+    const fns=APP.allEvents.filter(e=>e.Client_ID===c.Client_ID);
+    const activeFns=fns.filter(f=>parseInt(f.Stage)!==0);
+    const st=getClientStatus(c);
+    const isSettled=c.Status==="not_converted"||c.Status==="served";
     return `<div class="client-card">
-      <div class="client-left-bar"></div>
+      <div class="client-left-bar" style="background:${st.color}"></div>
       <div style="padding-left:12px;flex:1">
-        <div onclick="openClient('${c.Client_ID}')" style="cursor:pointer">
-          <div class="client-card-name">${c.Client_Name}</div>
-          <div class="client-card-sub">${c.Contact_Person||""} ${c.Phone?"· "+c.Phone:""}</div>
+        <div onclick="openClient('${c.Client_ID}')" style="cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start">
+          <div>
+            <div class="client-card-name">${c.Client_Name}</div>
+            <div class="client-card-sub">${c.Contact_Person||""} ${c.Phone?"· "+c.Phone:""}</div>
+          </div>
+          <span style="font-size:11px;font-weight:600;color:${st.color};background:${st.bg};border:1px solid ${st.color}30;border-radius:10px;padding:3px 9px;white-space:nowrap;margin-left:8px">${st.label}</span>
         </div>
-        <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
-          ${fns.map(f=>{
+        <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
+          ${activeFns.map(f=>{
             const color=STAGE_COLORS[parseInt(f.Stage)||1];
             const tod=f.Time_of_Day?` · ${f.Time_of_Day}`:"";
             return `<span class="tag" onclick="openClientAndFunction('${c.Client_ID}','${f.Event_ID}')" style="background:${color}18;color:${color};border:1px solid ${color}30;cursor:pointer">${f.Function} · ${f.Date}${tod}</span>`;
           }).join("")}
           ${!fns.length?`<span style="font-size:12px;color:var(--muted)">No functions yet</span>`:""}
         </div>
+        ${!isSettled?`<div style="display:flex;gap:6px;margin-top:8px">
+          <button onclick="event.stopPropagation();setClientStatus('${c.Client_ID}','served')" style="font-size:11px;padding:4px 10px;border-radius:8px;border:1px solid #2e7d32;color:#2e7d32;background:#e8f5e9;cursor:pointer">✓ Served</button>
+          <button onclick="event.stopPropagation();setClientStatus('${c.Client_ID}','not_converted')" style="font-size:11px;padding:4px 10px;border-radius:8px;border:1px solid #C0392B;color:#C0392B;background:#fdecea;cursor:pointer">✗ Not Converted</button>
+        </div>`:`<div style="margin-top:6px">
+          <button onclick="event.stopPropagation();setClientStatus('${c.Client_ID}','')" style="font-size:11px;padding:4px 10px;border-radius:8px;border:1px solid #999;color:#999;background:#f5f5f5;cursor:pointer">↺ Reactivate</button>
+        </div>`}
       </div>
     </div>`;
   }).join("");
+}
+
+async function setClientStatus(clientId, status){
+  showToast(status==="served"?"Marked as served":status==="not_converted"?"Marked as not converted":"Reactivated",1500);
+  await apiWrite("updateClient",{Client_ID:clientId, Status:status});
+  const c=APP.clients.find(function(x){ return x.Client_ID===clientId; });
+  if(c) c.Status=status;
+  saveToLocal({settings:APP.settings,vendors:APP.vendors,clients:APP.clients,events:APP.allEvents,tasks:APP.tasks,itemVendors:APP.itemVendors,allEventItems:APP.allEventItemsCache,allEventVendors:APP.allEventVendorsCache});
+  renderClients();
 }
 
 async function openClient(clientId){
@@ -2379,6 +2471,117 @@ function sendVendorReminderInternal(idx, btn, vendorId, label){
     const url=phone+"?text="+encodeURIComponent(msg);
     setTimeout(function(){ window.open(url,"_blank"); }, 300);
   }
+}
+
+// -- TASTING ---------------------------------------------------
+function renderTasting(){
+  const tastings=(APP.tastings||[]);
+  // Sort: scheduled first, then done/cancelled
+  const sorted=[...tastings].sort(function(a,b){
+    const order={scheduled:0,done:2,cancelled:3};
+    return (order[a.Status]||0)-(order[b.Status]||0);
+  });
+  document.getElementById("tastingCount").textContent=tastings.length+" tasting"+(tastings.length!==1?"s":"");
+  if(!tastings.length){
+    document.getElementById("tastingList").innerHTML=`<div class="empty-state"><div class="icon">🍽️</div><p>No tastings scheduled yet.</p></div>`;
+    return;
+  }
+  document.getElementById("tastingList").innerHTML=sorted.map(function(t){
+    const ev=APP.allEvents.find(function(e){ return e.Event_ID===t.Event_ID; });
+    const evLabel=ev?ev.Client_Name+" · "+ev.Function:"Unknown";
+    const statusColor=t.Status==="done"?"#2e7d32":t.Status==="cancelled"?"#999":"#A8841E";
+    const statusBg=t.Status==="done"?"#e8f5e9":t.Status==="cancelled"?"#f5f5f5":"#fff8e1";
+    const statusLabel=t.Status==="done"?"✓ Done":t.Status==="cancelled"?"Cancelled":"Scheduled";
+    return `<div class="card" style="margin-bottom:10px;border-left:4px solid ${statusColor}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+        <div>
+          <div style="font-weight:600;font-size:15px">${evLabel}</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:3px">📅 ${t.Tasting_Date||"Date TBD"} ${t.Time?"· ⏰ "+t.Time:""}</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px">📍 ${t.Venue_Type}${t.Venue?" — "+t.Venue:""}</div>
+        </div>
+        <span style="font-size:11px;font-weight:600;color:${statusColor};background:${statusBg};border:1px solid ${statusColor}30;border-radius:10px;padding:3px 9px">${statusLabel}</span>
+      </div>
+      ${t.Status==="scheduled"?`<div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn btn-outline btn-sm" style="flex:1;font-size:12px" onclick="updateTastingStatus('${t.Row_ID}','done')">✓ Mark Done</button>
+        <button class="btn btn-outline btn-sm" style="flex:1;font-size:12px;color:var(--red)" onclick="updateTastingStatus('${t.Row_ID}','cancelled')">✗ Cancel</button>
+        <button class="btn btn-gold btn-sm" style="flex:1;font-size:12px" onclick="sendTastingMsg('${t.Row_ID}')">📤 Remind</button>
+      </div>`:`<button class="btn btn-outline btn-sm" style="font-size:12px;margin-top:6px" onclick="updateTastingStatus('${t.Row_ID}','scheduled')">↺ Reschedule</button>`}
+    </div>`;
+  }).join("");
+}
+
+function openNewTasting(){
+  document.getElementById("tastingModalTitle").textContent="Schedule Tasting";
+  document.getElementById("tast-date").value="";
+  document.getElementById("tast-time").value="";
+  document.getElementById("tast-venue").value="";
+  document.getElementById("tast-venue-type").value="Client's Place";
+  document.getElementById("tastingModalMsg").innerHTML="";
+  // Populate event dropdown
+  const sel=document.getElementById("tast-event");
+  sel.innerHTML=`<option value="">— Select Function —</option>`+
+    APP.allEvents.filter(function(e){ return parseInt(e.Stage)!==0; }).map(function(e){
+      return `<option value="${e.Event_ID}">${e.Client_Name} · ${e.Function} · ${e.Date}</option>`;
+    }).join("");
+  delete window._editTastingId;
+  document.getElementById("saveTastingBtn").textContent="Schedule Tasting";
+  openModal("modal-tasting");
+}
+
+async function saveTasting(){
+  const eventId=document.getElementById("tast-event").value;
+  const date=document.getElementById("tast-date").value;
+  if(!eventId){ showToast("Please select a function",2000); return; }
+  if(!date){ showToast("Please select a date",2000); return; }
+  const btn=document.getElementById("saveTastingBtn");
+  btn.textContent="Saving..."; btn.disabled=true;
+  const data={
+    Event_ID:eventId,
+    Tasting_Date:date,
+    Time:document.getElementById("tast-time").value,
+    Venue_Type:document.getElementById("tast-venue-type").value,
+    Venue:document.getElementById("tast-venue").value,
+    Status:"scheduled"
+  };
+  const res=await apiWrite("addTasting",data);
+  if(res.success){
+    data.Row_ID=res.Row_ID;
+    if(!APP.tastings) APP.tastings=[];
+    APP.tastings.push(data);
+    saveToLocal({settings:APP.settings,vendors:APP.vendors,clients:APP.clients,events:APP.allEvents,tasks:APP.tasks,itemVendors:APP.itemVendors,allEventItems:APP.allEventItemsCache,allEventVendors:APP.allEventVendorsCache,tastings:APP.tastings});
+    renderTasting();
+    closeModal("modal-tasting");
+    showToast("Tasting scheduled ✓",2000);
+  }
+  btn.textContent="Schedule Tasting"; btn.disabled=false;
+}
+
+async function updateTastingStatus(rowId, status){
+  await apiWrite("updateTasting",{Row_ID:rowId, Status:status});
+  const t=APP.tastings.find(function(x){ return x.Row_ID===rowId; });
+  if(t) t.Status=status;
+  saveToLocal({settings:APP.settings,vendors:APP.vendors,clients:APP.clients,events:APP.allEvents,tasks:APP.tasks,itemVendors:APP.itemVendors,allEventItems:APP.allEventItemsCache,allEventVendors:APP.allEventVendorsCache,tastings:APP.tastings});
+  renderTasting();
+  showToast(status==="done"?"Marked as done ✓":status==="cancelled"?"Cancelled":"Rescheduled",1500);
+}
+
+function sendTastingMsg(rowId){
+  const t=APP.tastings.find(function(x){ return x.Row_ID===rowId; });
+  if(!t) return;
+  const ev=APP.allEvents.find(function(e){ return e.Event_ID===t.Event_ID; });
+  const sig=APP.settings.Signature||"UVI LUXURY CATERING & DECOR";
+  const evLabel=ev?ev.Client_Name:"";
+  const msg="Dear "+evLabel+",\n\n"+
+    "Greetings from *"+sig+"*\n\n"+
+    "This is a reminder for your scheduled tasting:\n\n"+
+    "📅 *Date:* "+t.Tasting_Date+"\n"+
+    (t.Time?"⏰ *Time:* "+t.Time+"\n":"")+
+    "📍 *Venue:* "+t.Venue_Type+(t.Venue?" — "+t.Venue:"")+"\n\n"+
+    "Kindly confirm your attendance.\n\n*"+sig+"*";
+  // Get client phone
+  const client=ev?APP.clients.find(function(c){ return c.Client_ID===ev.Client_ID; }):null;
+  const phone=client&&client.Phone?"https://wa.me/91"+client.Phone.replace(/\D/g,""):"";
+  showWAMsg(msg,phone,"Tasting Reminder → "+evLabel);
 }
 
 // -- REMINDERS -------------------------------------------------
