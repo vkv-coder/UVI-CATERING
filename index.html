@@ -784,6 +784,9 @@ async function checkPin(){
     document.getElementById("mainApp").style.display="block";
     document.getElementById("userBadge").textContent=res.name;
     initApp(); // loads data in background
+  } else if(res && res.blocked){
+    document.getElementById("pinError").textContent=res.message||"Your trial has ended. Please contact vkvcoder.support@gmail.com to continue.";
+    pinValue=""; updatePinDots();
   } else {
     document.getElementById("pinError").textContent="Incorrect PIN. Try again.";
     pinValue=""; updatePinDots();
