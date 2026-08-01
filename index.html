@@ -314,6 +314,12 @@ button:active, .btn:active, .fn-card:active, .client-card:active, .cat-pill:acti
     <button class="pin-key empty"></button><button class="pin-key" onclick="pinPress('0')">0</button><button class="pin-key del" onclick="pinDel()">⌫</button>
   </div>
   <button id="pinEnterBtn" class="pin-enter-btn" onclick="checkPin()">Enter ↵</button>
+  <div style="text-align:center;margin-top:14px">
+    <a href="#" id="forgotPinLink" onclick="showForgotPin();return false;" style="color:#A8841E;font-size:13px;font-weight:600;text-decoration:underline">Forgot PIN?</a>
+  </div>
+  <p id="forgotPinMsg" style="display:none;text-align:center;margin-top:10px;font-size:12px;color:var(--muted);max-width:260px;margin-left:auto;margin-right:auto">
+    Write to <a href="mailto:vkvcoder.support@gmail.com" style="color:#A8841E">vkvcoder.support@gmail.com</a> and your PIN will be sent to you.
+  </p>
 </div>
 
 <!-- MAIN APP -->
@@ -770,6 +776,10 @@ async function apiWrite(action, data) {
 
 // -- PIN -------------------------------------------------------
 let pinValue="";
+function showForgotPin(){
+  document.getElementById("forgotPinLink").style.display="none";
+  document.getElementById("forgotPinMsg").style.display="block";
+}
 function pinPress(d){if(pinValue.length>=4)return;pinValue+=d;updatePinDots();if(pinValue.length===4)setTimeout(checkPin,200);}
 function pinDel(){pinValue=pinValue.slice(0,-1);updatePinDots();document.getElementById("pinError").textContent="";}
 function updatePinDots(){for(let i=0;i<4;i++)document.getElementById("pd"+i).classList.toggle("filled",i<pinValue.length);}
