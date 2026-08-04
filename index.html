@@ -1244,7 +1244,8 @@ function renderFunctionCard(f, showServedBtn){
 
 async function markFunctionServed(eventId){
   showToast("Marking as served...",3000);
-  await apiWrite("updateEvent",{Event_ID:eventId, Stage:0});
+  const res=await apiWrite("updateEvent",{Event_ID:eventId, Stage:0});
+  if(!res.success){ showToast("Could not mark as served — try again",2500); return; }
   // Update local cache
   const ev=APP.allEvents.find(function(e){ return e.Event_ID===eventId; });
   if(ev) ev.Stage=0;
@@ -1411,14 +1412,14 @@ async function goBackToClient(){
 
 async function deleteItemRow(rowId){
   showToast("Removing...", 5000);
-  await apiWrite("deleteEventItem",{Row_ID:rowId});
+  const res=await apiWrite("deleteEventItem",{Row_ID:rowId});
   await Promise.all([loadAllEventItemsCache(), loadAllEventVendorsCache()]);
   buildEventItemCounts();
   const evId=APP.currentEvent.Event_ID;
   APP.currentEventItems=(APP.allEventItemsCache||[]).filter(function(i){ return i.Event_ID===evId; });
   APP.currentEventVendors=(APP.allEventVendorsCache||[]).filter(function(v){ return v.Event_ID===evId; });
   saveToLocal({settings:APP.settings,vendors:APP.vendors,clients:APP.clients,events:APP.allEvents,tasks:APP.tasks,itemVendors:APP.itemVendors,allEventItems:APP.allEventItemsCache,allEventVendors:APP.allEventVendorsCache});
-  showToast("Item removed", 1500);
+  showToast(res.success ? "Item removed" : "Could not remove item — try again", 1500);
   renderFunctionDetailScreen();
 }
 
@@ -2171,7 +2172,7 @@ function editFunction(){
 async function saveEditFunction(){
   const btn=document.getElementById("saveFunctionBtn");
   btn.textContent="Saving...";btn.disabled=true;
-  await apiWrite("updateEvent",{
+  const res=await apiWrite("updateEvent",{
     Event_ID:APP.currentEvent.Event_ID,
     Function:document.getElementById("nf-function").value,
     Date:document.getElementById("nf-date").value,
@@ -2181,6 +2182,7 @@ async function saveEditFunction(){
     Meal_Type:document.getElementById("nf-mealtype").value,
     Notes:document.getElementById("nf-notes").value
   });
+  if(!res.success){ showToast("Could not save changes — try again",2500); btn.textContent="Add Function";btn.onclick=saveNewFunction;btn.disabled=false; return; }
   await loadAllEvents();
   APP.currentEvent=APP.allEvents.find(e=>e.Event_ID===APP.currentEvent.Event_ID);
   renderFunctionDetailScreen();
@@ -2192,7 +2194,8 @@ function updateFunctionStage(){
   document.getElementById("fnDropdown").classList.remove("open");
   const stage=prompt(`Current stage: ${APP.currentEvent.Stage}\nEnter new stage (1-6):\n1=Menu Quote, 2=Vendor Costs, 3=Price Quote, 4=Tasting, 5=Advance, 6=Final Orders`);
   if(stage&&parseInt(stage)>=1&&parseInt(stage)<=6){
-    apiWrite("updateEvent",{Event_ID:APP.currentEvent.Event_ID,Stage:parseInt(stage)}).then(async()=>{
+    apiWrite("updateEvent",{Event_ID:APP.currentEvent.Event_ID,Stage:parseInt(stage)}).then(async(res)=>{
+      if(!res.success){ showToast("Could not update stage — try again",2500); return; }
       await loadAllEvents();
       APP.currentEvent=APP.allEvents.find(e=>e.Event_ID===APP.currentEvent.Event_ID);
       renderFunctionDetailScreen();
@@ -2203,7 +2206,8 @@ function updateFunctionStage(){
 async function cancelFunction(){
   document.getElementById("fnDropdown").classList.remove("open");
   if(!confirm(`Cancel ${APP.currentEvent.Function}? Record will be kept.`))return;
-  await apiWrite("updateEvent",{Event_ID:APP.currentEvent.Event_ID,Stage:0});
+  const res=await apiWrite("updateEvent",{Event_ID:APP.currentEvent.Event_ID,Stage:0});
+  if(!res.success){ showToast("Could not cancel — try again",2500); return; }
   await loadAllEvents();
   goBackToClient();
 }
@@ -2256,7 +2260,8 @@ async function markMenuSent(){
   if(res.success){
     document.getElementById("menuSentMsg").innerHTML=`<div class="success-box"><div class="title">✓ Recorded</div><div class="sub">Follow-up reminder set for 2 days.</div></div>`;
     document.getElementById("menuMarkSentBtn").textContent="✓ Recorded";
-    await apiWrite("updateEvent",{Event_ID:APP.currentEvent.Event_ID,Stage:2});
+    const stageRes=await apiWrite("updateEvent",{Event_ID:APP.currentEvent.Event_ID,Stage:2});
+    if(!stageRes.success) showToast("Recorded, but stage didn't advance — update it manually",3000);
     await loadAllEvents();
     APP.currentEvent=APP.allEvents.find(e=>e.Event_ID===APP.currentEvent.Event_ID);
     renderFunctionDetailScreen();
@@ -2574,7 +2579,8 @@ async function saveTasting(){
 }
 
 async function updateTastingStatus(rowId, status){
-  await apiWrite("updateTasting",{Row_ID:rowId, Status:status});
+  const res=await apiWrite("updateTasting",{Row_ID:rowId, Status:status});
+  if(!res.success){ showToast("Could not update — try again",2500); return; }
   const t=APP.tastings.find(function(x){ return x.Row_ID===rowId; });
   if(t) t.Status=status;
   saveToLocal({settings:APP.settings,vendors:APP.vendors,clients:APP.clients,events:APP.allEvents,tasks:APP.tasks,itemVendors:APP.itemVendors,allEventItems:APP.allEventItemsCache,allEventVendors:APP.allEventVendorsCache,tastings:APP.tastings});
@@ -2669,10 +2675,12 @@ async function saveReminder(){
     Event_ID:"", Due_Date:date, Task:text,
     Tag:"REMINDER", Status:"pending", Type:"reminder"
   });
-  // Add to local cache
-  if(res&&res.Row_ID){
-    APP.tasks.push({Row_ID:res.Row_ID,Task:text,Due_Date:date,Tag:"REMINDER",Status:"pending",Type:"reminder",urgency:"future"});
+  if(!res||!res.Row_ID){
+    btn.textContent="Save Reminder"; btn.disabled=false;
+    showToast("Could not save reminder — try again",2500);
+    return;
   }
+  APP.tasks.push({Row_ID:res.Row_ID,Task:text,Due_Date:date,Tag:"REMINDER",Status:"pending",Type:"reminder",urgency:"future"});
   saveToLocal({settings:APP.settings,vendors:APP.vendors,clients:APP.clients,events:APP.allEvents,tasks:APP.tasks,itemVendors:APP.itemVendors,allEventItems:APP.allEventItemsCache,allEventVendors:APP.allEventVendorsCache});
   renderReminders();
   btn.textContent="Saved!";
@@ -2681,7 +2689,8 @@ async function saveReminder(){
 
 async function deleteReminder(rowId){
   showToast("Deleting...",2000);
-  await apiWrite("completeTask",{Row_ID:rowId});
+  const res=await apiWrite("completeTask",{Row_ID:rowId});
+  if(!res.success){ showToast("Could not delete — try again",2500); return; }
   // Remove from local cache immediately
   APP.tasks=APP.tasks.filter(function(t){ return t.Row_ID!==rowId; });
   saveToLocal({settings:APP.settings,vendors:APP.vendors,clients:APP.clients,events:APP.allEvents,tasks:APP.tasks,itemVendors:APP.itemVendors,allEventItems:APP.allEventItemsCache,allEventVendors:APP.allEventVendorsCache});
