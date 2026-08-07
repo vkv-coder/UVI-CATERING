@@ -1066,11 +1066,22 @@ function renderSimpleTask(t,color){
   </div>`;
 }
 async function doneTask(rowId,btn){
-  btn.textContent="✓";btn.style.color="var(--green)";
-  await apiWrite("completeTask",{Row_ID:rowId});
-  await loadTasks();
-  saveToLocal({settings:APP.settings,vendors:APP.vendors,clients:APP.clients,events:APP.allEvents,tasks:APP.tasks,itemVendors:APP.itemVendors,allEventItems:APP.allEventItemsCache,allEventVendors:APP.allEventVendorsCache});
-  renderToday();
+  btn.disabled=true;
+  try{
+    const res=await apiWrite("completeTask",{Row_ID:rowId});
+    if(!res||res.success===false){
+      btn.disabled=false;
+      showToast("Could not mark done — try again",2500);
+      return;
+    }
+    btn.textContent="✓";btn.style.color="var(--green)";
+    await loadTasks();
+    saveToLocal({settings:APP.settings,vendors:APP.vendors,clients:APP.clients,events:APP.allEvents,tasks:APP.tasks,itemVendors:APP.itemVendors,allEventItems:APP.allEventItemsCache,allEventVendors:APP.allEventVendorsCache});
+    renderToday();
+  } catch(e){
+    btn.disabled=false;
+    showToast("Error: "+e.message,2500);
+  }
 }
 
 // -- CLIENTS ---------------------------------------------------
@@ -2105,19 +2116,25 @@ async function saveNewClient(){
   if(!name){alert("Client name is required");return;}
   const btn=document.getElementById("saveClientBtn");
   btn.textContent="Saving...";btn.disabled=true;
-  const res=await apiWrite("addClient",{
-    Client_Name:name,
-    Contact_Person:document.getElementById("nc-contact").value,
-    Phone:document.getElementById("nc-phone").value,
-    Email:document.getElementById("nc-email").value,
-    Notes:document.getElementById("nc-notes").value
-  });
-  if(res.success){
-    document.getElementById("newClientMsg").innerHTML=`<div class="success-box"><div class="title">✓ Client Added</div></div>`;
-    await loadClients();await loadAllEvents();
-  saveToLocal({settings:APP.settings,vendors:APP.vendors,clients:APP.clients,events:APP.allEvents,tasks:APP.tasks,itemVendors:APP.itemVendors,allEventItems:APP.allEventItemsCache,allEventVendors:APP.allEventVendorsCache});
-    renderClients();
-    setTimeout(()=>{closeModal("modal-newClient");document.getElementById("newClientMsg").innerHTML="";},1200);
+  try{
+    const res=await apiWrite("addClient",{
+      Client_Name:name,
+      Contact_Person:document.getElementById("nc-contact").value,
+      Phone:document.getElementById("nc-phone").value,
+      Email:document.getElementById("nc-email").value,
+      Notes:document.getElementById("nc-notes").value
+    });
+    if(res.success){
+      document.getElementById("newClientMsg").innerHTML=`<div class="success-box"><div class="title">✓ Client Added</div></div>`;
+      await loadClients();await loadAllEvents();
+      saveToLocal({settings:APP.settings,vendors:APP.vendors,clients:APP.clients,events:APP.allEvents,tasks:APP.tasks,itemVendors:APP.itemVendors,allEventItems:APP.allEventItemsCache,allEventVendors:APP.allEventVendorsCache});
+      renderClients();
+      setTimeout(()=>{closeModal("modal-newClient");document.getElementById("newClientMsg").innerHTML="";},1200);
+    } else {
+      document.getElementById("newClientMsg").innerHTML=`<div class="error-box">Error: ${res.error||'Could not save client'}</div>`;
+    }
+  } catch(e){
+    document.getElementById("newClientMsg").innerHTML=`<div class="error-box">Error: ${e.message}</div>`;
   }
   btn.textContent="Create Client";btn.disabled=false;
 }
@@ -2128,26 +2145,32 @@ async function saveNewFunction(){
   const btn=document.getElementById("saveFunctionBtn");
   btn.textContent="Saving...";btn.disabled=true;
   showToast("Saving function...", 8000);
-  const res=await apiWrite("addEvent",{
-    Client_ID:APP.currentClient.Client_ID,
-    Client_Name:APP.currentClient.Client_Name,
-    Function:document.getElementById("nf-function").value,
-    Date:document.getElementById("nf-date").value,
-    Pax:document.getElementById("nf-pax").value||0,
-    Venue:document.getElementById("nf-venue").value,
-    Time_of_Day:document.getElementById("nf-timeofday").value,
-    Meal_Type:document.getElementById("nf-mealtype").value,
-    Notes:document.getElementById("nf-notes").value,
-    Stage:1
-  });
-  if(res.success){
-    document.getElementById("newFunctionMsg").innerHTML=`<div class="success-box"><div class="title">✓ Function Added</div><div class="sub">Tasks auto-generated.</div></div>`;
-    await loadAllEvents();await loadTasks();
-  saveToLocal({settings:APP.settings,vendors:APP.vendors,clients:APP.clients,events:APP.allEvents,tasks:APP.tasks,itemVendors:APP.itemVendors,allEventItems:APP.allEventItemsCache,allEventVendors:APP.allEventVendorsCache});
-    renderToday();
-    const fns=APP.allEvents.filter(e=>e.Client_ID===APP.currentClient.Client_ID);
-    renderClientDetail(fns);
-    setTimeout(()=>{closeModal("modal-newFunction");document.getElementById("newFunctionMsg").innerHTML="";},1200);
+  try{
+    const res=await apiWrite("addEvent",{
+      Client_ID:APP.currentClient.Client_ID,
+      Client_Name:APP.currentClient.Client_Name,
+      Function:document.getElementById("nf-function").value,
+      Date:document.getElementById("nf-date").value,
+      Pax:document.getElementById("nf-pax").value||0,
+      Venue:document.getElementById("nf-venue").value,
+      Time_of_Day:document.getElementById("nf-timeofday").value,
+      Meal_Type:document.getElementById("nf-mealtype").value,
+      Notes:document.getElementById("nf-notes").value,
+      Stage:1
+    });
+    if(res.success){
+      document.getElementById("newFunctionMsg").innerHTML=`<div class="success-box"><div class="title">✓ Function Added</div><div class="sub">Tasks auto-generated.</div></div>`;
+      await loadAllEvents();await loadTasks();
+      saveToLocal({settings:APP.settings,vendors:APP.vendors,clients:APP.clients,events:APP.allEvents,tasks:APP.tasks,itemVendors:APP.itemVendors,allEventItems:APP.allEventItemsCache,allEventVendors:APP.allEventVendorsCache});
+      renderToday();
+      const fns=APP.allEvents.filter(e=>e.Client_ID===APP.currentClient.Client_ID);
+      renderClientDetail(fns);
+      setTimeout(()=>{closeModal("modal-newFunction");document.getElementById("newFunctionMsg").innerHTML="";},1200);
+    } else {
+      document.getElementById("newFunctionMsg").innerHTML=`<div class="error-box">Error: ${res.error||'Could not save function'}</div>`;
+    }
+  } catch(e){
+    document.getElementById("newFunctionMsg").innerHTML=`<div class="error-box">Error: ${e.message}</div>`;
   }
   btn.textContent="Add Function";btn.disabled=false;
 }
@@ -2172,21 +2195,25 @@ function editFunction(){
 async function saveEditFunction(){
   const btn=document.getElementById("saveFunctionBtn");
   btn.textContent="Saving...";btn.disabled=true;
-  const res=await apiWrite("updateEvent",{
-    Event_ID:APP.currentEvent.Event_ID,
-    Function:document.getElementById("nf-function").value,
-    Date:document.getElementById("nf-date").value,
-    Pax:document.getElementById("nf-pax").value,
-    Venue:document.getElementById("nf-venue").value,
-    Time_of_Day:document.getElementById("nf-timeofday").value,
-    Meal_Type:document.getElementById("nf-mealtype").value,
-    Notes:document.getElementById("nf-notes").value
-  });
-  if(!res.success){ showToast("Could not save changes — try again",2500); btn.textContent="Add Function";btn.onclick=saveNewFunction;btn.disabled=false; return; }
-  await loadAllEvents();
-  APP.currentEvent=APP.allEvents.find(e=>e.Event_ID===APP.currentEvent.Event_ID);
-  renderFunctionDetailScreen();
-  closeModal("modal-newFunction");
+  try{
+    const res=await apiWrite("updateEvent",{
+      Event_ID:APP.currentEvent.Event_ID,
+      Function:document.getElementById("nf-function").value,
+      Date:document.getElementById("nf-date").value,
+      Pax:document.getElementById("nf-pax").value,
+      Venue:document.getElementById("nf-venue").value,
+      Time_of_Day:document.getElementById("nf-timeofday").value,
+      Meal_Type:document.getElementById("nf-mealtype").value,
+      Notes:document.getElementById("nf-notes").value
+    });
+    if(!res.success){ showToast("Could not save changes — try again",2500); return; }
+    await loadAllEvents();
+    APP.currentEvent=APP.allEvents.find(e=>e.Event_ID===APP.currentEvent.Event_ID);
+    renderFunctionDetailScreen();
+    closeModal("modal-newFunction");
+  } catch(e){
+    showToast("Error: "+e.message,2500);
+  }
   btn.textContent="Add Function";btn.onclick=saveNewFunction;btn.disabled=false;
 }
 
@@ -2565,15 +2592,21 @@ async function saveTasting(){
     Venue:document.getElementById("tast-venue").value,
     Status:"scheduled"
   };
-  const res=await apiWrite("addTasting",data);
-  if(res.success){
-    data.Row_ID=res.Row_ID;
-    if(!APP.tastings) APP.tastings=[];
-    APP.tastings.push(data);
-    saveToLocal({settings:APP.settings,vendors:APP.vendors,clients:APP.clients,events:APP.allEvents,tasks:APP.tasks,itemVendors:APP.itemVendors,allEventItems:APP.allEventItemsCache,allEventVendors:APP.allEventVendorsCache,tastings:APP.tastings});
-    renderTasting();
-    closeModal("modal-tasting");
-    showToast("Tasting scheduled ✓",2000);
+  try{
+    const res=await apiWrite("addTasting",data);
+    if(res.success){
+      data.Row_ID=res.Row_ID;
+      if(!APP.tastings) APP.tastings=[];
+      APP.tastings.push(data);
+      saveToLocal({settings:APP.settings,vendors:APP.vendors,clients:APP.clients,events:APP.allEvents,tasks:APP.tasks,itemVendors:APP.itemVendors,allEventItems:APP.allEventItemsCache,allEventVendors:APP.allEventVendorsCache,tastings:APP.tastings});
+      renderTasting();
+      closeModal("modal-tasting");
+      showToast("Tasting scheduled ✓",2000);
+    } else {
+      showToast("Could not save — try again",2500);
+    }
+  } catch(e){
+    showToast("Error: "+e.message,2500);
   }
   btn.textContent="Schedule Tasting"; btn.disabled=false;
 }
@@ -2666,25 +2699,30 @@ async function saveReminder(){
   if(!date){ alert("Please select a date."); return; }
   const btn=document.getElementById("saveReminderBtn");
   btn.textContent="Saving..."; btn.disabled=true;
-  if(window._editReminderId){
-    // Mark old one complete first
-    await apiWrite("completeTask",{Row_ID:window._editReminderId});
-    APP.tasks=APP.tasks.filter(function(t){ return t.Row_ID!==window._editReminderId; });
-  }
-  const res=await apiWrite("addTask",{
-    Event_ID:"", Due_Date:date, Task:text,
-    Tag:"REMINDER", Status:"pending", Type:"reminder"
-  });
-  if(!res||!res.Row_ID){
+  try{
+    if(window._editReminderId){
+      // Mark old one complete first
+      await apiWrite("completeTask",{Row_ID:window._editReminderId});
+      APP.tasks=APP.tasks.filter(function(t){ return t.Row_ID!==window._editReminderId; });
+    }
+    const res=await apiWrite("addTask",{
+      Event_ID:"", Due_Date:date, Task:text,
+      Tag:"REMINDER", Status:"pending", Type:"reminder"
+    });
+    if(!res||!res.Row_ID){
+      btn.textContent="Save Reminder"; btn.disabled=false;
+      showToast("Could not save reminder — try again",2500);
+      return;
+    }
+    APP.tasks.push({Row_ID:res.Row_ID,Task:text,Due_Date:date,Tag:"REMINDER",Status:"pending",Type:"reminder",urgency:"future"});
+    saveToLocal({settings:APP.settings,vendors:APP.vendors,clients:APP.clients,events:APP.allEvents,tasks:APP.tasks,itemVendors:APP.itemVendors,allEventItems:APP.allEventItemsCache,allEventVendors:APP.allEventVendorsCache});
+    renderReminders();
+    btn.textContent="Saved!";
+    setTimeout(function(){ closeModal("modal-newReminder"); btn.disabled=false; btn.textContent="Save Reminder"; }, 800);
+  } catch(e){
     btn.textContent="Save Reminder"; btn.disabled=false;
-    showToast("Could not save reminder — try again",2500);
-    return;
+    showToast("Error: "+e.message,2500);
   }
-  APP.tasks.push({Row_ID:res.Row_ID,Task:text,Due_Date:date,Tag:"REMINDER",Status:"pending",Type:"reminder",urgency:"future"});
-  saveToLocal({settings:APP.settings,vendors:APP.vendors,clients:APP.clients,events:APP.allEvents,tasks:APP.tasks,itemVendors:APP.itemVendors,allEventItems:APP.allEventItemsCache,allEventVendors:APP.allEventVendorsCache});
-  renderReminders();
-  btn.textContent="Saved!";
-  setTimeout(function(){ closeModal("modal-newReminder"); btn.disabled=false; btn.textContent="Save Reminder"; }, 800);
 }
 
 async function deleteReminder(rowId){
