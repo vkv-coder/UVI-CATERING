@@ -1147,8 +1147,9 @@ function renderClients(){
 }
 
 async function setClientStatus(clientId, status){
+  const res=await apiWrite("updateClient",{Client_ID:clientId, Status:status});
+  if(!res.success){ showToast("Could not update — try again",2500); return; }
   showToast(status==="served"?"Marked as served":status==="not_converted"?"Marked as not converted":"Reactivated",1500);
-  await apiWrite("updateClient",{Client_ID:clientId, Status:status});
   const c=APP.clients.find(function(x){ return x.Client_ID===clientId; });
   if(c) c.Status=status;
   saveToLocal({settings:APP.settings,vendors:APP.vendors,clients:APP.clients,events:APP.allEvents,tasks:APP.tasks,itemVendors:APP.itemVendors,allEventItems:APP.allEventItemsCache,allEventVendors:APP.allEventVendorsCache});
@@ -2295,6 +2296,8 @@ async function markMenuSent(){
     await loadAllEvents();
     APP.currentEvent=APP.allEvents.find(e=>e.Event_ID===APP.currentEvent.Event_ID);
     renderFunctionDetailScreen();
+  } else {
+    document.getElementById("menuSentMsg").innerHTML=`<div class="error-box">Error: ${res.error||'Could not record — try again'}</div>`;
   }
 }
 
@@ -2362,6 +2365,8 @@ async function saveNewVendor(){
     document.getElementById("addVendorMsg").innerHTML=`<div class="success-box"><div class="title">✓ Vendor Added</div></div>`;
     await loadVendors();renderVendors();
     setTimeout(()=>closeModal("modal-addVendor"),1200);
+  } else {
+    document.getElementById("addVendorMsg").innerHTML=`<div class="error-box">Error: ${res.error||'Could not save vendor'}</div>`;
   }
 }
 
